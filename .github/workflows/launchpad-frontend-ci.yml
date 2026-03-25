@@ -81,6 +81,7 @@ jobs:
           context: ./launchpad/frontend
           file: ./launchpad/frontend/Dockerfile
           push: true
+          provenance: false
           tags: |
             ghcr.io/${{ github.repository_owner }}/hatchloom-frontend:latest
             ghcr.io/${{ github.repository_owner }}/hatchloom-frontend:${{ github.sha }}

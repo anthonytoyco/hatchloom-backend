@@ -64,7 +64,9 @@ jobs:
 
       - name: Run unit tests
         working-directory: launchpad/backend
-        run: ./mvnw test
+        run: |
+          chmod +x mvnw
+          ./mvnw test
 
       - name: Upload surefire reports
         if: always()
@@ -103,6 +105,7 @@ jobs:
           context: ./launchpad/backend
           file: ./launchpad/backend/Dockerfile
           push: true
+          provenance: false
           tags: |
             ghcr.io/${{ github.repository_owner }}/hatchloom-launchpad:latest
             ghcr.io/${{ github.repository_owner }}/hatchloom-launchpad:${{ github.sha }}

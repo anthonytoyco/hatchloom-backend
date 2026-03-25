@@ -1,16 +1,16 @@
 name: connecthub-deployment
 
 on:
-  push:
+  workflow_run:
+    workflows: ["connecthub-test"]
+    types: [completed]
     branches: [main]
-    paths:
-      - connecthub/**
-      - .github/workflows/connecthub-deployment.yml
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout code
