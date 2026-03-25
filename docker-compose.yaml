@@ -46,6 +46,16 @@ services:
     depends_on:
       auth-postgres:
         condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://localhost:8080/.well-known/openid-configuration > /dev/null 2>&1",
+        ]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
     networks:
       default:
         aliases:
@@ -60,12 +70,13 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://launchpad-postgres:5432/launchpad_db
       SPRING_DATASOURCE_USERNAME: launchpad_user
       SPRING_DATASOURCE_PASSWORD: launchpad_pass
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://auth-service:8080/.well-known/jwks.json
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:8080
     depends_on:
       launchpad-postgres:
         condition: service_healthy
       auth-service:
-        condition: service_started
+        condition: service_healthy
 
   launchpad-frontend:
     build:
@@ -99,6 +110,52 @@ services:
     depends_on:
       - auth-postgres
 
+  connecthub-postgres:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_DB: connecthub_db
+      POSTGRES_USER: connecthub_user
+      POSTGRES_PASSWORD: connecthub_pass
+    ports:
+      - "5434:5432"
+    volumes:
+      - connecthub_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U connecthub_user -d connecthub_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  connecthub-service:
+    build:
+      context: ./connecthub/backend
+    ports:
+      - "8083:8080"
+    environment:
+      DB_HOST: connecthub-postgres
+      DB_PORT: 5432
+      DB_USERNAME: connecthub_user
+      DB_PASSWORD: connecthub_pass
+      DB_NAME: connecthub_db
+      DB_URL: jdbc:postgresql://connecthub-postgres:5432/connecthub_db
+      AUTH_SERVICE_URL: http://auth-service:8080
+    depends_on:
+      connecthub-postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+
+  connecthub-frontend:
+    build:
+      context: ./connecthub/frontend
+      args:
+        VITE_API_BASE_URL: ""
+    ports:
+      - "5173:80"
+    depends_on:
+      - connecthub-service
+
 volumes:
   launchpad_postgres_data:
   auth_postgres_data:
+  connecthub_postgres_data:

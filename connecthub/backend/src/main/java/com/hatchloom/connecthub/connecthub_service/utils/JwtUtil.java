@@ -1,22 +1,21 @@
 package com.hatchloom.connecthub.connecthub_service.utils;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 @Component
 public class JwtUtil {
-    @Value("${jwt.secret}")
-    private String secret;
+    private final JwtDecoder jwtDecoder;
+
+    public JwtUtil(JwtDecoder jwtDecoder) {
+        this.jwtDecoder = jwtDecoder;
+    }
 
     public UUID extractUserId(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -25,10 +24,8 @@ public class JwtUtil {
 
         try {
             String token = authHeader.substring(7);
-            SecretKey k = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-
-            Claims claims = Jwts.parser().verifyWith(k).build().parseSignedClaims(token).getPayload();
-            String subject = claims.getSubject();
+            Jwt jwt = jwtDecoder.decode(token);
+            String subject = jwt.getSubject();
 
             if (subject == null) {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Subject claim missing");
@@ -36,11 +33,11 @@ public class JwtUtil {
 
             return UUID.fromString(subject);
 
-        }
-        catch (ExpiredJwtException e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token expired");
-        }
-        catch (Exception e) {
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (JwtException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token expired or invalid");
+        } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
         }
     }

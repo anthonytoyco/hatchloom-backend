@@ -1,29 +1,36 @@
+import { getAuthToken } from "@/lib/api-client"
 import { LaunchPadHome } from "@/pages/LaunchPadHome"
+import { LoginPage } from "@/pages/LoginPage"
 import { NotFoundPage } from "@/pages/NotFoundPage"
 import { PlaceholderPage } from "@/pages/PlaceholderPage"
 import { SandboxDetail } from "@/pages/SandboxDetail"
 import { SideHustleDetail } from "@/pages/SideHustleDetail"
 import { StudentHome } from "@/pages/StudentHome"
 import { ToolPage } from "@/pages/ToolPage"
-import { BrowserRouter, Route, Routes } from "react-router"
+import { BrowserRouter, Navigate, Route, Routes } from "react-router"
+
+function RequireAuth({ children }: { children: React.ReactNode }) {
+  return getAuthToken() ? <>{children}</> : <Navigate to="/login" replace />
+}
 
 export function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<StudentHome />} />
-        <Route path="/launchpad" element={<LaunchPadHome />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={<RequireAuth><StudentHome /></RequireAuth>} />
+        <Route path="/launchpad" element={<RequireAuth><LaunchPadHome /></RequireAuth>} />
         <Route
           path="/launchpad/sandboxes/:sandboxId"
-          element={<SandboxDetail />}
+          element={<RequireAuth><SandboxDetail /></RequireAuth>}
         />
         <Route
           path="/launchpad/sidehustles/:sideHustleId"
-          element={<SideHustleDetail />}
+          element={<RequireAuth><SideHustleDetail /></RequireAuth>}
         />
         <Route
           path="/launchpad/sandboxes/:sandboxId/tools/:toolType"
-          element={<ToolPage />}
+          element={<RequireAuth><ToolPage /></RequireAuth>}
         />
         <Route
           path="/launchpad/sandboxes"

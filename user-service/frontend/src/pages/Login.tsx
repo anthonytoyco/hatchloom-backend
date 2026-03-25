@@ -68,6 +68,17 @@ const Login: React.FC = () => {
       document.cookie = `access_token=${encodeURIComponent(response.accessToken)}; path=/; max-age=${maxAge}; samesite=lax`;
       document.cookie = `user=${encodeURIComponent(userPayload)}; path=/; max-age=${maxAge}; samesite=lax`;
 
+      const redirectUri = new URLSearchParams(window.location.search).get("redirect_uri");
+      if (redirectUri) {
+        const params = new URLSearchParams({
+          token: response.accessToken,
+          refresh_token: response.refreshToken,
+          user: userPayload,
+        });
+        window.location.href = `${redirectUri}?${params.toString()}`;
+        return;
+      }
+
       navigate(`/profile/${session.userId}`);
     } catch (err) {
       if (err instanceof Error) {

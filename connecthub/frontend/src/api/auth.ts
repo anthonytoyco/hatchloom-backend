@@ -1,3 +1,4 @@
 export function redirectToLogin() {
-  window.location.href = "http://localhost:3000/login";
+  const callbackUrl = encodeURIComponent(`${window.location.origin}/auth/callback`);
+  window.location.href = `http://localhost:3000/login?redirect_uri=${callbackUrl}`;
 }

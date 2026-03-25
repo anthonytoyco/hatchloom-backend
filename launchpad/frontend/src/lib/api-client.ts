@@ -22,6 +22,16 @@ export function getStoredUser(): { userId: string; username: string; role: strin
   }
 }
 
+export function storeSession(accessToken: string, user: { userId: string; username: string; role: string }) {
+  localStorage.setItem("access_token", accessToken)
+  localStorage.setItem("user", JSON.stringify(user))
+}
+
+export function clearSession() {
+  localStorage.removeItem("access_token")
+  localStorage.removeItem("user")
+}
+
 export async function apiFetch<T>(
   path: string,
   options?: RequestInit
