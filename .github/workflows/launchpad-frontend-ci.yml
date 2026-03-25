@@ -1,17 +1,16 @@
 name: launchpad-frontend-ci
 
-# Run CI for LaunchPad frontend on PRs and pushes to main
 on:
   push:
     branches: [main]
     paths:
-      - frontend/**
-      - .github/workflows/frontend-ci.yml
+      - launchpad/frontend/**
+      - .github/workflows/launchpad-frontend-ci.yml
   pull_request:
     branches: [main]
     paths:
-      - frontend/**
-      - .github/workflows/frontend-ci.yml
+      - launchpad/frontend/**
+      - .github/workflows/launchpad-frontend-ci.yml
 
 jobs:
   # Validate lint, types, and production bundle output
@@ -27,22 +26,22 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: launchpad/frontend/package-lock.json
 
       - name: Install dependencies
-        working-directory: frontend
+        working-directory: launchpad/frontend
         run: npm ci
 
       - name: Run lint
-        working-directory: frontend
+        working-directory: launchpad/frontend
         run: npm run lint
 
       - name: Run typecheck
-        working-directory: frontend
+        working-directory: launchpad/frontend
         run: npm run typecheck
 
       - name: Build production bundle
-        working-directory: frontend
+        working-directory: launchpad/frontend
         run: npm run build
 
       - name: Upload frontend build artifact
@@ -50,7 +49,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: launchpad-frontend-dist
-          path: frontend/dist/**
+          path: launchpad/frontend/dist/**
 
   # Build and publish image only for pushes to main after checks pass
   build-docker:
@@ -79,9 +78,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          # Build from frontend/ and publish both "latest" and commit SHA tags
-          context: ./frontend
-          file: ./frontend/Dockerfile
+          context: ./launchpad/frontend
+          file: ./launchpad/frontend/Dockerfile
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/hatchloom-frontend:latest

@@ -1,8 +1,11 @@
-name: Deployment Pipeline
+name: connecthub-deployment
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+    paths:
+      - connecthub/**
+      - .github/workflows/connecthub-deployment.yml
   workflow_dispatch:
 
 jobs:
@@ -19,6 +22,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Convert owner name to lowercase
         run: |
           echo "OWNER_LC=${OWNER,,}" >> $GITHUB_ENV
@@ -27,7 +31,7 @@ jobs:
 
       - name: Pull Docker Image
         run: |
-          docker pull ghcr.io/${{ env.OWNER_LC }}/${{ github.event.repository.name }}:latest
+          docker pull ghcr.io/${{ env.OWNER_LC }}/connecthub:latest
 
       - name: Stop existing container
         run: |
@@ -35,7 +39,5 @@ jobs:
           docker rm connecthub || true
 
       - name: Run new container
-        run: | 
-            docker run -d --name connecthub -p 8080:8080 ghcr.io/${{ env.OWNER_LC }}/${{ github.event.repository.name }}:latest
-          
-      
+        run: |
+          docker run -d --name connecthub -p 8080:8080 ghcr.io/${{ env.OWNER_LC }}/connecthub:latest

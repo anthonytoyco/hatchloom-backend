@@ -1,29 +1,28 @@
 name: launchpad-backend-ci
 
-# Run CI for LaunchPad backend changes on PRs and on pushes to main
 on:
   push:
     branches: [main]
     paths:
-      - backend/src/**
-      - backend/pom.xml
-      - backend/mvnw
-      - backend/mvnw.cmd
-      - backend/.mvn/**
-      - backend/Dockerfile
-      - compose.yaml
-      - .github/workflows/backend-ci.yml
+      - launchpad/backend/src/**
+      - launchpad/backend/pom.xml
+      - launchpad/backend/mvnw
+      - launchpad/backend/mvnw.cmd
+      - launchpad/backend/.mvn/**
+      - launchpad/backend/Dockerfile
+      - launchpad/docker-compose.yaml
+      - .github/workflows/launchpad-backend-ci.yml
   pull_request:
     branches: [main]
     paths:
-      - backend/src/**
-      - backend/pom.xml
-      - backend/mvnw
-      - backend/mvnw.cmd
-      - backend/.mvn/**
-      - backend/Dockerfile
-      - compose.yaml
-      - .github/workflows/backend-ci.yml
+      - launchpad/backend/src/**
+      - launchpad/backend/pom.xml
+      - launchpad/backend/mvnw
+      - launchpad/backend/mvnw.cmd
+      - launchpad/backend/.mvn/**
+      - launchpad/backend/Dockerfile
+      - launchpad/docker-compose.yaml
+      - .github/workflows/launchpad-backend-ci.yml
 
 jobs:
   # Validate the service against a real Postgres dependency
@@ -64,7 +63,7 @@ jobs:
           cache: maven
 
       - name: Run unit tests
-        working-directory: backend
+        working-directory: launchpad/backend
         run: ./mvnw test
 
       - name: Upload surefire reports
@@ -72,7 +71,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: launchpad-surefire-reports
-          path: backend/target/surefire-reports/**
+          path: launchpad/backend/target/surefire-reports/**
 
   # Build and publish image only for pushes to main after tests pass
   build-docker:
@@ -101,9 +100,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          # Build from backend/ directory and publish to GitHub Container Registry with both "latest" and commit SHA tags
-          context: ./backend
-          file: ./backend/Dockerfile
+          context: ./launchpad/backend
+          file: ./launchpad/backend/Dockerfile
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/hatchloom-launchpad:latest
