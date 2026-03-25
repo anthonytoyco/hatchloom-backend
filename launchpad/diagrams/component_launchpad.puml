@@ -1,0 +1,57 @@
+@startuml component_launchpad
+title LaunchPad Service:
+left to right direction
+
+interface "LaunchPad Interface" as API
+
+rectangle "LaunchPad Service" {
+  component "Aggregator\n(home view: counts, open-position flags)" as Aggregator
+  component "Sandbox Module\n(Sandbox CRUD)" as SandboxModule
+  component "SideHustle Module\n(SideHustle CRUD; parent of BMC, Team, Positions)" as SideHustleModule
+  component "Position Module\n(OPEN -> FILLED | CLOSED)" as PositionModule
+  component "BMC Module\n(edit 9 BMC sections)" as BMCModule
+  component "Team Module\n(member add, remove, list)" as TeamModule
+  component "Factory Module\n(SideHustleFactoryProvider)" as FactoryModule
+  component "State Module\n(PositionStateContext)" as StateModule
+  component "Security Module\n(JWT resource server)" as SecurityModule
+}
+
+database "LaunchPad Data Store\n(sandboxes, sandbox_tools, side_hustles, bmc_sections\nteams, team_members, positions)" as LaunchPadDB
+interface "Position Status Interface" as PositionStatusInterface
+component "Auth Service\n(JWT issuer)" as AuthService
+component "ConnectHub Classifieds" as ConnectHub
+
+API --> SecurityModule : validate token
+SecurityModule --> AuthService : verify issuer/signature
+
+API --> Aggregator : home
+API --> SandboxModule : sandbox CRUD
+API --> SideHustleModule : sideHustle CRUD
+API --> PositionModule : position CRUD
+API --> BMCModule : BMC edit
+API --> TeamModule : team CRUD
+
+Aggregator --> SandboxModule : aggregate
+Aggregator --> SideHustleModule : aggregate
+Aggregator ..> PositionModule : open flags sourced from status state
+SideHustleModule --> PositionModule : owns
+SideHustleModule --> BMCModule : owns
+SideHustleModule --> TeamModule : owns
+SideHustleModule --> FactoryModule : select factory by SideHustle type
+PositionModule --> StateModule : validate status transitions
+
+SandboxModule --> LaunchPadDB
+SideHustleModule --> LaunchPadDB
+PositionModule --> LaunchPadDB
+BMCModule --> LaunchPadDB
+TeamModule --> LaunchPadDB
+
+PositionStatusInterface --> PositionModule : read position status
+ConnectHub --> PositionStatusInterface : consumed by classifieds
+
+note right of PositionStatusInterface
+Public endpoint:
+GET /launchpad/positions/{positionId}/status
+end note
+
+@enduml

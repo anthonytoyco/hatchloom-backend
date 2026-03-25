@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hatchloom — EcoSnack Packaging · Sandbox</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #FF1F5A; --cyan: #7DD3E0; --yellow: #FFF56D; --orange: #FF8C00;
+    --charcoal: #1E1E2E; --text: #2D2D2D; --text-soft: #6B7280;
+    --bg: #F7F8FC; --card: #FFFFFF; --border: #EDEEF2;
+    --sandbox-green: #059669; --sandbox-bg: #F0FDF4; --sandbox-border: #BBF7D0;
+    --pro: #A855F7;
+    --font-display: 'Outfit', sans-serif; --font-body: 'DM Sans', sans-serif;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:var(--font-body); background:var(--bg); color:var(--text); min-height:100vh; font-size:14px; }
+
+  /* TOP NAV */
+  .topnav { background:var(--card); border-bottom:1.5px solid var(--border); padding:0 1.75rem; height:58px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:0 2px 12px rgba(0,0,0,0.04); }
+  .logo { font-family:var(--font-display); font-weight:900; font-size:1.35rem; color:var(--pink); letter-spacing:-0.03em; }
+  .logo span { color:var(--charcoal); }
+  .nav-links { display:flex; align-items:center; gap:0.125rem; }
+  .nav-link { font-family:var(--font-display); font-weight:600; font-size:0.875rem; padding:0.45rem 0.9rem; border-radius:8px; color:var(--text-soft); cursor:pointer; transition:all 0.2s; }
+  .nav-link:hover { background:#F3F4F6; color:var(--text); }
+  .nav-link.active { background:#FFF7ED; color:var(--orange); }
+  .nav-right { display:flex; align-items:center; gap:0.625rem; }
+  .gamif-pill { display:flex; align-items:center; gap:0.35rem; padding:0.35rem 0.75rem; border-radius:99px; font-family:var(--font-display); font-weight:800; font-size:0.78rem; border:1.5px solid transparent; cursor:pointer; }
+  .streak-pill { background:linear-gradient(135deg,#FFF7E6,#FFF0CC); border-color:#FFD98A; color:#B45309; }
+  .xp-pill { background:linear-gradient(135deg,#F0FBFD,#E0F5F9); border-color:#BAE6F0; color:#0891B2; }
+  .notif-btn { width:34px; height:34px; border-radius:50%; background:var(--bg); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; font-size:1rem; }
+  .notif-badge { position:absolute; top:-3px; right:-3px; background:var(--pink); color:white; font-size:0.55rem; font-weight:800; width:15px; height:15px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid white; }
+  .avatar-btn { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#1E1E2E,#3D3060); display:flex; align-items:center; justify-content:center; font-size:1.2rem; border:2.5px solid white; box-shadow:0 2px 8px rgba(255,31,90,0.2); cursor:pointer; }
+  .nav-left { display:flex; align-items:center; gap:0.75rem; }
+  .role-pill { font-family:var(--font-display); font-size:0.68rem; font-weight:700; padding:0.25rem 0.6rem; border-radius:99px; background:#F0FBFD; color:#0891B2; border:1.5px solid #BAE6F0; }
+  .school-name { font-family:var(--font-display); font-size:0.78rem; font-weight:600; color:var(--text-soft); }
+
+  .layout { display:grid; grid-template-columns:215px 1fr; min-height:calc(100vh - 58px); }
+
+  /* SIDEMENU */
+  .sidemenu { background:var(--card); border-right:1.5px solid var(--border); padding:1.25rem 0 2rem; position:sticky; top:58px; height:calc(100vh - 58px); overflow-y:auto; display:flex; flex-direction:column; }
+  .sidemenu-section { padding:0 0.875rem; }
+  .sidemenu-label { font-family:var(--font-display); font-size:0.63rem; font-weight:800; text-transform:uppercase; letter-spacing:0.09em; color:#C4C8D4; margin:1rem 0 0.35rem 0.5rem; }
+  .sidemenu-item { display:flex; align-items:center; gap:0.5rem; padding:0.525rem 0.75rem; border-radius:9px; font-size:0.8125rem; font-weight:600; color:var(--text-soft); cursor:pointer; transition:all 0.18s; margin-bottom:0.1rem; }
+  .sidemenu-item:hover { background:#F3F4F6; color:var(--text); }
+  .sidemenu-item.active { background:#FFF7ED; color:var(--orange); }
+  .sidemenu-item .si { font-size:0.9375rem; width:18px; text-align:center; flex-shrink:0; }
+  .sidemenu-item .badge-count { margin-left:auto; background:var(--pink); color:white; font-size:0.6rem; font-weight:800; padding:0.1rem 0.4rem; border-radius:99px; }
+  .sidemenu-item .badge-new { margin-left:auto; background:#FFF0F5; color:var(--pink); font-size:0.58rem; font-weight:800; padding:0.1rem 0.4rem; border-radius:4px; }
+  .sidemenu-divider { height:1px; background:var(--border); margin:0.625rem 0.875rem; }
+  .sidebar-spacer { flex:1; }
+  .sidebar-cta { margin:0 0.875rem; font-family:var(--font-display); font-size:0.78rem; font-weight:700; padding:0.6rem 1rem; border-radius:10px; cursor:pointer; background:var(--pink); color:white; border:none; text-align:center; display:block; width:calc(100% - 1.75rem); }
+
+  .main { padding:1.75rem 2rem 2rem; overflow-y:auto; }
+  .breadcrumb { display:flex; align-items:center; gap:0.4rem; font-size:0.72rem; color:var(--text-soft); font-weight:600; margin-bottom:0.75rem; }
+  .breadcrumb .bc-link { color:var(--pink); cursor:pointer; }
+  .breadcrumb .bc-sep { color:#D1D5DB; }
+
+  /* ═══════════════════════════════════════════
+     ZONE 1 — HERO CARD (banner + identity + phases + team)
+     ═══════════════════════════════════════════ */
+  .hero-card { background:var(--card); border:1.5px solid var(--border); border-radius:18px; overflow:visible; margin-bottom:1rem; box-shadow:0 2px 12px rgba(0,0,0,0.04); animation:fadeUp 0.4s ease both; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+  .project-banner { height:72px; background:linear-gradient(150deg,#34D399,#059669); display:flex; align-items:center; padding:0 1.5rem; position:relative; border-radius:18px 18px 0 0; z-index:10; }
+  .project-emoji-wrap { width:52px; height:52px; border-radius:14px; background:rgba(255,255,255,0.92); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; font-size:1.6rem; box-shadow:0 2px 12px rgba(0,0,0,0.1); flex-shrink:0; }
+  .project-banner-meta { margin-left:1rem; display:flex; flex-direction:column; gap:0.15rem; }
+  .project-type-badge { font-family:var(--font-display); font-size:0.6rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; background:rgba(255,255,255,0.25); color:white; padding:0.12rem 0.5rem; border-radius:99px; width:fit-content; }
+  .project-status-pill { font-family:var(--font-display); font-size:0.6rem; font-weight:800; padding:0.12rem 0.5rem; border-radius:99px; background:rgba(255,255,255,0.92); color:var(--sandbox-green); width:fit-content; display:flex; align-items:center; gap:0.3rem; }
+  .project-status-pill .dot { width:6px; height:6px; border-radius:50%; background:var(--sandbox-green); }
+
+  /* Dates + team on banner right */
+  .banner-right { margin-left:auto; display:flex; align-items:center; gap:1rem; position:relative; z-index:200; }
+  .banner-dates { font-family:var(--font-display); font-size:0.6rem; font-weight:600; color:rgba(255,255,255,0.7); text-align:right; line-height:1.5; }
+
+  /* Identity body */
+  .project-identity { padding:1rem 1.5rem 0.75rem; position:relative; z-index:1; }
+  .project-title { font-family:var(--font-display); font-weight:900; font-size:1.35rem; color:var(--charcoal); letter-spacing:-0.02em; border:none; background:none; outline:none; width:100%; cursor:text; padding:0; margin-bottom:0.3rem; }
+  .project-title:focus { border-bottom:2px solid var(--sandbox-green); }
+  .project-description { font-size:0.85rem; color:var(--text-soft); line-height:1.5; border:none; background:none; outline:none; width:100%; resize:none; cursor:text; font-family:var(--font-body); min-height:2em; }
+  .project-description:focus { border-bottom:1px solid var(--sandbox-green); }
+
+  /* TEAM — stack hover tooltips */
+  .team-stack { display:flex; align-items:center; cursor:pointer; transition:opacity 0.15s; position:relative; }
+  .team-stack:hover { opacity:0.85; }
+  .team-stack-avatar { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.7rem; border:2px solid rgba(255,255,255,0.8); margin-left:-6px; box-shadow:0 1px 4px rgba(0,0,0,0.15); position:relative; }
+  .team-stack-avatar:first-child { margin-left:0; }
+  .team-stack-avatar .stack-tip { position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); background:var(--charcoal); color:white; font-family:var(--font-display); font-size:0.6rem; font-weight:600; padding:0.25rem 0.5rem; border-radius:6px; white-space:nowrap; pointer-events:none; opacity:0; transition:opacity 0.2s; z-index:50; }
+  .team-stack-avatar .stack-tip::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:3px solid transparent; border-top-color:var(--charcoal); }
+  .team-stack-avatar:hover .stack-tip { opacity:1; }
+  .team-stack-count { font-family:var(--font-display); font-size:0.6rem; font-weight:800; color:rgba(255,255,255,0.85); margin-left:0.4rem; }
+
+  /* Team dropdown — right-aligned compact */
+  .team-dropdown { position:fixed; background:#FFFFFF; border:1.5px solid var(--border); border-radius:10px; padding:0.5rem; width:240px; box-shadow:0 12px 32px rgba(0,0,0,0.22), 0 0 0 1px rgba(0,0,0,0.05); z-index:99999; display:none; }
+  .team-dropdown.open { display:block; }
+  .team-row { display:flex; align-items:center; gap:0.5rem; padding:0.3rem 0.25rem; background:#FFFFFF; border-radius:6px; }
+  .team-row-avatar { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.7rem; flex-shrink:0; border:2px solid white; box-shadow:0 1px 3px rgba(0,0,0,0.1); }
+  .team-row-info { font-family:var(--font-display); font-size:0.75rem; font-weight:700; color:var(--charcoal); flex:1; min-width:0; }
+  .team-row-info span { font-weight:500; color:var(--text-soft); font-size:0.68rem; }
+  .ai-badge { font-size:0.5rem; font-weight:800; padding:0.05rem 0.3rem; border-radius:3px; background:#FAF0FF; color:var(--pro); margin-left:0.15rem; }
+  .team-row-actions { display:flex; align-items:center; gap:0.2rem; flex-shrink:0; }
+  .team-action-btn { width:24px; height:24px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:0.65rem; cursor:pointer; background:transparent; border:1.5px solid transparent; transition:all 0.18s; color:#C4C8D4; }
+  .team-action-btn:hover { background:var(--sandbox-bg); border-color:var(--sandbox-border); color:var(--sandbox-green); }
+  .team-action-btn.ai-call { width:auto; padding:0 0.45rem; font-family:var(--font-display); font-size:0.6rem; font-weight:700; gap:0.2rem; }
+  .team-action-btn.ai-call:hover { background:#FAF0FF; border-color:#DDD6FE; color:var(--pro); }
+  .team-divider { height:1px; background:var(--border); margin:0.3rem 0; }
+
+  /* ═══════════════════════════════════════════
+     PHASE TRACKER
+     ═══════════════════════════════════════════ */
+  .phase-tracker { padding:0.875rem 1.5rem 1rem; border-top:1px solid var(--border); position:relative; z-index:1; }
+  .phase-tracker-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.65rem; }
+  .phase-tracker-title { font-family:var(--font-display); font-weight:800; font-size:0.78rem; color:var(--charcoal); }
+  .phase-edit-btn { font-family:var(--font-display); font-size:0.65rem; font-weight:700; color:var(--text-soft); cursor:pointer; }
+  .phase-edit-btn:hover { color:var(--sandbox-green); }
+
+  .phase-bar { display:flex; align-items:flex-start; position:relative; margin-bottom:0.5rem; }
+  .phase-step { flex:1; display:flex; flex-direction:column; align-items:center; position:relative; z-index:2; }
+  .phase-node { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:800; color:white; border:3px solid var(--border); background:white; transition:all 0.25s; cursor:pointer; position:relative; }
+  .phase-tooltip { position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); background:var(--charcoal); color:white; font-family:var(--font-body); font-size:0.65rem; font-weight:500; padding:0.35rem 0.6rem; border-radius:7px; white-space:nowrap; pointer-events:none; opacity:0; transition:opacity 0.2s; z-index:50; line-height:1.3; max-width:180px; white-space:normal; text-align:center; }
+  .phase-tooltip::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:4px solid transparent; border-top-color:var(--charcoal); }
+  .phase-node:hover .phase-tooltip { opacity:1; }
+  .phase-node.done { background:var(--sandbox-green); border-color:var(--sandbox-green); }
+  .phase-node.current { background:var(--orange); border-color:var(--orange); box-shadow:0 0 0 4px rgba(255,140,0,0.2); animation:phasePulse 2s ease infinite; }
+  @keyframes phasePulse { 0%,100%{box-shadow:0 0 0 4px rgba(255,140,0,0.2)} 50%{box-shadow:0 0 0 8px rgba(255,140,0,0.1)} }
+  .phase-node.future { color:var(--border); }
+  .phase-node.launch-node { background:linear-gradient(135deg,var(--pink),#E6004E); border-color:var(--pink); width:32px; height:32px; font-size:0.85rem; }
+  .phase-node.launch-node.future { background:white; border-color:var(--border); color:#D1D5DB; }
+  .phase-label { font-family:var(--font-display); font-size:0.6rem; font-weight:700; color:var(--text-soft); margin-top:0.3rem; text-align:center; max-width:76px; line-height:1.2; }
+  .phase-label.done-label { color:var(--sandbox-green); }
+  .phase-label.current-label { color:var(--orange); font-weight:800; }
+  .phase-label.launch-label { color:var(--pink); font-weight:800; }
+  .phase-connector { position:absolute; top:14px; left:40px; right:40px; height:3px; background:var(--border); z-index:1; }
+  .phase-connector-fill { height:100%; background:var(--sandbox-green); border-radius:99px; }
+
+  /* Gate diamonds */
+  .gate-diamond-wrap { position:relative; display:flex; flex-direction:column; align-items:center; z-index:3; padding-top:2px; flex-shrink:0; width:24px; }
+  .gate-date { font-family:var(--font-display); font-size:0.5rem; font-weight:700; color:#C4C8D4; margin-top:0.2rem; white-space:nowrap; }
+  .gate-date.passed { color:var(--sandbox-green); }
+  .gate-diamond { width:18px; height:18px; background:white; border:2px solid var(--border); transform:rotate(45deg); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.2s; }
+  .gate-diamond:hover { border-color:var(--orange); background:#FFF7ED; }
+  .gate-diamond.answered { border-color:var(--sandbox-green); background:var(--sandbox-bg); }
+  .gate-diamond-icon { transform:rotate(-45deg); font-size:0.5rem; font-weight:900; color:var(--text-soft); }
+  .gate-diamond.answered .gate-diamond-icon { color:var(--sandbox-green); }
+  .gate-popover { display:none; position:absolute; top:24px; left:50%; transform:translateX(-50%); background:var(--card); border:1.5px solid var(--border); border-radius:10px; padding:0.75rem; width:220px; box-shadow:0 8px 24px rgba(0,0,0,0.12); z-index:50; }
+  .gate-popover.open { display:block; }
+  .gate-popover::before { content:''; position:absolute; top:-6px; left:50%; transform:translateX(-50%) rotate(45deg); width:10px; height:10px; background:var(--card); border-left:1.5px solid var(--border); border-top:1.5px solid var(--border); }
+  .gate-question { font-family:var(--font-display); font-size:0.72rem; font-weight:700; color:var(--charcoal); margin-bottom:0.5rem; line-height:1.3; }
+  .gate-input { width:100%; border:1.5px solid var(--border); border-radius:8px; padding:0.4rem 0.6rem; font-family:var(--font-body); font-size:0.72rem; color:var(--text); resize:none; outline:none; min-height:48px; }
+  .gate-input:focus { border-color:var(--sandbox-green); }
+  .gate-save { font-family:var(--font-display); font-size:0.65rem; font-weight:700; color:var(--sandbox-green); cursor:pointer; margin-top:0.35rem; float:right; }
+  .gate-answer-preview { font-size:0.65rem; color:var(--text-soft); font-style:italic; margin-top:0.3rem; line-height:1.3; }
+
+  .launch-cta-wrap { display:flex; align-items:center; justify-content:flex-end; margin-top:0.25rem; }
+  .launch-remaining { font-family:var(--font-display); font-size:0.65rem; font-weight:600; color:var(--text-soft); margin-right:0.75rem; }
+  .launch-cta { display:flex; align-items:center; gap:0.4rem; font-family:var(--font-display); font-size:0.75rem; font-weight:800; padding:0.45rem 1rem; border-radius:10px; background:linear-gradient(135deg,var(--pink),#E6004E); color:white; border:none; cursor:pointer; box-shadow:0 2px 8px rgba(255,31,90,0.2); }
+  .launch-cta.disabled { background:#E5E7EB; color:#C4C8D4; cursor:default; box-shadow:none; }
+
+  /* ═══════════════════════════════════════════
+     QUICK ACTIONS BAR (bounded)
+     ═══════════════════════════════════════════ */
+  .quick-actions-bar { background:var(--card); border:1.5px solid var(--border); border-radius:12px; padding:0.6rem 1rem; display:flex; gap:0.5rem; margin-bottom:1.5rem; box-shadow:0 1px 4px rgba(0,0,0,0.03); animation:fadeUp 0.4s ease 0.08s both; }
+  .qa-btn { display:flex; align-items:center; gap:0.4rem; font-family:var(--font-display); font-size:0.75rem; font-weight:700; padding:0.4rem 0.75rem; border-radius:8px; border:1.5px solid var(--border); background:var(--bg); color:var(--text-soft); cursor:pointer; transition:all 0.18s; }
+  .qa-btn:hover { border-color:var(--sandbox-green); color:var(--sandbox-green); background:var(--sandbox-bg); }
+
+  /* ═══════════════════════════════════════════
+     ZONE 2 — WORKING WALL
+     ═══════════════════════════════════════════ */
+  .working-wall { display:grid; grid-template-columns:1.5fr 1fr; gap:1.25rem; margin-bottom:2rem; }
+  .section-card { background:var(--card); border:1.5px solid var(--border); border-radius:14px; padding:1rem 1.25rem; box-shadow:0 2px 8px rgba(0,0,0,0.03); margin-bottom:1rem; animation:fadeUp 0.4s ease both; }
+  .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem; }
+  .section-title { font-family:var(--font-display); font-weight:800; font-size:0.85rem; color:var(--charcoal); display:flex; align-items:center; gap:0.4rem; }
+  .section-count { font-family:var(--font-display); font-size:0.65rem; font-weight:700; color:#C4C8D4; background:#F3F4F6; padding:0.1rem 0.45rem; border-radius:99px; }
+  .section-add { font-family:var(--font-display); font-size:0.7rem; font-weight:700; color:var(--sandbox-green); cursor:pointer; }
+
+  /* Tools grid */
+  .tools-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; }
+  .active-tool { display:flex; align-items:center; gap:0.625rem; background:var(--bg); border:1.5px solid var(--border); border-radius:10px; padding:0.6rem 0.75rem; cursor:pointer; transition:all 0.18s; }
+  .active-tool:hover { border-color:var(--sandbox-green); box-shadow:0 2px 8px rgba(5,150,105,0.1); background:white; }
+  .active-tool .t-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:0.95rem; flex-shrink:0; }
+  .active-tool .t-name { font-family:var(--font-display); font-weight:700; font-size:0.78rem; color:var(--charcoal); }
+  .active-tool .t-sub { font-size:0.65rem; color:var(--text-soft); margin-top:1px; }
+  .active-tool .t-badge { font-size:0.55rem; font-weight:800; padding:0.08rem 0.35rem; border-radius:4px; margin-left:auto; flex-shrink:0; }
+  .t-badge-active { background:#F0FDF4; color:#15803D; }
+  .t-badge-new { background:#FFF0F5; color:var(--pink); }
+
+  /* Todos + Milestones side by side */
+  .todo-milestone-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  .todo-list { display:flex; flex-direction:column; gap:0.35rem; }
+  .todo-item { display:flex; align-items:center; gap:0.5rem; font-size:0.78rem; font-weight:500; color:var(--text); padding:0.3rem 0; cursor:pointer; }
+  .todo-item:hover { color:var(--sandbox-green); }
+  .todo-check { width:15px; height:15px; border-radius:4px; border:1.5px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:0.55rem; color:white; }
+  .todo-check.done { background:var(--sandbox-green); border-color:var(--sandbox-green); }
+  .todo-item.done-item { color:#C4C8D4; text-decoration:line-through; }
+  .todo-date { margin-left:auto; font-size:0.6rem; font-weight:600; color:#C4C8D4; flex-shrink:0; }
+  .todo-date.urgent { color:var(--pink); background:#FFF0F5; padding:0.08rem 0.35rem; border-radius:4px; }
+
+  /* Gantt milestones */
+  .gantt-header { display:grid; grid-template-columns:100px 1fr; margin-bottom:0.3rem; }
+  .gantt-header-label { font-family:var(--font-display); font-size:0.55rem; font-weight:700; color:#C4C8D4; text-transform:uppercase; letter-spacing:0.06em; }
+  .gantt-months { display:grid; grid-template-columns:repeat(3,1fr); }
+  .gantt-month { font-family:var(--font-display); font-size:0.55rem; font-weight:700; color:#C4C8D4; text-align:center; text-transform:uppercase; letter-spacing:0.04em; padding:0.2rem 0; border-left:1px solid var(--border); }
+  .gantt-month:first-child { border-left:none; }
+  .gantt-row { display:grid; grid-template-columns:100px 1fr; align-items:center; margin-bottom:0.3rem; }
+  .gantt-label { font-family:var(--font-display); font-weight:700; font-size:0.68rem; color:var(--charcoal); padding-right:0.5rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:0.3rem; }
+  .gantt-label-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  .gantt-timeline { position:relative; height:20px; display:grid; grid-template-columns:repeat(3,1fr); }
+  .gantt-cell { border-left:1px solid var(--border); height:100%; position:relative; }
+  .gantt-cell:first-child { border-left:none; }
+  .gantt-bar { position:absolute; height:14px; top:3px; border-radius:7px; min-width:8px; transition:all 0.25s; }
+  .gantt-bar:hover { filter:brightness(1.1); transform:scaleY(1.15); }
+  .gantt-bar-done { background:var(--sandbox-green); }
+  .gantt-bar-active { background:var(--orange); }
+  .gantt-bar-planned { background:#E5E7EB; }
+  .gantt-bar-label { position:absolute; right:5px; top:50%; transform:translateY(-50%); font-family:var(--font-display); font-size:0.5rem; font-weight:800; color:white; white-space:nowrap; }
+  .gantt-bar-planned .gantt-bar-label { color:#C4C8D4; }
+  .gantt-open-btn { font-family:var(--font-display); font-size:0.65rem; font-weight:700; color:var(--sandbox-green); cursor:pointer; display:flex; align-items:center; gap:0.3rem; margin-top:0.4rem; justify-content:flex-end; }
+
+  /* ═══════════════════════════════════════════
+     RIGHT COLUMN — Comms + Phonebook
+     ═══════════════════════════════════════════ */
+  /* Comms tabs */
+  .comms-tabs { display:flex; align-items:center; gap:0; margin-bottom:0.75rem; border-bottom:1.5px solid var(--border); }
+  .comms-tab { display:flex; align-items:center; gap:0.3rem; padding:0.5rem 0.75rem; cursor:pointer; border-bottom:2px solid transparent; transition:all 0.15s; font-size:0.9rem; position:relative; }
+  .comms-tab:hover { background:var(--bg); border-radius:6px 6px 0 0; }
+  .comms-tab.active { border-bottom-color:var(--sandbox-green); }
+  .comms-badge { font-family:var(--font-display); font-size:0.5rem; font-weight:800; background:var(--pink); color:white; width:14px; height:14px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+  .comms-panel { display:none; }
+  .comms-panel.active { display:block; }
+
+  .msg-preview { display:flex; align-items:flex-start; gap:0.5rem; padding:0.45rem 0; border-bottom:1px solid var(--border); cursor:pointer; }
+  .msg-preview:last-child { border-bottom:none; }
+  .msg-preview:hover { background:var(--bg); border-radius:6px; padding:0.45rem 0.4rem; margin:0 -0.4rem; }
+  .msg-avatar { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.65rem; flex-shrink:0; background:linear-gradient(135deg,#1E1E2E,#3D3060); }
+  .msg-body { flex:1; min-width:0; }
+  .msg-sender { font-family:var(--font-display); font-weight:700; font-size:0.7rem; color:var(--charcoal); }
+  .msg-text { font-size:0.67rem; color:var(--text-soft); line-height:1.3; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .msg-time { font-size:0.58rem; color:#C4C8D4; flex-shrink:0; margin-top:2px; }
+  .msg-unread { width:5px; height:5px; border-radius:50%; background:var(--pink); flex-shrink:0; margin-top:5px; }
+
+  /* Phonebook (collapsed icon) */
+  .phonebook-trigger { display:flex; align-items:center; gap:0.5rem; padding:0.6rem 0.75rem; background:var(--bg); border:1.5px solid var(--border); border-radius:10px; cursor:pointer; transition:all 0.18s; margin-top:0; }
+  .phonebook-trigger:hover { border-color:var(--sandbox-green); background:white; }
+  .phonebook-icon { font-size:1rem; }
+  .phonebook-label { font-family:var(--font-display); font-weight:700; font-size:0.75rem; color:var(--charcoal); }
+  .phonebook-count { font-family:var(--font-display); font-size:0.6rem; font-weight:800; background:#F3F4F6; color:var(--text-soft); padding:0.08rem 0.4rem; border-radius:99px; margin-left:auto; }
+  .phonebook-expand { max-height:0; overflow:hidden; transition:max-height 0.35s ease; }
+  .phonebook-expand.open { max-height:400px; }
+  .contact-grid { display:grid; grid-template-columns:1fr; gap:0.35rem; padding-top:0.5rem; }
+  .contact-card { display:flex; align-items:center; gap:0.5rem; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:0.4rem 0.6rem; cursor:pointer; transition:all 0.15s; }
+  .contact-card:hover { border-color:var(--sandbox-green); background:var(--sandbox-bg); }
+  .contact-icon { width:22px; height:22px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:0.65rem; flex-shrink:0; }
+  .contact-name { font-family:var(--font-display); font-weight:700; font-size:0.7rem; color:var(--charcoal); }
+  .contact-type { font-size:0.58rem; color:var(--text-soft); }
+  .contact-add { font-family:var(--font-display); font-size:0.65rem; font-weight:700; color:var(--sandbox-green); cursor:pointer; padding:0.3rem 0; margin-top:0.25rem; }
+
+  /* ═══════════════════════════════════════════
+     ZONE 3 — SHELF
+     ═══════════════════════════════════════════ */
+  .shelf-section { margin-bottom:1.75rem; animation:fadeUp 0.4s ease 0.28s both; }
+  .shelf-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.625rem; }
+  .shelf-title { font-family:var(--font-display); font-weight:800; font-size:0.9rem; color:var(--charcoal); display:flex; align-items:center; gap:0.4rem; }
+  .shelf-see-all { font-size:0.72rem; font-weight:700; color:var(--pink); cursor:pointer; }
+  .shelf-track { display:flex; gap:0.75rem; overflow-x:auto; padding-bottom:0.5rem; scroll-behavior:smooth; scroll-snap-type:x mandatory; }
+  .shelf-track::-webkit-scrollbar { height:3px; }
+  .shelf-track::-webkit-scrollbar-thumb { background:#E5E7EB; border-radius:99px; }
+  .resource-card { flex-shrink:0; width:180px; background:var(--card); border:1.5px solid var(--border); border-radius:12px; padding:0.875rem; cursor:pointer; transition:all 0.2s; scroll-snap-align:start; }
+  .resource-card:hover { border-color:var(--sandbox-green); box-shadow:0 4px 16px rgba(0,0,0,0.08); transform:translateY(-2px); }
+  .resource-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; margin-bottom:0.5rem; }
+  .resource-name { font-family:var(--font-display); font-weight:700; font-size:0.78rem; color:var(--charcoal); margin-bottom:0.2rem; }
+  .resource-sub { font-size:0.67rem; color:var(--text-soft); line-height:1.3; }
+  .resource-tag { display:inline-flex; margin-top:0.5rem; font-size:0.58rem; font-weight:700; padding:0.1rem 0.4rem; border-radius:4px; }
+  .channel-card { flex-shrink:0; width:200px; background:var(--card); border:1.5px solid var(--border); border-radius:12px; padding:0.75rem 1rem; cursor:pointer; transition:all 0.2s; scroll-snap-align:start; display:flex; align-items:center; gap:0.75rem; }
+  .channel-card:hover { border-color:var(--sandbox-green); box-shadow:0 4px 16px rgba(0,0,0,0.08); }
+  .channel-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+  .channel-name { font-family:var(--font-display); font-weight:700; font-size:0.78rem; color:var(--charcoal); }
+  .channel-status { font-size:0.65rem; color:var(--text-soft); margin-top:2px; display:flex; align-items:center; gap:0.25rem; }
+  .channel-dot { width:5px; height:5px; border-radius:50%; }
+
+  .journal-cta { background:linear-gradient(135deg,#F0FDF4,#ECFDF5); border:1.5px solid var(--sandbox-border); border-radius:14px; padding:1rem 1.25rem; display:flex; align-items:center; gap:1rem; cursor:pointer; transition:all 0.2s; animation:fadeUp 0.4s ease 0.32s both; }
+  .journal-cta:hover { box-shadow:0 4px 16px rgba(5,150,105,0.12); border-color:var(--sandbox-green); }
+  .journal-icon { width:40px; height:40px; border-radius:10px; background:white; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+  .journal-text { flex:1; }
+  .journal-title { font-family:var(--font-display); font-weight:800; font-size:0.85rem; color:var(--charcoal); }
+  .journal-sub { font-size:0.74rem; color:var(--text-soft); margin-top:2px; }
+  .journal-arrow { font-size:1rem; color:var(--sandbox-green); }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="nav-left">
+    <div class="logo">hatch<span>loom</span></div>
+    <div class="role-pill">Student</div>
+    <div class="school-name">Ridgewood Academy</div>
+  </div>
+  <div class="nav-links">
+    <div class="nav-link">🔭 Explore</div>
+    <div class="nav-link">🤝 Connect</div>
+    <div class="nav-link active">🚀 Launch</div>
+  </div>
+  <div class="nav-right">
+    <div class="gamif-pill streak-pill">🔥 18-day streak</div>
+    <div class="gamif-pill xp-pill">⚡ 2,450 XP</div>
+    <div class="notif-btn">✉️<div class="notif-badge">3</div></div>
+    <div class="notif-btn">🔔<div class="notif-badge">3</div></div>
+    <div class="avatar-btn">🦊</div>
+  </div>
+</nav>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidemenu">
+    <div class="sidemenu-section">
+      <div class="sidemenu-item"><span class="si">🚀</span> Launchpad Home</div>
+      <div class="sidemenu-divider"></div>
+      <div class="sidemenu-label">Launchpad</div>
+      <div class="sidemenu-item active"><span class="si">🧪</span> My Sandboxes</div>
+      <div class="sidemenu-item"><span class="si">💼</span> My SideHustles</div>
+      <div class="sidemenu-divider"></div>
+      <div class="sidemenu-label">Community</div>
+      <div class="sidemenu-item"><span class="si">👥</span> My Teams</div>
+      <div class="sidemenu-item"><span class="si">📅</span> Upcoming Events <span class="badge-new">2 NEW</span></div>
+      <div class="sidemenu-item"><span class="si">📋</span> Classifieds <span class="badge-count">4</span></div>
+      <div class="sidemenu-item"><span class="si">🏪</span> Market Square</div>
+      <div class="sidemenu-divider"></div>
+      <div class="sidemenu-label">Library</div>
+      <div class="sidemenu-item"><span class="si">🛠</span> Tools</div>
+      <div class="sidemenu-item"><span class="si">🤝</span> Organizations</div>
+      <div class="sidemenu-item"><span class="si">📚</span> Learning Paths</div>
+    </div>
+    <div class="sidebar-spacer"></div>
+    <button class="sidebar-cta">💬 Contact Hatchloom</button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="breadcrumb">
+      <span class="bc-link">Student Home</span>
+      <span class="bc-sep">›</span>
+      <span class="bc-link">Launchpad</span>
+      <span class="bc-sep">›</span>
+      <span class="bc-link">My Sandboxes</span>
+      <span class="bc-sep">›</span>
+      <span>♻️ EcoSnack Packaging</span>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         ZONE 1 — HERO CARD
+         ════════════════════════════════════════ -->
+    <div class="hero-card">
+      <!-- Banner with dates + team stack -->
+      <div class="project-banner">
+        <div class="project-emoji-wrap">♻️</div>
+        <div class="project-banner-meta">
+          <div class="project-type-badge">🧪 Sandbox · Idea Lab</div>
+          <div class="project-status-pill"><span class="dot"></span> In Lab</div>
+        </div>
+        <div class="banner-right">
+          <div class="banner-icon" onclick="alert('Open Project Journal — screen 260-001')" title="Project Journal · 4 entries" style="width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:0.9rem;cursor:pointer;transition:background 0.15s;backdrop-filter:blur(4px);" onmouseover="this.style.background='rgba(255,255,255,0.35)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">📓</div>
+          <div class="banner-dates">Created Jan 28, 2026<br>Updated 2 hours ago</div>
+          <div class="team-stack" id="teamStack" onclick="toggleTeam(event)">
+            <div class="team-stack-avatar" style="background:linear-gradient(135deg,#1E1E2E,#3D3060)">🦊<span class="stack-tip">@firefox_hl</span></div>
+            <div class="team-stack-avatar" style="background:linear-gradient(135deg,#3B82F6,#60A5FA)">🐬<span class="stack-tip">@oceandive</span></div>
+            <div class="team-stack-avatar" style="background:linear-gradient(135deg,#7C3AED,#A78BFA)">💡<span class="stack-tip">Spark</span></div>
+            <div class="team-stack-avatar" style="background:linear-gradient(135deg,#22C55E,#15803D)">🌍<span class="stack-tip">Scout</span></div>
+            <div class="team-stack-avatar" style="background:linear-gradient(135deg,#0891B2,#7DD3E0)">📊<span class="stack-tip">Barry</span></div>
+            <div class="team-stack-count">5</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Identity -->
+      <div class="project-identity">
+        <input class="project-title" type="text" value="EcoSnack Packaging" spellcheck="false">
+        <textarea class="project-description" rows="2" spellcheck="false">Designing sustainable, compostable snack packaging for school cafeterias. Exploring material science, supplier partnerships, and student-friendly pricing.</textarea>
+      </div>
+
+      <!-- Phase Tracker with gate diamonds -->
+      <div class="phase-tracker">
+        <div class="phase-tracker-header">
+          <div class="phase-tracker-title">📍 Project Phase</div>
+          <div class="phase-edit-btn">✏️ Edit phases</div>
+        </div>
+        <div class="phase-bar">
+          <div class="phase-connector"><div class="phase-connector-fill" style="width:18%;"></div></div>
+
+          <div class="phase-step">
+            <div class="phase-node done">✓<div class="phase-tooltip">Discover who your customer is and what they struggle with</div></div>
+            <div class="phase-label done-label">Understand</div>
+          </div>
+
+          <div class="gate-diamond-wrap">
+            <div class="gate-diamond answered" onclick="toggleGate('g1')"><span class="gate-diamond-icon">✓</span></div>
+            <div class="gate-date passed">Feb 10</div>
+            <div class="gate-popover" id="g1">
+              <div class="gate-question">What's the #1 pain point I discovered?</div>
+              <div class="gate-answer-preview">"Cafeteria staff throw out 200+ wrappers daily and feel guilty about it."</div>
+            </div>
+          </div>
+
+          <div class="phase-step">
+            <div class="phase-node current">2<div class="phase-tooltip">Pinpoint the specific problem worth solving</div></div>
+            <div class="phase-label current-label">Define Problem</div>
+          </div>
+
+          <div class="gate-diamond-wrap">
+            <div class="gate-diamond" onclick="toggleGate('g2')"><span class="gate-diamond-icon">?</span></div>
+            <div class="gate-date">Feb 25</div>
+            <div class="gate-popover" id="g2">
+              <div class="gate-question">What problem am I solving, and for who?</div>
+              <textarea class="gate-input" placeholder="Write your answer here..."></textarea>
+              <div class="gate-save">Save →</div>
+            </div>
+          </div>
+
+          <div class="phase-step">
+            <div class="phase-node future">3<div class="phase-tooltip">Generate a range of possible solutions</div></div>
+            <div class="phase-label">Ideas</div>
+          </div>
+
+          <div class="gate-diamond-wrap">
+            <div class="gate-diamond" onclick="toggleGate('g3')"><span class="gate-diamond-icon">?</span></div>
+            <div class="gate-date">Mar 8</div>
+            <div class="gate-popover" id="g3">
+              <div class="gate-question">Which idea am I going with, and why?</div>
+              <textarea class="gate-input" placeholder="Write your answer here..."></textarea>
+              <div class="gate-save">Save →</div>
+            </div>
+          </div>
+
+          <div class="phase-step">
+            <div class="phase-node future">4<div class="phase-tooltip">Turn your best idea into something tangible</div></div>
+            <div class="phase-label">Build It</div>
+          </div>
+
+          <div class="gate-diamond-wrap">
+            <div class="gate-diamond" onclick="toggleGate('g4')"><span class="gate-diamond-icon">?</span></div>
+            <div class="gate-date">Mar 18</div>
+            <div class="gate-popover" id="g4">
+              <div class="gate-question">What exactly am I putting in front of people?</div>
+              <textarea class="gate-input" placeholder="Write your answer here..."></textarea>
+              <div class="gate-save">Save →</div>
+            </div>
+          </div>
+
+          <div class="phase-step">
+            <div class="phase-node future">5<div class="phase-tooltip">Validate your solution with real users</div></div>
+            <div class="phase-label">Test It</div>
+          </div>
+
+          <div class="gate-diamond-wrap">
+            <div class="gate-diamond" onclick="toggleGate('g5')"><span class="gate-diamond-icon">?</span></div>
+            <div class="gate-date">Mar 28</div>
+            <div class="gate-popover" id="g5">
+              <div class="gate-question">What did I change based on feedback?</div>
+              <textarea class="gate-input" placeholder="Write your answer here..."></textarea>
+              <div class="gate-save">Save →</div>
+            </div>
+          </div>
+
+          <div class="phase-step">
+            <div class="phase-node launch-node future">🚀<div class="phase-tooltip">Go to market</div></div>
+            <div class="phase-label launch-label">Launch!</div>
+          </div>
+        </div>
+        <div class="launch-cta-wrap">
+          <span class="launch-remaining">Skip ahead anytime</span>
+          <button class="launch-cta">🚀 Ready to Launch as SideHustle?</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════
+         ZONE 2 — WORKING WALL
+         ════════════════════════════════════════ -->
+
+    <!-- Row 1: Active Tools (full width) -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">🛠 Active Tools <span class="section-count">4</span></div>
+        <div style="display:flex;align-items:center;gap:0.75rem;"><div class="section-add">+ Add tool</div><div class="section-add" style="color:var(--pink);">See all →</div></div>
+      </div>
+      <div class="tools-grid">
+        <div class="active-tool"><div class="t-icon" style="background:#FFF0F5">🗣</div><div><div class="t-name">Customer Interviews</div><div class="t-sub">10 interviews completed</div></div><span class="t-badge t-badge-active">Active</span></div>
+        <div class="active-tool"><div class="t-icon" style="background:#F0FBFD">🧠</div><div><div class="t-name">Brainstorm Board</div><div class="t-sub">8 ideas captured</div></div><span class="t-badge t-badge-active">Active</span></div>
+        <div class="active-tool"><div class="t-icon" style="background:#F0FDF4">🎯</div><div><div class="t-name">Problem Statement Builder</div><div class="t-sub">Draft in progress</div></div><span class="t-badge t-badge-active">Active</span></div>
+        <div class="active-tool"><div class="t-icon" style="background:#EFF6FF">🔍</div><div><div class="t-name">Competitor Scan</div><div class="t-sub">Not started</div></div><span class="t-badge t-badge-new">New</span></div>
+      </div>
+    </div>
+
+    <!-- Row 2: Todos + Comms side by side -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:2rem;">
+
+      <!-- Todos -->
+      <div class="section-card" style="margin-bottom:0;">
+        <div class="section-header">
+          <div class="section-title">✅ Todos <span class="section-count">5</span></div>
+          <div style="display:flex;align-items:center;gap:0.75rem;"><div class="section-add">+ Add</div><div class="section-add" style="color:var(--pink);">See all →</div></div>
+        </div>
+        <div class="todo-list">
+          <div class="todo-item done-item"><div class="todo-check done">✓</div> Talk to 5 cafeteria workers about waste <span class="todo-date">Feb 10</span></div>
+          <div class="todo-item done-item"><div class="todo-check done">✓</div> Count wrappers thrown out in one lunch <span class="todo-date">Feb 14</span></div>
+          <div class="todo-item"><div class="todo-check"></div> Write problem statement in one sentence <span class="todo-date urgent">Feb 24</span></div>
+          <div class="todo-item"><div class="todo-check"></div> List 3 things that make this problem hard <span class="todo-date">Feb 28</span></div>
+          <div class="todo-item"><div class="todo-check"></div> Share problem statement with team <span class="todo-date">Mar 2</span></div>
+        </div>
+      </div>
+
+      <!-- Comms (messages + email + phonebook) -->
+      <div class="section-card" style="margin-bottom:0;">
+        <div class="comms-tabs">
+          <div class="comms-tab active" onclick="switchTab('msgs',this)">💬 <span class="comms-badge">2</span></div>
+          <div class="comms-tab" onclick="switchTab('emails',this)">✉️ <span class="comms-badge">1</span></div>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:0.3rem;padding:0.5rem 0.6rem;cursor:pointer;font-size:0.9rem;color:var(--text-soft);transition:color 0.15s;" onclick="switchTab('phonebook',null)" onmouseover="this.style.color='var(--sandbox-green)'" onmouseout="this.style.color='var(--text-soft)'" title="Phonebook">📇 <span class="comms-badge" style="background:var(--sandbox-green)">4</span></div>
+        </div>
+        <div class="comms-panel active" id="msgs">
+          <div class="msg-preview">
+            <div class="msg-avatar">🐬</div>
+            <div class="msg-body"><div class="msg-sender">@oceandive</div><div class="msg-text">Found a compostable film supplier in BC — check this link!</div></div>
+            <div class="msg-time">2h</div><div class="msg-unread"></div>
+          </div>
+          <div class="msg-preview">
+            <div class="msg-avatar" style="background:linear-gradient(135deg,#7C3AED,#A78BFA)">💡</div>
+            <div class="msg-body"><div class="msg-sender">Spark <span class="ai-badge">AI</span></div><div class="msg-text">Try narrowing your problem statement — who exactly feels the pain?</div></div>
+            <div class="msg-time">5h</div>
+          </div>
+          <div class="msg-preview">
+            <div class="msg-avatar" style="background:linear-gradient(135deg,#F97316,#FDBA74)">👩‍🏫</div>
+            <div class="msg-body"><div class="msg-sender">Ms. Patel</div><div class="msg-text">Great interview notes! Your problem statement draft is due Friday.</div></div>
+            <div class="msg-time">1d</div>
+          </div>
+        </div>
+        <div class="comms-panel" id="emails">
+          <div class="msg-preview">
+            <div class="msg-avatar" style="background:linear-gradient(135deg,#059669,#34D399)">🏭</div>
+            <div class="msg-body"><div class="msg-sender">GreenWrap BC</div><div class="msg-text">RE: Compostable film samples — We can ship 3 sample rolls by March 1...</div></div>
+            <div class="msg-time">4h</div><div class="msg-unread"></div>
+          </div>
+          <div class="msg-preview">
+            <div class="msg-avatar" style="background:linear-gradient(135deg,#3B82F6,#60A5FA)">🏫</div>
+            <div class="msg-body"><div class="msg-sender">Cafeteria Manager</div><div class="msg-text">Happy to let you observe lunch service — come by Tuesday at 11:30.</div></div>
+            <div class="msg-time">2d</div>
+          </div>
+        </div>
+        <div class="comms-panel" id="phonebook">
+          <div class="contact-grid">
+            <div class="contact-card"><div class="contact-icon" style="background:#EFF6FF">🏭</div><div><div class="contact-name">GreenWrap BC</div><div class="contact-type">Supplier</div></div></div>
+            <div class="contact-card"><div class="contact-icon" style="background:#F0FDF4">🏫</div><div><div class="contact-name">School Cafeteria</div><div class="contact-type">Customer</div></div></div>
+            <div class="contact-card"><div class="contact-icon" style="background:#FAF0FF">🧑‍🔬</div><div><div class="contact-name">Alberta Innovates</div><div class="contact-type">Organization</div></div></div>
+            <div class="contact-card"><div class="contact-icon" style="background:#FFF7ED">🛒</div><div><div class="contact-name">Calgary Farmers Mkt</div><div class="contact-type">Marketplace</div></div></div>
+          </div>
+          <div class="contact-add">+ Add contact</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ZONE 3 — SHELF -->
+
+    <div class="shelf-section">
+      <div class="shelf-header"><div class="shelf-title">📌 Tagged Resources</div><div class="shelf-see-all">See all →</div></div>
+      <div class="shelf-track">
+        <div class="resource-card"><div class="resource-icon" style="background:#F0FDF4">📄</div><div class="resource-name">Compostable Materials Guide</div><div class="resource-sub">PDF · Saved from Explore</div><div class="resource-tag" style="background:#F0FDF4;color:#15803D;">Learning</div></div>
+        <div class="resource-card"><div class="resource-icon" style="background:#F0FBFD">🎬</div><div class="resource-name">How Packaging Gets Made</div><div class="resource-sub">Video · 12 min · Hatchloom</div><div class="resource-tag" style="background:#EFF6FF;color:#1D4ED8;">Video</div></div>
+        <div class="resource-card"><div class="resource-icon" style="background:#FFF7ED">📝</div><div class="resource-name">Guide to Writing a Problem Statement</div><div class="resource-sub">Article · From Library</div><div class="resource-tag" style="background:#F0FDF4;color:#15803D;">Learning</div></div>
+        <div class="resource-card"><div class="resource-icon" style="background:#FAF0FF">♻️</div><div class="resource-name">Compostable vs Recyclable Explained</div><div class="resource-sub">Article · Bookmarked</div><div class="resource-tag" style="background:#F0FDF4;color:#15803D;">Learning</div></div>
+        <div class="resource-card"><div class="resource-icon" style="background:#F3F4F6">🔗</div><div class="resource-name">CFIA Food Packaging Rules</div><div class="resource-sub">External link · Bookmarked</div><div class="resource-tag" style="background:#F3F4F6;color:var(--text-soft);">Reference</div></div>
+      </div>
+    </div>
+
+    <div class="shelf-section">
+      <div class="shelf-header"><div class="shelf-title">📡 Active Channels</div><div class="shelf-see-all">Manage →</div></div>
+      <div class="shelf-track">
+        <div class="channel-card"><div class="channel-icon" style="background:#F0FDF4">🏫</div><div><div class="channel-name">School Cafeteria</div><div class="channel-status"><span class="channel-dot" style="background:var(--sandbox-green)"></span> Active — 3 conversations</div></div></div>
+        <div class="channel-card"><div class="channel-icon" style="background:#EFF6FF">🌿</div><div><div class="channel-name">Ridgewood Eco Club</div><div class="channel-status"><span class="channel-dot" style="background:var(--sandbox-green)"></span> Active — collaborating</div></div></div>
+        <div class="channel-card"><div class="channel-icon" style="background:#FAF0FF">♻️</div><div><div class="channel-name">Alberta Zero Waste Network</div><div class="channel-status"><span class="channel-dot" style="background:#C4C8D4"></span> Exploring</div></div></div>
+        <div class="channel-card"><div class="channel-icon" style="background:#FFF7ED">🛒</div><div><div class="channel-name">Calgary Farmers Market</div><div class="channel-status"><span class="channel-dot" style="background:#C4C8D4"></span> Bookmarked</div></div></div>
+      </div>
+    </div>
+
+    <div class="shelf-section">
+      <div class="shelf-header"><div class="shelf-title">✨ Recommended for This Project</div></div>
+      <div class="shelf-track">
+        <div class="resource-card"><div class="resource-icon" style="background:#FFF7ED">📝</div><div class="resource-name">Problem Statement Template</div><div class="resource-sub">Directly useful right now</div><div class="resource-tag" style="background:#FFF7ED;color:var(--orange);">Tool</div></div>
+        <div class="resource-card"><div class="resource-icon" style="background:#F0FBFD">👤</div><div class="resource-name">Who Is Your Customer?</div><div class="resource-sub">Mini-course · 3 blocks</div><div class="resource-tag" style="background:#EFF6FF;color:#1D4ED8;">Course</div></div>
+        <div class="resource-card"><div class="resource-icon" style="background:#FFF0F5">🌍</div><div class="resource-name">How Other Teens Solved Packaging Problems</div><div class="resource-sub">Peer examples · Inspiring</div><div class="resource-tag" style="background:#F0FDF4;color:#15803D;">Stories</div></div>
+        <div class="resource-card"><div class="resource-icon" style="background:#F0FDF4">📓</div><div class="resource-name">Observation Journal Template</div><div class="resource-sub">Organise what you learned</div><div class="resource-tag" style="background:#FFF7ED;color:var(--orange);">Tool</div></div>
+        <div class="resource-card"><div class="resource-icon" style="background:#FAF0FF">💡</div><div class="resource-name">Idea Generator</div><div class="resource-sub">Get ready for your next phase</div><div class="resource-tag" style="background:#FFF7ED;color:var(--orange);">Tool</div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Team dropdown (body-level for z-index) -->
+<div class="team-dropdown" id="teamDropdown" onclick="event.stopPropagation()">
+  <div class="team-row">
+    <div class="team-row-avatar" style="background:linear-gradient(135deg,#1E1E2E,#3D3060)">🦊</div>
+    <div class="team-row-info">@firefox_hl <span>· Lead (You)</span></div>
+    <div class="team-row-actions">
+      <div class="team-action-btn" title="Message">✉️</div>
+      <div class="team-action-btn" title="Mention">@</div>
+    </div>
+  </div>
+  <div class="team-row">
+    <div class="team-row-avatar" style="background:linear-gradient(135deg,#3B82F6,#60A5FA)">🐬</div>
+    <div class="team-row-info">@oceandive <span>· Researcher</span></div>
+    <div class="team-row-actions">
+      <div class="team-action-btn" title="Message">✉️</div>
+      <div class="team-action-btn" title="Mention">@</div>
+    </div>
+  </div>
+  <div class="team-divider"></div>
+  <div class="team-row">
+    <div class="team-row-avatar" style="background:linear-gradient(135deg,#7C3AED,#A78BFA)">💡</div>
+    <div class="team-row-info">Spark <span>· Ideas Coach</span> <span class="ai-badge">AI</span></div>
+    <div class="team-row-actions"><div class="team-action-btn ai-call">💬 Ask</div></div>
+  </div>
+  <div class="team-row">
+    <div class="team-row-avatar" style="background:linear-gradient(135deg,#22C55E,#15803D)">🌍</div>
+    <div class="team-row-info">Scout <span>· Market Explorer</span> <span class="ai-badge">AI</span></div>
+    <div class="team-row-actions"><div class="team-action-btn ai-call">💬 Ask</div></div>
+  </div>
+  <div class="team-row">
+    <div class="team-row-avatar" style="background:linear-gradient(135deg,#0891B2,#7DD3E0)">📊</div>
+    <div class="team-row-info">Barry <span>· Business Mentor</span> <span class="ai-badge">AI</span></div>
+    <div class="team-row-actions"><div class="team-action-btn ai-call">💬 Ask</div></div>
+  </div>
+</div>
+
+<script>
+function toggleGate(id) {
+  document.querySelectorAll('.gate-popover').forEach(p => {
+    if (p.id !== id) p.classList.remove('open');
+  });
+  document.getElementById(id).classList.toggle('open');
+}
+
+function switchTab(panelId, tabEl) {
+  document.querySelectorAll('.comms-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(panelId).classList.add('active');
+  if (tabEl) {
+    document.querySelectorAll('.comms-tab').forEach(t => t.classList.remove('active'));
+    tabEl.classList.add('active');
+  } else {
+    document.querySelectorAll('.comms-tab').forEach(t => t.classList.remove('active'));
+  }
+}
+
+function toggleTeam(e) {
+  e.stopPropagation();
+  var dd = document.getElementById('teamDropdown');
+  var stack = document.getElementById('teamStack');
+  var rect = stack.getBoundingClientRect();
+  dd.style.top = (rect.bottom + 8) + 'px';
+  dd.style.right = (window.innerWidth - rect.right) + 'px';
+  dd.classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.gate-diamond-wrap')) {
+    document.querySelectorAll('.gate-popover').forEach(p => p.classList.remove('open'));
+  }
+  if (!e.target.closest('.team-stack') && !e.target.closest('.team-dropdown')) {
+    document.getElementById('teamDropdown').classList.remove('open');
+  }
+});
+</script>
+
+</body>
+</html>

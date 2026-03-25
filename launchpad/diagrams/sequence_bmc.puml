@@ -1,0 +1,31 @@
+@startuml sequence_bmc
+title SideHustle BMC Section Edit Sequence
+
+actor User
+participant Client
+participant "Server\n(BMC API + services)" as Server
+participant "SideHustle API" as SideHustleApi
+database Database
+
+User -> Client: 1 Click open SideHustle page
+Client -> SideHustleApi: 2 GET /launchpad/sidehustles/{sideHustleId} (Bearer JWT)
+SideHustleApi -> Database: 3 Query SideHustle record
+Database --> SideHustleApi: 4 SideHustle data
+SideHustleApi --> Client: 5 Return SideHustle payload
+Client -> Server: 6 GET /launchpad/sidehustles/{sideHustleId}/bmc (Bearer JWT)
+Server -> Database: 7 Query all 9 BMC sections by side_hustle_id
+Database --> Server: 8 BMC record
+Server --> Client: 9 Return current BMC content
+Client --> User: 10 Display SideHustle page with BMC sections
+
+User -> Client: 11 Edit one BMC section and submit content
+Client -> Server: 12 PATCH /launchpad/sidehustles/{sideHustleId}/bmc {section, content}
+Server -> Database: 13 Read SideHustle owner student_id
+Database --> Server: 14 Owner record
+Server -> Server: 15 Validate ownership + parse BMCSectionKey enum
+Server -> Database: 16 Persist only targeted BMC field
+Database --> Server: 17 Updated BMC row
+Server --> Client: 18 Return 200 + updated BMC payload
+Client --> User: 19 Display section update confirmation
+
+@enduml

@@ -1,0 +1,26 @@
+@startuml sequence_position
+title SideHustle Position Creation Sequence
+
+actor User
+participant Client
+participant "Server\n(Position API + services)" as Server
+database Database
+participant "ConnectHub Classifieds" as ConnectHub
+
+User -> Client: 1 Click create new position button on SideHustle page
+Client --> User: 2 Display position creation form
+User -> Client: 3 Fill out position title, description, and submit
+Client -> Server: 4 Send position creation request with SideHustle ID and details
+Server -> Database: 5 Validate SideHustle ownership
+Database --> Server: 6 Ownership confirmed
+Server -> Database: 7 Insert new position with OPEN status\nupdate side_hustles.has_open_positions = true
+Database --> Server: 8 Position creation success response
+Server --> Client: 9 Return created position payload (new position ID)
+Client --> User: 10 Display position creation success message
+
+ConnectHub -> Server: 11 GET /launchpad/positions/{positionId}/status (public)
+Server -> Database: 12 Read positions.status
+Database --> Server: 13 OPEN | FILLED | CLOSED
+Server --> ConnectHub: 14 Return plain status string
+
+@enduml

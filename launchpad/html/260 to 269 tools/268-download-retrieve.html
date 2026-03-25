@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hatchloom · 268 — Download / Retrieve</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#FF1F5A;--orange:#FF8C00;--cyan:#0891B2;--charcoal:#1E1E2E;--text:#2D2D2D;--text-soft:#6B7280;--muted:#9CA3AF;--bg:#F7F8FC;--card:#FFF;--border:#EDEEF2;--green:#059669;--green-bg:#F0FDF4;--green-bdr:#BBF7D0;--font-d:'Outfit',sans-serif;--font-b:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-b);font-size:14px;background:#1a1a2e;color:var(--text)}
+.backdrop{position:fixed;inset:0;background:rgba(30,30,46,.6);backdrop-filter:blur(4px);z-index:500}
+.panel{position:fixed;top:40px;left:50%;transform:translateX(-50%);width:calc(100% - 40px);max-width:1440px;height:calc(100vh - 56px);background:var(--card);border-radius:18px 18px 0 0;box-shadow:0 -8px 60px rgba(0,0,0,.35);z-index:600;display:flex;flex-direction:column;overflow:hidden;animation:su .35s cubic-bezier(.16,1,.3,1) both}
+@keyframes su{from{transform:translateX(-50%) translateY(40px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+.bc{padding:.4rem 1.5rem;background:var(--bg);border-bottom:1px solid var(--border);font-size:.72rem;color:var(--text-soft);font-weight:600;display:flex;align-items:center;gap:.35rem;flex-shrink:0}.bc a{color:var(--pink);cursor:pointer;text-decoration:none}.bc .sep{color:#D1D5DB}
+.hdr{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;border-bottom:1.5px solid var(--border);flex-shrink:0}
+.hdr-icon{width:40px;height:40px;border-radius:12px;background:var(--green-bg);border:1.5px solid var(--green-bdr);display:flex;align-items:center;justify-content:center;font-size:1.15rem}
+.hdr-meta{flex:1}.hdr-title{font-family:var(--font-d);font-weight:900;font-size:1.05rem;color:var(--charcoal)}.hdr-desc{font-size:.74rem;color:var(--text-soft);margin-top:1px}
+.pill{font-family:var(--font-d);font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:99px;display:inline-flex;align-items:center;gap:.3rem;flex-shrink:0}.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill-a{background:#FFF7ED;color:var(--orange);border:1.5px solid #FFD98A}.pill-x{background:#F0FBFD;color:var(--cyan);border:1.5px solid #BAE6F0}
+.hdr-close{width:34px;height:34px;border-radius:50%;background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;color:var(--text-soft);transition:all .15s;flex-shrink:0}.hdr-close:hover{background:#FFF0F5;border-color:var(--pink);color:var(--pink)}
+.abar{display:flex;align-items:center;padding:.4rem 1.5rem;border-bottom:1px solid var(--border);flex-shrink:0;gap:.5rem}
+.abar-l{display:flex;align-items:center;gap:.5rem;flex:1}.save-st{display:flex;align-items:center;gap:.25rem;font-size:.72rem;font-weight:600}
+.sv-d{width:7px;height:7px;border-radius:50%}.sv-ok{background:var(--green)}
+.sv-l{color:var(--text-soft)}.sv-t{color:var(--muted);font-size:.68rem}
+.abar-r{display:flex;align-items:center;gap:.2rem}
+.ab{width:32px;height:32px;border-radius:7px;border:1.5px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;transition:all .15s;position:relative}.ab:hover{background:var(--bg)}.ab:hover .tp{opacity:1}
+.tp{position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:var(--charcoal);color:#fff;font-family:var(--font-d);font-size:.6rem;font-weight:600;padding:.15rem .45rem;border-radius:4px;white-space:nowrap;opacity:0;transition:opacity .15s;pointer-events:none;z-index:10}.tp::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:3px solid transparent;border-top-color:var(--charcoal)}
+.ab-s{width:1px;height:18px;background:var(--border);margin:0 .15rem}.ab-d:hover{background:#FFF0F5;border-color:var(--pink);color:var(--pink)}
+
+/* ─── CONTENT ─── */
+.dl-zone{flex:1;overflow:auto;padding:1.25rem 1.5rem 2rem;display:flex;justify-content:center}
+.dl-inner{width:100%;max-width:800px}
+
+/* Type tabs */
+.type-tabs{display:flex;gap:.35rem;margin-bottom:1.25rem}
+.type-tab{font-family:var(--font-d);font-weight:700;font-size:.76rem;padding:.45rem 1rem;border-radius:9px;border:1.5px solid var(--border);background:var(--card);color:var(--text-soft);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:.35rem}
+.type-tab:hover{border-color:#C4C8D4}
+.type-tab.active{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.type-tab .badge{font-size:.58rem;font-weight:800;background:var(--bg);padding:.1rem .35rem;border-radius:99px;color:var(--muted)}
+.type-tab.active .badge{background:rgba(5,150,105,.15);color:var(--green)}
+
+/* Drop zone */
+.drop-zone{border:2.5px dashed var(--border);border-radius:16px;padding:2.5rem 2rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;margin-bottom:1.25rem;transition:all .2s;cursor:pointer;background:var(--bg)}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--green);background:var(--green-bg)}
+.drop-icon{font-size:2.5rem;margin-bottom:.5rem}
+.drop-title{font-family:var(--font-d);font-weight:800;font-size:.95rem;color:var(--charcoal)}
+.drop-sub{font-size:.78rem;color:var(--text-soft);margin-top:.2rem}
+.drop-or{font-size:.72rem;color:var(--muted);margin:.6rem 0}
+.drop-btns{display:flex;gap:.5rem}
+.drop-btn{font-family:var(--font-d);font-weight:700;font-size:.76rem;padding:.4rem 1rem;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all .15s}.drop-btn:hover{background:var(--card);border-color:#C4C8D4}
+.drop-btn-primary{background:var(--green);color:#fff;border-color:var(--green)}.drop-btn-primary:hover{background:#047857}
+
+/* Linked files */
+.linked{margin-top:.5rem}
+.linked-title{font-family:var(--font-d);font-weight:800;font-size:.78rem;color:var(--charcoal);margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem}
+.linked-title .count{font-size:.6rem;font-weight:800;background:var(--bg);padding:.1rem .4rem;border-radius:99px;color:var(--muted)}
+.file-list{display:flex;flex-direction:column;gap:.4rem}
+.file-item{display:flex;align-items:center;gap:.65rem;padding:.6rem .85rem;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;transition:all .15s}
+.file-item:hover{border-color:#C4C8D4;box-shadow:0 2px 8px rgba(0,0,0,.03)}
+.file-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.fi-doc{background:#EEF2FF;border:1px solid #C7D2FE}
+.fi-vid{background:#FFF0F5;border:1px solid #FECDD3}
+.fi-img{background:#FFF7ED;border:1px solid #FFD98A}
+.fi-link{background:#F0FBFD;border:1px solid #BAE6F0}
+.file-meta{flex:1;min-width:0}
+.file-name{font-family:var(--font-d);font-weight:700;font-size:.8rem;color:var(--charcoal);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-info{font-size:.68rem;color:var(--muted);display:flex;gap:.5rem}
+.file-actions{display:flex;gap:.3rem}
+.file-act{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.7rem;transition:all .15s}.file-act:hover{background:var(--bg)}
+.file-act-del:hover{background:#FFF0F5;border-color:var(--pink);color:var(--pink)}
+
+/* Empty state for tabs */
+.empty-tab{text-align:center;padding:3rem 2rem;color:var(--muted)}
+.empty-icon{font-size:2.5rem;margin-bottom:.5rem}
+.empty-title{font-family:var(--font-d);font-weight:800;font-size:.9rem;color:var(--text-soft)}
+.empty-sub{font-size:.76rem;margin-top:.2rem}
+
+.ftr{padding:.55rem 1.5rem;border-top:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.fi-label{font-size:.72rem;color:var(--muted)}.fb{display:flex;gap:.4rem}
+.bs{font-family:var(--font-d);font-weight:700;font-size:.76rem;padding:.4rem .9rem;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);cursor:pointer}.bs:hover{background:var(--bg)}
+.bp{font-family:var(--font-d);font-weight:700;font-size:.76rem;padding:.4rem 1.1rem;border-radius:8px;border:none;background:var(--green);color:#fff;cursor:pointer}.bp:hover{background:#047857}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--charcoal);color:#fff;font-family:var(--font-d);font-weight:600;font-size:.8rem;padding:.5rem 1.1rem;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:999;transition:transform .3s cubic-bezier(.16,1,.3,1);pointer-events:none}.toast.show{transform:translateX(-50%) translateY(0);pointer-events:auto}
+</style>
+</head>
+<body>
+<div class="backdrop" onclick="closePanel()"></div>
+<div class="panel">
+  <div class="bc"><a>🚀 LaunchPad</a><span class="sep">›</span><a>My Sandboxes</a><span class="sep">›</span><a>♻️ EcoSnack Packaging</a><span class="sep">›</span><span>📎 Project Files</span></div>
+  <div class="hdr">
+    <div class="hdr-icon">📎</div>
+    <div class="hdr-meta"><div class="hdr-title">Project Files</div><div class="hdr-desc">Attach documents, images, videos, and links to your project — keep everything in one place</div></div>
+    <span class="pill pill-a"><span class="dot"></span>4 files</span>
+    <span class="pill pill-x">⚡ 5 XP / upload</span>
+    <div class="hdr-close" onclick="closePanel()">✕</div>
+  </div>
+  <div class="abar">
+    <div class="abar-l"><div class="save-st"><div class="sv-d sv-ok" id="sD"></div><span class="sv-l" id="sL">Saved</span><span class="sv-t" id="sT">· auto</span></div></div>
+    <div class="abar-r">
+      <div class="ab" onclick="toast('🔗 Link copied!')"><span class="tp">Share link</span>🔗</div><div class="ab-s"></div>
+      <div class="ab ab-d" onclick="toast('🗑️ Moved to trash')"><span class="tp">Delete</span>🗑️</div>
+    </div>
+  </div>
+
+  <div class="dl-zone">
+    <div class="dl-inner">
+
+      <!-- Type tabs -->
+      <div class="type-tabs">
+        <div class="type-tab active" onclick="switchTab('all',this)">📁 All <span class="badge">4</span></div>
+        <div class="type-tab" onclick="switchTab('doc',this)">📄 Documents <span class="badge">2</span></div>
+        <div class="type-tab" onclick="switchTab('img',this)">🖼️ Images <span class="badge">1</span></div>
+        <div class="type-tab" onclick="switchTab('vid',this)">🎬 Video / Audio <span class="badge">0</span></div>
+        <div class="type-tab" onclick="switchTab('link',this)">🔗 Links <span class="badge">1</span></div>
+      </div>
+
+      <!-- Drop zone -->
+      <div class="drop-zone" id="dropZone" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');toast('📎 File received!')">
+        <div class="drop-icon">📂</div>
+        <div class="drop-title">Drop files here</div>
+        <div class="drop-sub">or choose an option below</div>
+        <div class="drop-or">— or —</div>
+        <div class="drop-btns">
+          <button class="drop-btn drop-btn-primary" onclick="toast('📎 Opening file picker…')">📄 Upload File</button>
+          <button class="drop-btn" onclick="toast('🔗 Paste a URL…')">🔗 Add Link</button>
+          <button class="drop-btn" onclick="toast('📚 Opening Tagged Resources…')">📚 From Resources</button>
+        </div>
+      </div>
+
+      <!-- Linked files -->
+      <div class="linked" id="linkedAll">
+        <div class="linked-title">Attached Files <span class="count">4</span></div>
+        <div class="file-list">
+          <div class="file-item" data-type="doc">
+            <div class="file-icon fi-doc">📄</div>
+            <div class="file-meta">
+              <div class="file-name">Compostable_Materials_Research.pdf</div>
+              <div class="file-info"><span>PDF · 2.4 MB</span><span>Added Feb 15</span></div>
+            </div>
+            <div class="file-actions">
+              <div class="file-act" onclick="toast('⬇️ Downloading…')">⬇️</div>
+              <div class="file-act" onclick="toast('👁 Opening preview…')">👁</div>
+              <div class="file-act file-act-del" onclick="toast('🗑️ Removed')">✕</div>
+            </div>
+          </div>
+          <div class="file-item" data-type="doc">
+            <div class="file-icon fi-doc">📝</div>
+            <div class="file-meta">
+              <div class="file-name">Customer_Interview_Notes.docx</div>
+              <div class="file-info"><span>DOCX · 340 KB</span><span>Added Feb 20</span></div>
+            </div>
+            <div class="file-actions">
+              <div class="file-act" onclick="toast('⬇️ Downloading…')">⬇️</div>
+              <div class="file-act" onclick="toast('👁 Opening preview…')">👁</div>
+              <div class="file-act file-act-del" onclick="toast('🗑️ Removed')">✕</div>
+            </div>
+          </div>
+          <div class="file-item" data-type="img">
+            <div class="file-icon fi-img">🖼️</div>
+            <div class="file-meta">
+              <div class="file-name">Prototype_Wrapper_v1.png</div>
+              <div class="file-info"><span>PNG · 1.8 MB</span><span>Added Feb 18</span></div>
+            </div>
+            <div class="file-actions">
+              <div class="file-act" onclick="toast('⬇️ Downloading…')">⬇️</div>
+              <div class="file-act" onclick="toast('👁 Opening preview…')">👁</div>
+              <div class="file-act file-act-del" onclick="toast('🗑️ Removed')">✕</div>
+            </div>
+          </div>
+          <div class="file-item" data-type="link">
+            <div class="file-icon fi-link">🔗</div>
+            <div class="file-meta">
+              <div class="file-name">EcoWraps Supplier Website</div>
+              <div class="file-info"><span>ecowraps.ca</span><span>Added Feb 15</span></div>
+            </div>
+            <div class="file-actions">
+              <div class="file-act" onclick="toast('🔗 Opening in new tab…')">↗</div>
+              <div class="file-act file-act-del" onclick="toast('🗑️ Removed')">✕</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty state for video tab -->
+      <div class="empty-tab" id="emptyVid" style="display:none">
+        <div class="empty-icon">🎬</div>
+        <div class="empty-title">No videos or audio yet</div>
+        <div class="empty-sub">Record a pitch video or upload a clip to get started</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="ftr"><div class="fi-label">Files · 4 attached · 4.5 MB total</div><div class="fb"><button class="bs" onclick="closePanel()">Close</button><button class="bp" onclick="toast('📎 Opening file picker…')">+ Add File</button></div></div>
+</div>
+<div class="toast" id="tst"></div>
+<script>
+document.head.appendChild(Object.assign(document.createElement('style'),{textContent:'@keyframes sd{to{transform:translateX(-50%) translateY(40px);opacity:0}}'}));
+function closePanel(){document.querySelector('.panel').style.animation='sd .25s ease forwards';document.querySelector('.backdrop').style.opacity='0';document.querySelector('.backdrop').style.transition='opacity .25s'}
+function switchTab(type,el){
+  document.querySelectorAll('.type-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  const items=document.querySelectorAll('.file-item');
+  const empty=document.getElementById('emptyVid');
+  const linked=document.getElementById('linkedAll');
+  if(type==='vid'){items.forEach(i=>i.style.display='none');empty.style.display='';linked.style.display='none';return}
+  empty.style.display='none';linked.style.display='';
+  items.forEach(i=>{i.style.display=(type==='all'||i.dataset.type===type)?'':'none'});
+}
+function toast(m){const t=document.getElementById('tst');t.innerHTML=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2500)}
+</script>
+</body>
+</html>

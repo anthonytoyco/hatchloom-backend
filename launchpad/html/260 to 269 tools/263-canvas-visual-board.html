@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hatchloom · 263 — Canvas / Visual Board</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#FF1F5A;--orange:#FF8C00;--cyan:#0891B2;--charcoal:#1E1E2E;--text:#2D2D2D;--text-soft:#6B7280;--muted:#9CA3AF;--bg:#F7F8FC;--card:#FFFFFF;--border:#EDEEF2;--green:#059669;--green-bg:#F0FDF4;--green-border:#BBF7D0;--radius:14px;--font-d:'Outfit',sans-serif;--font-b:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-b);font-size:14px;background:#1a1a2e;color:var(--text)}
+
+/* ─── BACKDROP ─── */
+.backdrop{position:fixed;inset:0;background:rgba(30,30,46,0.6);backdrop-filter:blur(4px);z-index:500}
+
+/* ─── OVERLAY PANEL ─── */
+.panel{position:fixed;top:40px;left:50%;transform:translateX(-50%);width:calc(100% - 40px);max-width:1440px;height:calc(100vh - 56px);background:var(--card);border-radius:18px 18px 0 0;box-shadow:0 -8px 60px rgba(0,0,0,0.35);z-index:600;display:flex;flex-direction:column;overflow:hidden;animation:slideUp .35s cubic-bezier(.16,1,.3,1) both}
+@keyframes slideUp{from{transform:translateX(-50%) translateY(40px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+
+/* ─── BREADCRUMB ─── */
+.bc{padding:.4rem 1.5rem;background:var(--bg);border-bottom:1px solid var(--border);font-size:.72rem;color:var(--text-soft);font-weight:600;display:flex;align-items:center;gap:.35rem;flex-shrink:0}
+.bc a{color:var(--pink);cursor:pointer;text-decoration:none}.bc a:hover{text-decoration:underline}
+.bc .sep{color:#D1D5DB}
+
+/* ─── HEADER ─── */
+.hdr{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;border-bottom:1.5px solid var(--border);flex-shrink:0}
+.hdr-icon{width:40px;height:40px;border-radius:12px;background:var(--green-bg);border:1.5px solid var(--green-border);display:flex;align-items:center;justify-content:center;font-size:1.15rem}
+.hdr-meta{flex:1;min-width:0}
+.hdr-title{font-family:var(--font-d);font-weight:900;font-size:1.05rem;color:var(--charcoal)}
+.hdr-desc{font-size:.74rem;color:var(--text-soft);margin-top:1px}
+.pill{font-family:var(--font-d);font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:99px;display:inline-flex;align-items:center;gap:.3rem;flex-shrink:0}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill-prog{background:#FFF7ED;color:var(--orange);border:1.5px solid #FFD98A}
+.pill-xp{background:#F0FBFD;color:var(--cyan);border:1.5px solid #BAE6F0}
+.hdr-close{width:34px;height:34px;border-radius:50%;background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;color:var(--text-soft);transition:all .15s;flex-shrink:0}
+.hdr-close:hover{background:#FFF0F5;border-color:var(--pink);color:var(--pink)}
+
+/* ─── ACTION BAR ─── */
+.abar{display:flex;align-items:center;padding:.4rem 1.5rem;border-bottom:1px solid var(--border);flex-shrink:0;gap:.5rem}
+.abar-left{display:flex;align-items:center;gap:.5rem;flex:1}
+.save-st{display:flex;align-items:center;gap:.25rem;font-size:.72rem;font-weight:600}
+.sv-dot{width:7px;height:7px;border-radius:50%}
+.sv-ok{background:var(--green)}.sv-ing{background:var(--orange);animation:pulse 1s infinite}.sv-un{background:var(--pink)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.sv-lbl{color:var(--text-soft)}.sv-time{color:var(--muted);font-size:.68rem}
+.abar-right{display:flex;align-items:center;gap:.2rem}
+.ab{width:32px;height:32px;border-radius:7px;border:1.5px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;transition:all .15s;position:relative}
+.ab:hover{background:var(--bg);border-color:#C4C8D4}
+.ab:hover .tip{opacity:1}
+.ab.on{background:#FFF7ED;border-color:#FFD98A;color:var(--orange)}
+.tip{position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:var(--charcoal);color:#fff;font-family:var(--font-d);font-size:.6rem;font-weight:600;padding:.15rem .45rem;border-radius:4px;white-space:nowrap;opacity:0;transition:opacity .15s;pointer-events:none;z-index:10}
+.tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:3px solid transparent;border-top-color:var(--charcoal)}
+.ab-sep{width:1px;height:18px;background:var(--border);margin:0 .15rem}
+.ab-del:hover{background:#FFF0F5;border-color:var(--pink);color:var(--pink)}
+
+/* ─── CANVAS CONTENT ─── */
+.canvas{flex:1;overflow:auto;padding:1rem 1.25rem 2rem}
+.bmc{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;grid-template-rows:1fr 1fr auto;gap:0;border:2px solid var(--border);border-radius:14px;overflow:hidden;min-height:480px;background:var(--card)}
+.cell{border:.5px solid var(--border);padding:.65rem;display:flex;flex-direction:column;position:relative;transition:background .15s}
+.cell:hover{background:rgba(5,150,105,0.015)}
+.cell-hd{display:flex;align-items:center;gap:.35rem;margin-bottom:.4rem;padding-bottom:.35rem;border-bottom:1.5px solid var(--border)}
+.cell-ic{font-size:.8rem}.cell-lb{font-family:var(--font-d);font-weight:800;font-size:.65rem;text-transform:uppercase;letter-spacing:.04em;color:var(--charcoal)}
+.cell-ct{font-size:.58rem;font-weight:700;color:var(--muted);margin-left:auto;background:var(--bg);padding:.05rem .35rem;border-radius:99px}
+
+.cell.kp{grid-column:1;grid-row:1/3}.cell.ka{grid-column:2;grid-row:1}.cell.kr{grid-column:2;grid-row:2}
+.cell.vp{grid-column:3;grid-row:1/3}.cell.cr{grid-column:4;grid-row:1}.cell.ch{grid-column:4;grid-row:2}
+.cell.cs{grid-column:5;grid-row:1/3}.cell.cost{grid-column:1/4;grid-row:3;min-height:100px}.cell.rev{grid-column:4/6;grid-row:3;min-height:100px}
+
+.items{display:flex;flex-direction:column;gap:.25rem;flex:1}
+.itm{display:flex;align-items:flex-start;gap:.3rem;padding:.25rem .4rem;border-radius:6px;background:var(--bg);font-size:.73rem;line-height:1.35;border:1px solid transparent;transition:all .15s;cursor:text}
+.itm:hover{border-color:var(--green-border);background:var(--green-bg)}
+.itm .bul{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:5px}
+.itm-txt{flex:1;outline:none;min-height:1em}
+.itm .rm{opacity:0;font-size:.6rem;color:var(--muted);cursor:pointer;padding:1px 3px;transition:opacity .15s}
+.itm:hover .rm{opacity:1}.itm .rm:hover{color:var(--pink)}
+.add-btn{display:flex;align-items:center;gap:.25rem;padding:.25rem .4rem;border-radius:6px;font-size:.68rem;color:var(--muted);cursor:pointer;margin-top:.15rem;border:1px dashed transparent;transition:all .15s}
+.add-btn:hover{border-color:var(--green-border);background:var(--green-bg);color:var(--green)}
+
+/* Bottom row items horizontal */
+.cell.cost .items,.cell.rev .items{flex-direction:row;flex-wrap:wrap;gap:.3rem}
+
+/* ─── FOOTER ─── */
+.ftr{padding:.55rem 1.5rem;border-top:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ftr-info{font-size:.72rem;color:var(--muted)}
+.ftr-btns{display:flex;gap:.4rem}
+.btn-s{font-family:var(--font-d);font-weight:700;font-size:.76rem;padding:.4rem .9rem;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all .15s}
+.btn-s:hover{background:var(--bg)}.btn-p{font-family:var(--font-d);font-weight:700;font-size:.76rem;padding:.4rem 1.1rem;border-radius:8px;border:none;background:var(--green);color:#fff;cursor:pointer;transition:all .15s}
+.btn-p:hover{background:#047857}
+
+/* ─── TOAST ─── */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--charcoal);color:#fff;font-family:var(--font-d);font-weight:600;font-size:.8rem;padding:.5rem 1.1rem;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.25);z-index:999;display:flex;align-items:center;gap:.5rem;transition:transform .3s cubic-bezier(.16,1,.3,1);pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0);pointer-events:auto}
+.toast u{color:var(--pink);cursor:pointer;font-weight:700;text-decoration:none}
+</style>
+</head>
+<body>
+
+<div class="backdrop" onclick="closePanel()"></div>
+
+<div class="panel">
+  <div class="bc">
+    <a>🚀 LaunchPad</a><span class="sep">›</span>
+    <a>My Sandboxes</a><span class="sep">›</span>
+    <a>♻️ EcoSnack Packaging</a><span class="sep">›</span>
+    <span>📋 Business Model Canvas</span>
+  </div>
+
+  <div class="hdr">
+    <div class="hdr-icon">📋</div>
+    <div class="hdr-meta">
+      <div class="hdr-title">Business Model Canvas</div>
+      <div class="hdr-desc">Map your whole business on one page — who you help, how you help, and how you earn</div>
+    </div>
+    <span class="pill pill-prog"><span class="dot"></span>In Progress</span>
+    <span class="pill pill-xp">⚡ 25 XP</span>
+    <div class="hdr-close" onclick="closePanel()" title="Close overlay">✕</div>
+  </div>
+
+  <div class="abar">
+    <div class="abar-left">
+      <div class="save-st"><div class="sv-dot sv-ok" id="sDot"></div><span class="sv-lbl" id="sLbl">Saved</span><span class="sv-time" id="sTime">· 2 min ago</span></div>
+    </div>
+    <div class="abar-right">
+      <div class="ab on" id="bEdit" onclick="togEdit()"><span class="tip">Edit</span>✏️</div>
+      <div class="ab" onclick="doSave()"><span class="tip">Save</span>💾</div>
+      <div class="ab-sep"></div>
+      <div class="ab" onclick="toast('⬇️ Downloading as PDF…')"><span class="tip">Download PDF</span>⬇️</div>
+      <div class="ab" onclick="toast('📤 Choose export destination')"><span class="tip">Export to…</span>📤</div>
+      <div class="ab" onclick="toast('🔗 Shareable link copied!')"><span class="tip">Share link</span>🔗</div>
+      <div class="ab-sep"></div>
+      <div class="ab" onclick="toast('📋 Duplicated as BMC v2')"><span class="tip">Duplicate</span>📋</div>
+      <div class="ab ab-del" onclick="toast('🗑️ Moved to trash &nbsp;<u onclick=&quot;toast(\'↩️ Restored\')&quot;>Undo</u>',4000)"><span class="tip">Delete</span>🗑️</div>
+    </div>
+  </div>
+
+  <div class="canvas">
+    <div class="bmc">
+
+      <div class="cell kp">
+        <div class="cell-hd"><span class="cell-ic">🤝</span><span class="cell-lb">Key Partners</span><span class="cell-ct">2</span></div>
+        <div class="items" data-z="kp">
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">Ridgewood Academy cafeteria manager</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">EcoWraps (compostable material supplier)</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+        </div>
+        <div class="add-btn" onclick="addItm(this)">+ Add partner</div>
+      </div>
+
+      <div class="cell ka">
+        <div class="cell-hd"><span class="cell-ic">⚙️</span><span class="cell-lb">Key Activities</span><span class="cell-ct">3</span></div>
+        <div class="items" data-z="ka">
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">Research compostable materials</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">Design packaging prototypes</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">Test with cafeteria pilot</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+        </div>
+        <div class="add-btn" onclick="addItm(this)">+ Add activity</div>
+      </div>
+
+      <div class="cell vp">
+        <div class="cell-hd"><span class="cell-ic">💎</span><span class="cell-lb">Value Propositions</span><span class="cell-ct">3</span></div>
+        <div class="items" data-z="vp">
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">Snack wrappers that actually compost in 90 days</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">Schools reduce landfill waste by 60%</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">Affordable — within existing supply budget</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+        </div>
+        <div class="add-btn" onclick="addItm(this)">+ Add value prop</div>
+      </div>
+
+      <div class="cell cr">
+        <div class="cell-hd"><span class="cell-ic">❤️</span><span class="cell-lb">Customer Relationships</span><span class="cell-ct">2</span></div>
+        <div class="items" data-z="cr">
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">Direct demo + free sample pack</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">Monthly check-in with cafeteria staff</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+        </div>
+        <div class="add-btn" onclick="addItm(this)">+ Add relationship</div>
+      </div>
+
+      <div class="cell cs">
+        <div class="cell-hd"><span class="cell-ic">👥</span><span class="cell-lb">Customer Segments</span><span class="cell-ct">2</span></div>
+        <div class="items" data-z="cs">
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">School cafeterias (Calgary, 50+ schools)</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">Eco-conscious school boards with green targets</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+        </div>
+        <div class="add-btn" onclick="addItm(this)">+ Add segment</div>
+      </div>
+
+      <div class="cell kr">
+        <div class="cell-hd"><span class="cell-ic">🔑</span><span class="cell-lb">Key Resources</span><span class="cell-ct">2</span></div>
+        <div class="items" data-z="kr">
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">Compostable material samples from EcoWraps</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">School Eco Club volunteers for testing</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+        </div>
+        <div class="add-btn" onclick="addItm(this)">+ Add resource</div>
+      </div>
+
+      <div class="cell ch">
+        <div class="cell-hd"><span class="cell-ic">📣</span><span class="cell-lb">Channels</span><span class="cell-ct">2</span></div>
+        <div class="items" data-z="ch">
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">In-person cafeteria demos</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">School board sustainability meetings</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+        </div>
+        <div class="add-btn" onclick="addItm(this)">+ Add channel</div>
+      </div>
+
+      <div class="cell cost">
+        <div class="cell-hd"><span class="cell-ic">💸</span><span class="cell-lb">Cost Structure</span><span class="cell-ct">3</span></div>
+        <div class="items" data-z="cost">
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">Compostable material (biggest cost)</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">Prototype printing</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">Sample packs for demos</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+        </div>
+        <div class="add-btn" onclick="addItm(this)">+ Add cost</div>
+      </div>
+
+      <div class="cell rev">
+        <div class="cell-hd"><span class="cell-ic">💰</span><span class="cell-lb">Revenue Streams</span><span class="cell-ct">2</span></div>
+        <div class="items" data-z="rev">
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">Per-unit packaging sales to schools</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+          <div class="itm"><span class="bul"></span><span class="itm-txt" contenteditable="true">Bulk order contracts (semester-long)</span><span class="rm" onclick="rmItm(this)">✕</span></div>
+        </div>
+        <div class="add-btn" onclick="addItm(this)">+ Add revenue stream</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="ftr">
+    <div class="ftr-info" id="ftrInfo">Canvas · 9 zones · 21 items</div>
+    <div class="ftr-btns">
+      <button class="btn-s" onclick="closePanel()">Close</button>
+      <button class="btn-p" onclick="doSave()">💾 Save Canvas</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="tst"></div>
+
+<script>
+let editing=true;
+function closePanel(){document.querySelector('.panel').style.animation='slideDown .25s ease forwards';document.querySelector('.backdrop').style.opacity='0';document.querySelector('.backdrop').style.transition='opacity .25s'}
+document.head.appendChild(Object.assign(document.createElement('style'),{textContent:'@keyframes slideDown{to{transform:translateX(-50%) translateY(40px);opacity:0}}'}));
+
+function togEdit(){editing=!editing;document.getElementById('bEdit').classList.toggle('on',editing);document.querySelectorAll('.itm-txt').forEach(e=>e.contentEditable=editing);document.querySelectorAll('.add-btn,.rm').forEach(e=>e.style.display=editing?'':'none');toast(editing?'✏️ Edit mode':'👁 View mode')}
+
+function addItm(btn){const c=btn.previousElementSibling;const d=document.createElement('div');d.className='itm';d.innerHTML='<span class="bul"></span><span class="itm-txt" contenteditable="true"></span><span class="rm" onclick="rmItm(this)">✕</span>';c.appendChild(d);d.querySelector('.itm-txt').focus();markUn();updCt()}
+
+function rmItm(b){b.parentElement.remove();markUn();updCt()}
+
+function updCt(){let t=0;document.querySelectorAll('.items').forEach(c=>{const n=c.children.length;const z=c.dataset.z;const ct=c.parentElement.querySelector('.cell-ct');if(ct)ct.textContent=n;t+=n});document.getElementById('ftrInfo').textContent='Canvas · 9 zones · '+t+' items'}
+
+function markUn(){document.getElementById('sDot').className='sv-dot sv-un';document.getElementById('sLbl').textContent='Unsaved';document.getElementById('sTime').textContent=''}
+
+function doSave(){document.getElementById('sDot').className='sv-dot sv-ing';document.getElementById('sLbl').textContent='Saving…';document.getElementById('sTime').textContent='';setTimeout(()=>{document.getElementById('sDot').className='sv-dot sv-ok';document.getElementById('sLbl').textContent='Saved';document.getElementById('sTime').textContent='· just now';toast('💾 Canvas saved')},700)}
+
+function toast(m,dur){const t=document.getElementById('tst');t.innerHTML=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),dur||2500)}
+
+document.addEventListener('input',e=>{if(e.target.classList.contains('itm-txt')){markUn();clearTimeout(window._as);window._as=setTimeout(doSave,2000)}});
+</script>
+</body>
+</html>

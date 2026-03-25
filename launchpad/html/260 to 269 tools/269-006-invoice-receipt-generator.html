@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hatchloom · Invoice & Receipt Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#FF1F5A;--orange:#FF8C00;--cyan:#0891B2;--charcoal:#1E1E2E;--text:#2D2D2D;--text-soft:#6B7280;--muted:#9CA3AF;--bg:#F7F8FC;--card:#FFF;--border:#EDEEF2;--hustle:#D97706;--hustle-bg:#FFFBEB;--hustle-bdr:#FDE68A;--green:#059669;--font-d:'Outfit',sans-serif;--font-b:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-b);font-size:14px;background:#1a1a2e;color:var(--text)}
+.backdrop{position:fixed;inset:0;background:rgba(30,30,46,.6);backdrop-filter:blur(4px);z-index:500}
+.panel{position:fixed;top:40px;left:50%;transform:translateX(-50%);width:calc(100% - 40px);max-width:1440px;height:calc(100vh - 56px);background:var(--card);border-radius:18px 18px 0 0;box-shadow:0 -8px 60px rgba(0,0,0,.35);z-index:600;display:flex;flex-direction:column;overflow:hidden;animation:su .35s cubic-bezier(.16,1,.3,1) both}
+@keyframes su{from{transform:translateX(-50%) translateY(40px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+.bc{padding:.4rem 1.5rem;background:var(--bg);border-bottom:1px solid var(--border);font-size:.72rem;color:var(--text-soft);font-weight:600;display:flex;align-items:center;gap:.35rem;flex-shrink:0}.bc a{color:var(--pink);cursor:pointer;text-decoration:none}.bc .sep{color:#D1D5DB}
+.hdr{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;border-bottom:1.5px solid var(--border);flex-shrink:0}
+.hdr-icon{width:40px;height:40px;border-radius:12px;background:var(--hustle-bg);border:1.5px solid var(--hustle-bdr);display:flex;align-items:center;justify-content:center;font-size:1.15rem}
+.hdr-meta{flex:1}.hdr-title{font-family:var(--font-d);font-weight:900;font-size:1.05rem;color:var(--charcoal)}.hdr-desc{font-size:.74rem;color:var(--text-soft);margin-top:1px}
+.pill{font-family:var(--font-d);font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:99px;display:inline-flex;align-items:center;gap:.3rem;flex-shrink:0}.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill-soon{background:var(--bg);color:var(--muted);border:1.5px solid var(--border)}
+.pill-x{background:#F0FBFD;color:var(--cyan);border:1.5px solid #BAE6F0}
+.hdr-close{width:34px;height:34px;border-radius:50%;background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;color:var(--text-soft);transition:all .15s;flex-shrink:0}.hdr-close:hover{background:#FFF0F5;border-color:var(--pink);color:var(--pink)}
+.content{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:2rem}
+.coming{max-width:420px}
+.coming-icon{font-size:4rem;margin-bottom:1rem;filter:grayscale(.3)}
+.coming-title{font-family:var(--font-d);font-weight:900;font-size:1.5rem;color:var(--charcoal);margin-bottom:.35rem}
+.coming-sub{font-size:.88rem;color:var(--text-soft);line-height:1.5;margin-bottom:1.5rem}
+.features{display:flex;flex-direction:column;gap:.5rem;text-align:left;background:var(--bg);border:1.5px solid var(--border);border-radius:14px;padding:1rem 1.25rem}
+.feat{display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:var(--text)}
+.feat-dot{width:8px;height:8px;border-radius:50%;background:var(--border);flex-shrink:0}
+.coming-badge{display:inline-flex;align-items:center;gap:.35rem;font-family:var(--font-d);font-weight:700;font-size:.78rem;padding:.4rem 1rem;border-radius:99px;background:var(--hustle-bg);border:1.5px solid var(--hustle-bdr);color:var(--hustle);margin-top:1.25rem}
+.ftr{padding:.55rem 1.5rem;border-top:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.fi{font-size:.72rem;color:var(--muted)}
+.bs{font-family:var(--font-d);font-weight:700;font-size:.76rem;padding:.4rem .9rem;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);cursor:pointer}.bs:hover{background:var(--bg)}
+</style>
+</head>
+<body>
+<div class="backdrop" onclick="closePanel()"></div>
+<div class="panel">
+  <div class="bc"><a>🚀 LaunchPad</a><span class="sep">›</span><a>Creator Toolkit</a><span class="sep">›</span><span>🧾 Invoice & Receipt Generator</span></div>
+  <div class="hdr">
+    <div class="hdr-icon">🧾</div>
+    <div class="hdr-meta"><div class="hdr-title">Invoice & Receipt Generator</div><div class="hdr-desc">Create simple invoices for your SideHustle sales — look professional, get paid</div></div>
+    <span class="pill pill-soon"><span class="dot"></span>Coming Soon</span>
+    <span class="pill pill-x">⚡ XP</span>
+    <div class="hdr-close" onclick="closePanel()">✕</div>
+  </div>
+  <div class="content">
+    <div class="coming">
+      <div class="coming-icon">🧾</div>
+      <div class="coming-title">Invoice & Receipt Generator</div>
+      <div class="coming-sub">This tool is on its way! Here's what you'll be able to do:</div>
+      <div class="features">
+        <div class="feat"><div class="feat-dot"></div>Fill in seller and buyer details</div>
+        <div class="feat"><div class="feat-dot"></div>Add line items with quantities and prices</div>
+        <div class="feat"><div class="feat-dot"></div>Auto-calculate totals and tax</div>
+        <div class="feat"><div class="feat-dot"></div>Preview formatted invoice</div>
+        <div class="feat"><div class="feat-dot"></div>Export as PDF to share or print</div>
+      </div>
+      <div class="coming-badge">🚧 Launching soon — stay tuned!</div>
+    </div>
+  </div>
+  <div class="ftr"><div class="fi">Creator Toolkit · Coming Soon</div><button class="bs" onclick="closePanel()">Close</button></div>
+</div>
+<script>
+document.head.appendChild(Object.assign(document.createElement('style'),{textContent:'@keyframes sd{to{transform:translateX(-50%) translateY(40px);opacity:0}}'}));
+function closePanel(){document.querySelector('.panel').style.animation='sd .25s ease forwards';document.querySelector('.backdrop').style.opacity='0';document.querySelector('.backdrop').style.transition='opacity .25s'}
+</script>
+</body>
+</html>

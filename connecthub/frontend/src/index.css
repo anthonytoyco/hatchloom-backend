@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Outfit", sans-serif;
+  --font-body: "DM-Sans", sans-serif;
+
+  --color-pink: #ff1f5a;
+  --color-orange: #ff8c00;
+  --color-teal: #0891b2;
+  --color-teal-light: #f0fbfd;
+  --color-teal-border: #bae6f0;
+  --color-charcoal: #1e1e2e;
+  --color-text: #2d2d2d;
+  --color-text-soft: #6b7280;
+  --color-bg: #f7f8fc;
+  --color-card: #ffffff;
+  --color-border: #edeef2;
+}

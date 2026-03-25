@@ -1,0 +1,41 @@
+name: Deployment Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Github Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Convert owner name to lowercase
+        run: |
+          echo "OWNER_LC=${OWNER,,}" >> $GITHUB_ENV
+        env:
+          OWNER: ${{ github.repository_owner }}
+
+      - name: Pull Docker Image
+        run: |
+          docker pull ghcr.io/${{ env.OWNER_LC }}/${{ github.event.repository.name }}:latest
+
+      - name: Stop existing container
+        run: |
+          docker stop connecthub || true
+          docker rm connecthub || true
+
+      - name: Run new container
+        run: | 
+            docker run -d --name connecthub -p 8080:8080 ghcr.io/${{ env.OWNER_LC }}/${{ github.event.repository.name }}:latest
+          
+      

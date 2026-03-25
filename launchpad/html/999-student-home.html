@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hatchloom — Student Home</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --pink: #FF1F5A;
+      --teal: #0891B2;
+      --orange: #FF8C00;
+      --charcoal: #1E1E2E;
+      --text: #2D2D2D;
+      --text-soft: #6B7280;
+      --bg: #F7F8FC;
+      --card: #FFFFFF;
+      --border: #EDEEF2;
+      --rookie: #22C55E;
+      --explorer: #3B82F6;
+      --challenger: #F97316;
+      --pro: #A855F7;
+      --sw-ei: #FF1F5A;
+      --sw-ss: #0891B2;
+      --sw-rb: #FF8C00;
+      --sw-ee: #A855F7;
+      --font-display: 'Outfit', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 14px;
+    }
+
+    /* TOP NAV */
+    .topnav {
+      background: var(--card);
+      border-bottom: 1.5px solid var(--border);
+      padding: 0 1.75rem;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    .logo {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 1.35rem;
+      color: var(--charcoal);
+      letter-spacing: -0.03em;
+    }
+
+    .logo span {
+      color: var(--pink);
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+    }
+
+    .student-pill {
+      background: var(--pink);
+      color: #fff;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.68rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.03em;
+    }
+
+    .school-name {
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-soft);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.125rem;
+    }
+
+    .nav-link {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.875rem;
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      color: var(--text-soft);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-link:hover {
+      background: #F3F4F6;
+      color: var(--text);
+    }
+
+    .nav-link.active {
+      background: #FFF0F5;
+      color: var(--pink);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+    }
+
+    .gamif-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 99px;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.78rem;
+      border: 1.5px solid transparent;
+      cursor: pointer;
+    }
+
+    .streak-pill {
+      background: linear-gradient(135deg, #FFF7E6, #FFF0CC);
+      border-color: #FFD98A;
+      color: #B45309;
+    }
+
+    .xp-pill {
+      background: linear-gradient(135deg, #F0FBFD, #E0F5F9);
+      border-color: #BAE6F0;
+      color: #0891B2;
+    }
+
+    .notif-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      font-size: 1rem;
+    }
+
+    .notif-badge {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      background: var(--pink);
+      color: white;
+      font-size: 0.55rem;
+      font-weight: 800;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid white;
+    }
+
+    .avatar-chip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 12px 5px 8px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.8rem;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .avatar-chip:hover {
+      background: var(--bg);
+    }
+
+    /* LAYOUT */
+    .layout {
+      display: grid;
+      grid-template-columns: 215px 1fr;
+      min-height: calc(100vh - 58px);
+    }
+
+    /* SIDE MENU */
+    .sidemenu {
+      background: var(--card);
+      border-right: 1.5px solid var(--border);
+      padding: 1.25rem 0 2rem;
+      position: sticky;
+      top: 58px;
+      height: calc(100vh - 58px);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidemenu::-webkit-scrollbar {
+      width: 3px;
+    }
+
+    .sidemenu::-webkit-scrollbar-thumb {
+      background: #E5E7EB;
+      border-radius: 99px;
+    }
+
+    .sidemenu-section {
+      padding: 0 0.875rem;
+    }
+
+    .sidemenu-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0.625rem 0.875rem;
+    }
+
+    .sidemenu-label {
+      font-family: var(--font-display);
+      font-size: 0.63rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: #C4C8D4;
+      margin: 1rem 0 0.35rem 0.5rem;
+    }
+
+    .sidemenu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.525rem 0.75rem;
+      border-radius: 9px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-soft);
+      cursor: pointer;
+      transition: all 0.18s;
+      margin-bottom: 0.1rem;
+    }
+
+    .sidemenu-item:hover {
+      background: #F3F4F6;
+      color: var(--text);
+    }
+
+    .sidemenu-item.active {
+      background: #FFF0F5;
+      color: var(--pink);
+    }
+
+    .sidemenu-item .si {
+      font-size: 0.9375rem;
+      width: 18px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .sidemenu-item.contact-item {
+      color: var(--text-soft);
+      font-size: 0.8rem;
+      margin-top: auto;
+    }
+
+    .sidemenu-item.contact-item:hover {
+      color: var(--pink);
+    }
+
+    /* Profile block in sidebar */
+    .sidebar-profile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem 0.875rem 0.75rem;
+      text-align: center;
+    }
+
+    .sidebar-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1E1E2E, #3D3060);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      border: 3px solid white;
+      box-shadow: 0 3px 12px rgba(255, 31, 90, 0.15);
+      margin-bottom: 0.5rem;
+    }
+
+    .sidebar-handle {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.9rem;
+      color: var(--charcoal);
+      margin-bottom: 0.1rem;
+    }
+
+    .sidebar-at {
+      font-size: 0.68rem;
+      color: var(--text-soft);
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    .sidebar-edit {
+      font-family: var(--font-display);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--pink);
+      cursor: pointer;
+      transition: opacity 0.15s;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+    }
+
+    .sidebar-edit:hover {
+      opacity: 0.7;
+      background: #FFF0F5;
+      border-color: var(--pink);
+    }
+
+    /* MAIN */
+    .main {
+      padding: 1.75rem 2rem;
+      overflow-y: auto;
+    }
+
+    /* GREETING */
+    .greeting {
+      margin-bottom: 1.5rem;
+    }
+
+    .greeting h1 {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: var(--charcoal);
+      margin-bottom: 0.35rem;
+    }
+
+    .greeting h1 .name {
+      color: var(--pink);
+    }
+
+    /* Skill Radar + Badges row */
+    .identity-strip {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .skill-radar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .skill-group {
+      display: flex;
+      align-items: center;
+      gap: 0.2rem;
+    }
+
+    .skill-label {
+      font-family: var(--font-display);
+      font-size: 0.58rem;
+      font-weight: 700;
+      color: var(--text-soft);
+      margin-right: 0.15rem;
+    }
+
+    .skill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #EDEEF2;
+    }
+
+    .skill-dot.r {
+      background: var(--rookie);
+    }
+
+    .skill-dot.e {
+      background: var(--explorer);
+    }
+
+    .skill-dot.c {
+      background: var(--challenger);
+    }
+
+    .skill-dot.p {
+      background: var(--pro);
+    }
+
+    .badge-coins {
+      display: flex;
+      align-items: center;
+    }
+
+    .badge-coin {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      margin-left: -6px;
+      border: 2px solid white;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+      cursor: default;
+      position: relative;
+    }
+
+    .badge-coin:first-child {
+      margin-left: 0;
+    }
+
+    .badge-coin:hover .badge-tt {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .badge-tt {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%) translateY(3px);
+      background: var(--charcoal);
+      color: white;
+      font-size: 0.58rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 5px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: all 0.15s;
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    .greeting-sub {
+      font-size: 0.875rem;
+      color: var(--text-soft);
+      font-weight: 500;
+    }
+
+    /* URGENT NOTIFICATIONS */
+    .urgent-banners {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .urgent-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-left: 4px solid var(--pink);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      animation: cardIn 0.4s ease both;
+    }
+
+    .urgent-banner:nth-child(2) {
+      animation-delay: 0.08s;
+    }
+
+    .urgent-banner-icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #FFF0F5;
+    }
+
+    .urgent-banner-text {
+      flex: 1;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .urgent-banner-cta {
+      flex-shrink: 0;
+      padding: 0.4rem 0.85rem;
+      border-radius: 8px;
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: var(--pink);
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .urgent-banner-cta:hover {
+      opacity: 0.85;
+    }
+
+    .urgent-banner-dismiss {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .urgent-banner-dismiss:hover {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* PILLAR CARDS */
+    .pillars {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .pillar-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+      transition: box-shadow 0.25s, border-color 0.25s;
+      animation: cardIn 0.4s ease both;
+    }
+
+    .pillar-card:nth-child(1) {
+      animation-delay: .04s
+    }
+
+    .pillar-card:nth-child(2) {
+      animation-delay: .12s
+    }
+
+    .pillar-card:nth-child(3) {
+      animation-delay: .20s
+    }
+
+    @keyframes cardIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .pillar-card:hover {
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+      border-color: #D1D5DB;
+    }
+
+    .pillar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.875rem 1.125rem 0.625rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .pillar-title-group {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .pillar-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .pillar-icon.explore {
+      background: #FFF0F5;
+    }
+
+    .pillar-icon.connect {
+      background: #F0FBFD;
+    }
+
+    .pillar-icon.launch {
+      background: #FFF7ED;
+    }
+
+    .pillar-name {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.88rem;
+    }
+
+    .pillar-name.explore {
+      color: var(--pink);
+    }
+
+    .pillar-name.connect {
+      color: var(--teal);
+    }
+
+    .pillar-name.launch {
+      color: var(--orange);
+    }
+
+    .pillar-link {
+      font-family: var(--font-display);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-soft);
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+
+    .pillar-link:hover {
+      color: var(--charcoal);
+    }
+
+    .pillar-body {
+      padding: 0.875rem 1.125rem;
+    }
+
+    /* Explore pillar items */
+    .explore-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0;
+      cursor: pointer;
+    }
+
+    .explore-item+.explore-item {
+      border-top: 1px solid var(--border);
+    }
+
+    .explore-format {
+      font-size: 0.85rem;
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .explore-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.78rem;
+      color: var(--charcoal);
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .explore-next {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-soft);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* Connect pillar items */
+    .connect-unread {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.5rem;
+      background: #F0FBFD;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+    }
+
+    .unread-badge {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      font-weight: 800;
+      background: var(--teal);
+      color: white;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .unread-text {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--teal);
+    }
+
+    .connect-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.35rem 0;
+      cursor: pointer;
+    }
+
+    .connect-item+.connect-item {
+      border-top: 1px solid var(--border);
+    }
+
+    .connect-av {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+    }
+
+    .connect-text {
+      font-size: 0.75rem;
+      color: var(--text);
+      line-height: 1.35;
+      flex: 1;
+    }
+
+    .connect-text strong {
+      font-family: var(--font-display);
+      font-weight: 800;
+      color: var(--charcoal);
+    }
+
+    .online-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0 0;
+      margin-top: 0.35rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .online-label {
+      font-family: var(--font-display);
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-soft);
+      white-space: nowrap;
+    }
+
+    .online-avatars {
+      display: flex;
+      align-items: center;
+    }
+
+    .mini-av {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      margin-left: -4px;
+      border: 1.5px solid white;
+      position: relative;
+    }
+
+    .mini-av:first-child {
+      margin-left: 0;
+    }
+
+    .online-dot {
+      position: absolute;
+      bottom: -1px;
+      right: -1px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22C55E;
+      border: 1.5px solid white;
+    }
+
+    .more-online {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-soft);
+      margin-left: 0.2rem;
+    }
+
+    /* Launch pillar items */
+    .launch-group-label {
+      font-family: var(--font-display);
+      font-size: 0.62rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #C4C8D4;
+      margin-bottom: 0.3rem;
+      margin-top: 0.5rem;
+    }
+
+    .launch-group-label:first-child {
+      margin-top: 0;
+    }
+
+    .launch-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0;
+      cursor: pointer;
+    }
+
+    .launch-item+.launch-item {
+      border-top: 1px solid var(--border);
+    }
+
+    .launch-emoji {
+      font-size: 0.9rem;
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .launch-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.78rem;
+      color: var(--charcoal);
+      flex: 1;
+    }
+
+    .launch-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .launch-dot.active {
+      background: #22C55E;
+    }
+
+    .launch-dot.paused {
+      background: #D1D5DB;
+    }
+
+    /* ACTIVITY SECTION */
+    .activity-section {
+      margin-bottom: 1.75rem;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--charcoal);
+      margin-bottom: 0.75rem;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+    }
+
+    .activity-content {
+      flex: 1;
+    }
+
+    .activity-text {
+      font-size: 0.8rem;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .activity-text strong {
+      font-family: var(--font-display);
+      font-weight: 700;
+    }
+
+    .activity-time {
+      font-size: 0.68rem;
+      color: #C4C8D4;
+      font-weight: 500;
+      margin-top: 0.15rem;
+    }
+
+    /* COMING SOON CONSTELLATION */
+    .constellation-wrap {
+      margin-bottom: 1rem;
+    }
+
+    .constellation {
+      background: #0F0F1A;
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      position: relative;
+      overflow: hidden;
+      cursor: default;
+    }
+
+    .constellation:hover .constellation-hover {
+      opacity: 1;
+    }
+
+    .constellation-title {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 0.375rem;
+    }
+
+    .stars {
+      position: relative;
+      height: 58px;
+    }
+
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.3;
+    }
+
+    .star.b {
+      opacity: 0.7;
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.35);
+    }
+
+    .star-line {
+      position: absolute;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.1);
+      transform-origin: left center;
+    }
+
+    .constellation-sub {
+      font-size: 0.64rem;
+      color: rgba(255, 255, 255, 0.22);
+      font-weight: 600;
+      text-align: center;
+      margin-top: 0.375rem;
+    }
+
+    .coming-soon-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 15, 26, 0.35);
+      border-radius: 14px;
+    }
+
+    .coming-soon-pill {
+      font-family: var(--font-display);
+      font-size: 0.63rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(4px);
+      color: rgba(255, 255, 255, 0.45);
+      padding: 0.275rem 0.75rem;
+      border-radius: 99px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .constellation-hover {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 15, 26, 0.85);
+      border-radius: 14px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      padding: 1rem 1.5rem;
+      text-align: center;
+    }
+
+    .constellation-hover-text {
+      font-size: 0.78rem;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.5;
+      font-weight: 500;
+    }
+
+    .constellation-hover-text strong {
+      font-family: var(--font-display);
+      font-weight: 800;
+      color: white;
+    }
+
+    ::-webkit-scrollbar {
+      width: 3px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #E5E7EB;
+      border-radius: 99px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="topnav">
+    <div class="nav-left">
+      <div class="logo">hatch<span>loom</span></div>
+      <div class="student-pill">Student</div>
+      <div class="school-name">Ridgewood Academy</div>
+    </div>
+    <div class="nav-links">
+      <div class="nav-link" onclick="window.location='000-explore-home.html'">🔭 Explore</div>
+      <div class="nav-link" onclick="window.location='100-connecthub-home.html'">🤝 Connect</div>
+      <div class="nav-link" onclick="window.location='200-student-launchpad.html'">🚀 Launch</div>
+    </div>
+    <div class="nav-right">
+      <div class="gamif-pill streak-pill">🔥 18-day streak</div>
+      <div class="gamif-pill xp-pill">⚡ 2,450 XP</div>
+      <div class="notif-btn" title="Messages">✉️<div class="notif-badge">3</div>
+      </div>
+      <div class="notif-btn" title="Notifications">🔔<div class="notif-badge">2</div>
+      </div>
+      <div class="avatar-chip">🦊 FireFox</div>
+    </div>
+  </nav>
+
+  <div class="layout">
+
+    <!-- LEFT NAV — Personal -->
+    <aside class="sidemenu">
+      <div class="sidemenu-section">
+        <div class="sidemenu-item active">
+          <span class="si">🏠</span> Home
+        </div>
+      </div>
+
+      <div class="sidemenu-divider"></div>
+
+      <div class="sidemenu-section">
+        <div class="sidemenu-label">Profile</div>
+
+        <div class="sidebar-profile">
+          <div class="sidebar-avatar">🦊</div>
+          <div class="sidebar-handle">FireFox</div>
+          <div class="sidebar-at">@firefox_hl</div>
+          <div class="sidebar-edit" onclick="alert('Edit Profile & Avatar')">✏️ Edit Profile</div>
+        </div>
+
+        <div class="sidemenu-item" onclick="window.location='900-student-profile.html'">
+          <span class="si">👤</span> Profile
+        </div>
+        <div class="sidemenu-item" onclick="window.location='901-credential-wallet.html'">
+          <span class="si">🎓</span> Credential Wallet
+        </div>
+        <div class="sidemenu-item" onclick="alert('Preferences')">
+          <span class="si">⚙️</span> Settings
+        </div>
+      </div>
+
+      <div style="flex:1"></div>
+
+      <div class="sidemenu-section">
+        <div class="sidemenu-item contact-item">
+          <span class="si">💬</span> Contact Hatchloom
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- GREETING -->
+      <div class="greeting">
+        <h1>Hey, <span class="name">FireFox</span> 🦊</h1>
+
+        <div class="identity-strip">
+          <!-- Skill Radar -->
+          <div class="skill-radar">
+            <div class="skill-group">
+              <div class="skill-label">EE</div>
+              <div class="skill-dot r"></div>
+              <div class="skill-dot e"></div>
+              <div class="skill-dot c"></div>
+              <div class="skill-dot"></div>
+              <div class="skill-dot"></div>
+            </div>
+            <div class="skill-group">
+              <div class="skill-label">E&I</div>
+              <div class="skill-dot r"></div>
+              <div class="skill-dot e"></div>
+              <div class="skill-dot"></div>
+              <div class="skill-dot"></div>
+              <div class="skill-dot"></div>
+            </div>
+            <div class="skill-group">
+              <div class="skill-label">RB</div>
+              <div class="skill-dot r"></div>
+              <div class="skill-dot"></div>
+              <div class="skill-dot"></div>
+              <div class="skill-dot"></div>
+              <div class="skill-dot"></div>
+            </div>
+            <div class="skill-group">
+              <div class="skill-label">SS</div>
+              <div class="skill-dot r"></div>
+              <div class="skill-dot e"></div>
+              <div class="skill-dot c"></div>
+              <div class="skill-dot p"></div>
+              <div class="skill-dot"></div>
+            </div>
+          </div>
+
+          <!-- Badge coins -->
+          <div class="badge-coins">
+            <div class="badge-coin" style="background:#FFF7ED">🏆<div class="badge-tt">Entrepreneur's Choice</div>
+            </div>
+            <div class="badge-coin" style="background:#FFF0F5">🎯<div class="badge-tt">Problem Solver</div>
+            </div>
+            <div class="badge-coin" style="background:#F0FBFD">⚡<div class="badge-tt">Quick Learner</div>
+            </div>
+            <div class="badge-coin" style="background:#F0FDF4">🌟<div class="badge-tt">First Challenge</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="greeting-sub">Tuesday, Feb 17 · 2 deadlines this week</div>
+      </div>
+
+      <!-- URGENT NOTIFICATIONS -->
+      <div class="urgent-banners">
+        <div class="urgent-banner">
+          <div class="urgent-banner-icon">🚨</div>
+          <div class="urgent-banner-text">Last day to sign up for Calgary's Teen Hackathon is today!</div>
+          <button class="urgent-banner-cta" onclick="alert('Sign up')">Sign Up →</button>
+          <button class="urgent-banner-dismiss" onclick="this.parentElement.remove()" title="Dismiss">✕</button>
+        </div>
+        <div class="urgent-banner">
+          <div class="urgent-banner-icon">🎙️</div>
+          <div class="urgent-banner-text">Live podcast with Manjit Minhas tomorrow at 3:30 MST</div>
+          <button class="urgent-banner-cta" onclick="alert('View details')">View Details →</button>
+          <button class="urgent-banner-dismiss" onclick="this.parentElement.remove()" title="Dismiss">✕</button>
+        </div>
+      </div>
+
+      <!-- THREE PILLAR CARDS -->
+      <div class="pillars">
+
+        <!-- CONTINUE EXPLORING -->
+        <div class="pillar-card">
+          <div class="pillar-header">
+            <div class="pillar-title-group">
+              <div class="pillar-icon explore">🔭</div>
+              <div class="pillar-name explore">Continue Exploring</div>
+            </div>
+            <div class="pillar-link" onclick="window.location='000-explore-home.html'">Explore →</div>
+          </div>
+          <div class="pillar-body">
+            <div class="explore-item">
+              <div class="explore-format">📚</div>
+              <div class="explore-name">Design Thinking 101</div>
+              <div class="explore-next">Pitch Day Mar 6</div>
+            </div>
+            <div class="explore-item">
+              <div class="explore-format">📚</div>
+              <div class="explore-name">Business Model Canvas</div>
+              <div class="explore-next">Live session Feb 19</div>
+            </div>
+            <div class="explore-item">
+              <div class="explore-format">📚</div>
+              <div class="explore-name">Financial Literacy 103</div>
+              <div class="explore-next">Office hours Feb 21</div>
+            </div>
+            <div class="explore-item">
+              <div class="explore-format">🎧</div>
+              <div class="explore-name">How I Built This</div>
+              <div class="explore-next">Ep 3 of 6</div>
+            </div>
+            <div class="explore-item">
+              <div class="explore-format">📖</div>
+              <div class="explore-name">Pricing Your Product</div>
+              <div class="explore-next">Activity 3 of 7</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONNECTING NOW -->
+        <div class="pillar-card">
+          <div class="pillar-header">
+            <div class="pillar-title-group">
+              <div class="pillar-icon connect">🤝</div>
+              <div class="pillar-name connect">Connecting Now</div>
+            </div>
+            <div class="pillar-link" onclick="window.location='100-connecthub-home.html'">Connect →</div>
+          </div>
+          <div class="pillar-body">
+            <div class="connect-unread">
+              <div class="unread-badge">16</div>
+              <div class="unread-text">unread messages</div>
+            </div>
+            <div class="connect-item">
+              <div class="connect-av" style="background:#FF6B6B">🐯</div>
+              <div class="connect-text"><strong>TigerSpark</strong> asking about empathy map in Design Thinking 101
+              </div>
+            </div>
+            <div class="connect-item">
+              <div class="connect-av" style="background:#4ECDC4">🐬</div>
+              <div class="connect-text"><strong>DolphinDash</strong> looking for team for Sarah Chen's challenge</div>
+            </div>
+            <div class="connect-item">
+              <div class="connect-av" style="background:#F97316">🦁</div>
+              <div class="connect-text"><strong>LionHeart Crafts</strong> needs a logo designer</div>
+            </div>
+            <div class="connect-item">
+              <div class="connect-av"
+                style="background:#F0FDF4;font-size:0.5rem;font-weight:900;font-family:var(--font-display);color:#15803D">
+                TD</div>
+              <div class="connect-text"><strong>TD Bank</strong> — $1,000 Teenpreneur Competition</div>
+            </div>
+            <div class="online-row">
+              <div class="online-label">Online:</div>
+              <div class="online-avatars">
+                <div class="mini-av" style="background:#FF6B6B">🐯<div class="online-dot"></div>
+                </div>
+                <div class="mini-av" style="background:#4ECDC4">🐬<div class="online-dot"></div>
+                </div>
+                <div class="mini-av" style="background:#A855F7">🦋<div class="online-dot"></div>
+                </div>
+                <div class="mini-av" style="background:#F97316">🦅<div class="online-dot"></div>
+                </div>
+              </div>
+              <div class="more-online">+8 more</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GO FOR LAUNCH -->
+        <div class="pillar-card">
+          <div class="pillar-header">
+            <div class="pillar-title-group">
+              <div class="pillar-icon launch">🚀</div>
+              <div class="pillar-name launch">Go for Launch</div>
+            </div>
+            <div class="pillar-link" onclick="window.location='200-student-launchpad.html'">Launch →</div>
+          </div>
+          <div class="pillar-body">
+            <div class="launch-group-label">Sandboxes</div>
+            <div class="launch-item">
+              <div class="launch-emoji">🌿</div>
+              <div class="launch-name">EcoSnack Packaging</div>
+              <div class="launch-dot active"></div>
+            </div>
+            <div class="launch-item">
+              <div class="launch-emoji">🎨</div>
+              <div class="launch-name">Local Artist Merch</div>
+              <div class="launch-dot active"></div>
+            </div>
+            <div class="launch-item">
+              <div class="launch-emoji">🐕</div>
+              <div class="launch-name">Dog Walking App</div>
+              <div class="launch-dot paused"></div>
+            </div>
+            <div class="launch-group-label">SideHustles</div>
+            <div class="launch-item">
+              <div class="launch-emoji">🧈</div>
+              <div class="launch-name">Flavour Butter Co.</div>
+              <div class="launch-dot active"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RECENT ACTIVITY -->
+      <div class="activity-section">
+        <div class="section-title">Recent Activity</div>
+        <div class="activity-item">
+          <div class="activity-icon" style="background:#FFF0F5">🏆</div>
+          <div class="activity-content">
+            <div class="activity-text">You earned the <strong>Entrepreneur's Choice</strong> badge in Design Thinking
+              101</div>
+            <div class="activity-time">Today, 9:14 AM</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon" style="background:#F0FBFD">📹</div>
+          <div class="activity-content">
+            <div class="activity-text"><strong>Pitch Day is coming</strong> — Design Thinking 101, Thursday Mar 6 at 4pm
+            </div>
+            <div class="activity-time">Yesterday, 3:00 PM</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon" style="background:#FFF7ED">📝</div>
+          <div class="activity-content">
+            <div class="activity-text">Your BMC submission was reviewed — <strong>feedback available</strong></div>
+            <div class="activity-time">Yesterday, 11:30 AM</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMING SOON — CONSTELLATION -->
+      <div class="constellation-wrap">
+        <div class="section-title">Coming Soon</div>
+        <div class="constellation">
+          <div class="constellation-title">My Learning Constellation</div>
+          <div class="stars">
+            <div class="star b" style="width:6px;height:6px;left:12%;top:18%"></div>
+            <div class="star" style="width:3px;height:3px;left:28%;top:62%"></div>
+            <div class="star b" style="width:6px;height:6px;left:48%;top:28%"></div>
+            <div class="star" style="width:3px;height:3px;left:63%;top:68%"></div>
+            <div class="star b" style="width:5px;height:5px;left:78%;top:22%"></div>
+            <div class="star" style="width:3px;height:3px;left:42%;top:78%"></div>
+            <div class="star" style="width:4px;height:4px;left:22%;top:42%"></div>
+            <div class="star b" style="width:5px;height:5px;left:68%;top:48%"></div>
+            <div class="star-line" style="left:15%;top:21%;width:72px;transform:rotate(20deg)"></div>
+            <div class="star-line" style="left:48%;top:31%;width:82px;transform:rotate(28deg)"></div>
+          </div>
+          <div class="constellation-sub">Your personalised learning constellation</div>
+          <div class="coming-soon-overlay">
+            <div class="coming-soon-pill">✦ Coming Soon</div>
+          </div>
+          <div class="constellation-hover">
+            <div class="constellation-hover-text">
+              <strong>Plot your future.</strong><br>
+              Choose courses, experiences, and goals to chart your own path. The ultimate planner and tracker for your
+              entrepreneurial journey.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+</body>
+
+</html>

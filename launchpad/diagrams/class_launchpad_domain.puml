@@ -1,0 +1,106 @@
+@startuml class_launchpad_domain
+title LaunchPad Domain Class Diagram
+left to right direction
+
+class Sandbox {
+  id: UUID
+  studentId: UUID
+  title: String
+  description: String
+  createdAt: LocalDateTime
+  updatedAt: LocalDateTime
+}
+
+class SandboxTool {
+  id: UUID
+  toolType: String
+  data: String
+  createdAt: LocalDateTime
+}
+
+class SideHustle {
+  id: UUID
+  studentId: UUID
+  title: String
+  description: String
+  status: SideHustleStatus
+  hasOpenPositions: boolean
+  createdAt: LocalDateTime
+  updatedAt: LocalDateTime
+}
+
+class BusinessModelCanvas {
+  id: UUID
+  keyPartners: String
+  keyActivities: String
+  keyResources: String
+  valuePropositions: String
+  customerRelationships: String
+  channels: String
+  customerSegments: String
+  costStructure: String
+  revenueStreams: String
+}
+
+class Team {
+  id: UUID
+  createdAt: LocalDateTime
+}
+
+class TeamMember {
+  id: UUID
+  studentId: UUID
+  role: String
+  joinedAt: LocalDateTime
+}
+
+class Position {
+  id: UUID
+  title: String
+  description: String
+  status: PositionStatus
+}
+
+enum SideHustleStatus {
+  IN_THE_LAB
+  LIVE_VENTURE
+}
+
+enum PositionStatus {
+  OPEN
+  FILLED
+  CLOSED
+}
+
+Sandbox "1" -- "0..*" SandboxTool : has tools
+Sandbox "0..*" -- "0..1" SideHustle : launches
+
+SideHustle "1" -- "1" BusinessModelCanvas : has BMC
+SideHustle "1" -- "1" Team : has team
+Team "1" -- "0..*" TeamMember : contains
+SideHustle "1" -- "0..*" Position : offers
+
+SideHustle --> SideHustleStatus
+Position --> PositionStatus
+
+note right of SideHustle
+On create:
+- SideHustleFactoryProvider selects type
+- empty BusinessModelCanvas created
+- empty Team created
+end note
+
+note right of Position
+Lifecycle enforced by PositionStateContext:
+OPEN -> FILLED
+OPEN -> CLOSED
+FILLED/CLOSED are terminal
+end note
+
+note top of SideHustle
+Database rule:
+side_hustles.sandbox_id is nullable.
+If a Sandbox is deleted, related side_hustles.sandbox_id is set to NULL.
+end note
+
+@enduml

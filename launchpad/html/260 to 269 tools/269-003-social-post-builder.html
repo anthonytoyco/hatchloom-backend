@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hatchloom · 269-003 — Social Post Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#FF1F5A;--orange:#FF8C00;--cyan:#0891B2;--charcoal:#1E1E2E;--text:#2D2D2D;--text-soft:#6B7280;--muted:#9CA3AF;--bg:#F7F8FC;--card:#FFF;--border:#EDEEF2;--hustle:#D97706;--hustle-bg:#FFFBEB;--hustle-bdr:#FDE68A;--green:#059669;--green-bg:#F0FDF4;--font-d:'Outfit',sans-serif;--font-b:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-b);font-size:14px;background:#1a1a2e;color:var(--text)}
+.backdrop{position:fixed;inset:0;background:rgba(30,30,46,.6);backdrop-filter:blur(4px);z-index:500}
+.panel{position:fixed;top:40px;left:50%;transform:translateX(-50%);width:calc(100% - 40px);max-width:1440px;height:calc(100vh - 56px);background:var(--card);border-radius:18px 18px 0 0;box-shadow:0 -8px 60px rgba(0,0,0,.35);z-index:600;display:flex;flex-direction:column;overflow:hidden;animation:su .35s cubic-bezier(.16,1,.3,1) both}
+@keyframes su{from{transform:translateX(-50%) translateY(40px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+.bc{padding:.4rem 1.5rem;background:var(--bg);border-bottom:1px solid var(--border);font-size:.72rem;color:var(--text-soft);font-weight:600;display:flex;align-items:center;gap:.35rem;flex-shrink:0}.bc a{color:var(--pink);cursor:pointer;text-decoration:none}.bc .sep{color:#D1D5DB}
+.hdr{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;border-bottom:1.5px solid var(--border);flex-shrink:0}
+.hdr-icon{width:40px;height:40px;border-radius:12px;background:var(--hustle-bg);border:1.5px solid var(--hustle-bdr);display:flex;align-items:center;justify-content:center;font-size:1.15rem}
+.hdr-meta{flex:1}.hdr-title{font-family:var(--font-d);font-weight:900;font-size:1.05rem;color:var(--charcoal)}.hdr-desc{font-size:.74rem;color:var(--text-soft);margin-top:1px}
+.pill{font-family:var(--font-d);font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:99px;display:inline-flex;align-items:center;gap:.3rem;flex-shrink:0}.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill-a{background:#FFF7ED;color:var(--orange);border:1.5px solid #FFD98A}.pill-x{background:#F0FBFD;color:var(--cyan);border:1.5px solid #BAE6F0}
+.hdr-close{width:34px;height:34px;border-radius:50%;background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;color:var(--text-soft);transition:all .15s;flex-shrink:0}.hdr-close:hover{background:#FFF0F5;border-color:var(--pink);color:var(--pink)}
+.abar{display:flex;align-items:center;padding:.4rem 1.5rem;border-bottom:1px solid var(--border);flex-shrink:0;gap:.5rem}
+.abar-l{display:flex;align-items:center;gap:.5rem;flex:1}.save-st{display:flex;align-items:center;gap:.25rem;font-size:.72rem;font-weight:600}
+.sv-d{width:7px;height:7px;border-radius:50%}.sv-ok{background:var(--green)}.sv-un{background:var(--pink)}.sv-ig{background:var(--orange);animation:p 1s infinite}@keyframes p{50%{opacity:.4}}
+.sv-l{color:var(--text-soft)}.sv-t{color:var(--muted);font-size:.68rem}
+.abar-r{display:flex;align-items:center;gap:.2rem}
+.ab{width:32px;height:32px;border-radius:7px;border:1.5px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;transition:all .15s;position:relative}.ab:hover{background:var(--bg)}.ab:hover .tp{opacity:1}.ab.on{background:#FFF7ED;border-color:#FFD98A;color:var(--orange)}
+.tp{position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:var(--charcoal);color:#fff;font-family:var(--font-d);font-size:.6rem;font-weight:600;padding:.15rem .45rem;border-radius:4px;white-space:nowrap;opacity:0;transition:opacity .15s;pointer-events:none;z-index:10}.tp::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:3px solid transparent;border-top-color:var(--charcoal)}
+.ab-s{width:1px;height:18px;background:var(--border);margin:0 .15rem}.ab-d:hover{background:#FFF0F5;border-color:var(--pink);color:var(--pink)}
+
+/* ─── BUILDER LAYOUT ─── */
+.builder{flex:1;overflow:hidden;display:flex}
+
+/* Left: settings */
+.settings{width:300px;flex-shrink:0;background:var(--bg);border-right:1.5px solid var(--border);padding:1rem;overflow-y:auto;display:flex;flex-direction:column;gap:1rem}
+.set-section{}
+.set-label{font-family:var(--font-d);font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:.4rem}
+
+/* Format selector */
+.format-row{display:flex;gap:.35rem}
+.format-opt{flex:1;padding:.5rem;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;text-align:center;transition:all .15s;background:var(--card)}
+.format-opt:hover{border-color:#C4C8D4}
+.format-opt.active{border-color:var(--hustle);background:var(--hustle-bg)}
+.format-icon{font-size:1.3rem;margin-bottom:.15rem}
+.format-name{font-family:var(--font-d);font-size:.65rem;font-weight:700;color:var(--text)}
+.format-size{font-size:.58rem;color:var(--muted)}
+
+/* Platform tabs */
+.plat-row{display:flex;gap:.25rem}
+.plat-tab{flex:1;font-family:var(--font-d);font-size:.7rem;font-weight:700;padding:.35rem;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text-soft);cursor:pointer;text-align:center;transition:all .15s}
+.plat-tab:hover{border-color:#C4C8D4}
+.plat-tab.active{border-color:var(--hustle);background:var(--hustle-bg);color:var(--hustle)}
+
+/* Background picker */
+.bg-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:.25rem}
+.bg-swatch{aspect-ratio:1;border-radius:6px;cursor:pointer;border:2px solid transparent;transition:all .12s}
+.bg-swatch:hover{transform:scale(1.1)}
+.bg-swatch.active{border-color:var(--charcoal);box-shadow:0 0 0 2px var(--card)}
+
+/* Text editor */
+.text-area{width:100%;padding:.55rem .75rem;border:1.5px solid var(--border);border-radius:9px;font-family:var(--font-b);font-size:.82rem;color:var(--text);outline:none;resize:vertical;min-height:70px;line-height:1.5;background:var(--card)}.text-area:focus{border-color:var(--hustle)}
+.text-area::placeholder{color:var(--muted)}
+.char-count{font-size:.65rem;color:var(--muted);text-align:right;margin-top:.2rem}
+
+/* Style controls */
+.style-row{display:flex;gap:.25rem}
+.style-btn{flex:1;font-family:var(--font-d);font-size:.68rem;font-weight:700;padding:.3rem;border-radius:6px;border:1.5px solid var(--border);background:var(--card);color:var(--text-soft);cursor:pointer;text-align:center;transition:all .15s}
+.style-btn:hover{background:var(--card);border-color:#C4C8D4}
+.style-btn.active{background:var(--hustle-bg);border-color:var(--hustle);color:var(--hustle)}
+
+/* Caption */
+.caption-area{width:100%;padding:.55rem .75rem;border:1.5px solid var(--border);border-radius:9px;font-family:var(--font-b);font-size:.78rem;color:var(--text);outline:none;resize:vertical;min-height:60px;line-height:1.5;background:var(--card)}.caption-area:focus{border-color:var(--hustle)}
+
+/* Preview area */
+.preview-area{flex:1;display:flex;align-items:center;justify-content:center;padding:1.5rem;background:#E5E7EB;overflow:auto}
+
+/* Phone mockup */
+.phone-mock{width:320px;background:var(--charcoal);border-radius:32px;padding:8px;box-shadow:0 12px 48px rgba(0,0,0,.2)}
+.phone-screen{background:#000;border-radius:26px;overflow:hidden;position:relative}
+.phone-notch{width:120px;height:22px;background:var(--charcoal);border-radius:0 0 14px 14px;margin:0 auto;position:relative;z-index:2}
+
+/* Post preview */
+.post-preview{position:relative;overflow:hidden}
+.post-bg{width:100%;display:flex;align-items:center;justify-content:center;position:relative}
+.post-bg.square{aspect-ratio:1}
+.post-bg.story{aspect-ratio:9/16}
+.post-bg.landscape{aspect-ratio:16/9}
+
+/* Overlay content */
+.post-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.5rem;text-align:center}
+.post-headline{font-family:var(--font-d);font-weight:900;font-size:1.4rem;line-height:1.2;margin-bottom:.4rem;text-shadow:0 2px 12px rgba(0,0,0,.15)}
+.post-subline{font-family:var(--font-b);font-size:.82rem;line-height:1.4;opacity:.85}
+.post-cta{font-family:var(--font-d);font-weight:800;font-size:.78rem;padding:.4rem 1.2rem;border-radius:99px;margin-top:1rem;display:inline-block}
+.post-handle{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-family:var(--font-d);font-size:.65rem;font-weight:700;opacity:.5}
+
+/* IG bottom bar */
+.ig-bar{display:flex;align-items:center;padding:.5rem .75rem;background:#000;gap:.5rem}
+.ig-icons{display:flex;gap:.6rem;flex:1;font-size:1.1rem;filter:brightness(0) invert(1)}
+.ig-dots{display:flex;gap:3px;justify-content:center;flex:1}
+.ig-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.3)}
+.ig-dot.active{background:#fff}
+
+/* Caption area in phone */
+.ig-caption{padding:.5rem .75rem;background:#000;color:#fff;font-size:.72rem;line-height:1.4}
+.ig-handle{font-family:var(--font-d);font-weight:700;font-size:.72rem}
+.ig-text{color:rgba(255,255,255,.85);margin-top:.15rem}
+.ig-hashtags{color:#8B9CF7;margin-top:.2rem;font-size:.68rem}
+
+/* Footer */
+.export-bar{padding:.6rem 1.5rem;border-top:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.eb-info{font-size:.72rem;color:var(--muted)}
+.eb-btns{display:flex;gap:.4rem}
+.eb-btn{font-family:var(--font-d);font-weight:700;font-size:.76rem;padding:.4rem 1rem;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);cursor:pointer}.eb-btn:hover{background:var(--bg)}
+.eb-btn-primary{background:var(--hustle);color:#fff;border-color:var(--hustle)}.eb-btn-primary:hover{background:#B45309}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--charcoal);color:#fff;font-family:var(--font-d);font-weight:600;font-size:.8rem;padding:.5rem 1.1rem;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:999;transition:transform .3s cubic-bezier(.16,1,.3,1);pointer-events:none}.toast.show{transform:translateX(-50%) translateY(0);pointer-events:auto}
+</style>
+</head>
+<body>
+<div class="backdrop" onclick="closePanel()"></div>
+<div class="panel">
+  <div class="bc"><a>🚀 LaunchPad</a><span class="sep">›</span><a>My SideHustles</a><span class="sep">›</span><a>🧈 Flavour Butter Co.</a><span class="sep">›</span><span>📱 Social Post Builder</span></div>
+  <div class="hdr">
+    <div class="hdr-icon">📱</div>
+    <div class="hdr-meta"><div class="hdr-title">Social Post Builder</div><div class="hdr-desc">Design posts for Instagram, TikTok, and more — pick a format, add your text, and preview</div></div>
+    <span class="pill pill-a"><span class="dot"></span>Draft</span>
+    <span class="pill pill-x">⚡ 15 XP</span>
+    <div class="hdr-close" onclick="closePanel()">✕</div>
+  </div>
+  <div class="abar">
+    <div class="abar-l"><div class="save-st"><div class="sv-d sv-ok" id="sD"></div><span class="sv-l" id="sL">Saved</span><span class="sv-t" id="sT">· auto</span></div></div>
+    <div class="abar-r">
+      <div class="ab on"><span class="tp">Edit</span>✏️</div>
+      <div class="ab" onclick="doSave()"><span class="tp">Save</span>💾</div><div class="ab-s"></div>
+      <div class="ab" onclick="toast('🔗 Link copied!')"><span class="tp">Share</span>🔗</div>
+      <div class="ab" onclick="toast('📋 Duplicated')"><span class="tp">Duplicate</span>📋</div>
+      <div class="ab ab-d" onclick="toast('🗑️ Deleted')"><span class="tp">Delete</span>🗑️</div>
+    </div>
+  </div>
+
+  <div class="builder">
+    <!-- Settings -->
+    <div class="settings">
+      <div class="set-section">
+        <div class="set-label">Post Format</div>
+        <div class="format-row">
+          <div class="format-opt active" onclick="setFormat('square',this)"><div class="format-icon">◻️</div><div class="format-name">Square</div><div class="format-size">1080×1080</div></div>
+          <div class="format-opt" onclick="setFormat('story',this)"><div class="format-icon">📱</div><div class="format-name">Story</div><div class="format-size">1080×1920</div></div>
+          <div class="format-opt" onclick="setFormat('landscape',this)"><div class="format-icon">🖥</div><div class="format-name">Landscape</div><div class="format-size">1920×1080</div></div>
+        </div>
+      </div>
+
+      <div class="set-section">
+        <div class="set-label">Platform Preview</div>
+        <div class="plat-row">
+          <div class="plat-tab active" onclick="setPlatform('ig',this)">📸 Instagram</div>
+          <div class="plat-tab" onclick="setPlatform('tt',this)">🎵 TikTok</div>
+          <div class="plat-tab" onclick="setPlatform('tw',this)">🐦 X / Twitter</div>
+        </div>
+      </div>
+
+      <div class="set-section">
+        <div class="set-label">Background</div>
+        <div class="bg-grid">
+          <div class="bg-swatch active" style="background:linear-gradient(135deg,#FFFBEB,#FDE68A)" onclick="setBg('linear-gradient(135deg,#FFFBEB,#FDE68A)','#92400E',this)"></div>
+          <div class="bg-swatch" style="background:linear-gradient(135deg,#059669,#34D399)" onclick="setBg('linear-gradient(135deg,#059669,#34D399)','#fff',this)"></div>
+          <div class="bg-swatch" style="background:linear-gradient(135deg,#FF1F5A,#FF6B8A)" onclick="setBg('linear-gradient(135deg,#FF1F5A,#FF6B8A)','#fff',this)"></div>
+          <div class="bg-swatch" style="background:linear-gradient(135deg,#1E1E2E,#374151)" onclick="setBg('linear-gradient(135deg,#1E1E2E,#374151)','#fff',this)"></div>
+          <div class="bg-swatch" style="background:linear-gradient(135deg,#F0FBFD,#BAE6F0)" onclick="setBg('linear-gradient(135deg,#F0FBFD,#BAE6F0)','#1E1E2E',this)"></div>
+          <div class="bg-swatch" style="background:linear-gradient(135deg,#EEF2FF,#C7D2FE)" onclick="setBg('linear-gradient(135deg,#EEF2FF,#C7D2FE)','#312E81',this)"></div>
+        </div>
+      </div>
+
+      <div class="set-section">
+        <div class="set-label">Upload Photo (optional)</div>
+        <div style="border:2px dashed var(--border);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;transition:all .15s;font-size:.78rem;color:var(--muted)" onclick="toast('🖼️ Opening photo picker…')">📷 Click to upload a background photo</div>
+      </div>
+
+      <div class="set-section">
+        <div class="set-label">Headline</div>
+        <textarea class="text-area" id="headline" oninput="updatePreview()" placeholder="Your main message">🧈 NEW: Chili Lime Butter!</textarea>
+        <div class="char-count"><span id="headCount">28</span> / 60</div>
+      </div>
+
+      <div class="set-section">
+        <div class="set-label">Subline</div>
+        <textarea class="text-area" id="subline" oninput="updatePreview()" placeholder="Supporting info" style="min-height:45px">Our spiciest flavour yet. Available now at the school cafeteria.</textarea>
+        <div class="char-count"><span id="subCount">62</span> / 120</div>
+      </div>
+
+      <div class="set-section">
+        <div class="set-label">Call to Action</div>
+        <div class="style-row">
+          <div class="style-btn active" onclick="setCTA('Try it Wednesday!',this)">Try it!</div>
+          <div class="style-btn" onclick="setCTA('Order now',this)">Order</div>
+          <div class="style-btn" onclick="setCTA('Link in bio',this)">Link in bio</div>
+          <div class="style-btn" onclick="setCTA('',this)">None</div>
+        </div>
+      </div>
+
+      <div class="set-section">
+        <div class="set-label">Caption & Hashtags</div>
+        <textarea class="caption-area" id="caption" oninput="updatePreview()" placeholder="Write your caption…">Our newest flavour just dropped! 🌶️ Say hello to Chili Lime Butter — it's got a kick. Grab yours at the school cafeteria every Wednesday.
+
+#FlavourButterCo #StudentBusiness #ChiliLime #SupportLocalStudents</textarea>
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div class="preview-area">
+      <div class="phone-mock">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="post-preview">
+            <div class="post-bg square" id="postBg" style="background:linear-gradient(135deg,#FFFBEB,#FDE68A)">
+              <div class="post-overlay" id="postOverlay" style="color:#92400E">
+                <div class="post-headline" id="pvHead">🧈 NEW: Chili Lime Butter!</div>
+                <div class="post-subline" id="pvSub">Our spiciest flavour yet. Available now at the school cafeteria.</div>
+                <div class="post-cta" id="pvCTA" style="background:#92400E;color:#FFFBEB">Try it Wednesday!</div>
+                <div class="post-handle">@flavourbutter</div>
+              </div>
+            </div>
+          </div>
+          <div class="ig-bar">
+            <div class="ig-icons">♡ 💬 ➤</div>
+            <div class="ig-dots"><div class="ig-dot active"></div><div class="ig-dot"></div><div class="ig-dot"></div></div>
+            <div style="flex:1;text-align:right;font-size:.85rem;filter:brightness(0) invert(1)">🔖</div>
+          </div>
+          <div class="ig-caption">
+            <div class="ig-handle">flavourbutter</div>
+            <div class="ig-text" id="pvCaption">Our newest flavour just dropped! 🌶️ Say hello to Chili Lime Butter — it's got a kick.</div>
+            <div class="ig-hashtags" id="pvHash">#FlavourButterCo #StudentBusiness #ChiliLime</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="export-bar">
+    <div class="eb-info">Social Post · Square · Instagram preview</div>
+    <div class="eb-btns">
+      <button class="eb-btn" onclick="closePanel()">Close</button>
+      <button class="eb-btn" onclick="toast('📋 Caption copied!')">📋 Copy Caption</button>
+      <button class="eb-btn eb-btn-primary" onclick="toast('⬇️ Exporting image…')">⬇️ Export Image</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="tst"></div>
+<script>
+document.head.appendChild(Object.assign(document.createElement('style'),{textContent:'@keyframes sd{to{transform:translateX(-50%) translateY(40px);opacity:0}}'}));
+function closePanel(){document.querySelector('.panel').style.animation='sd .25s ease forwards';document.querySelector('.backdrop').style.opacity='0';document.querySelector('.backdrop').style.transition='opacity .25s'}
+
+let curBg='linear-gradient(135deg,#FFFBEB,#FDE68A)',curColor='#92400E',curFormat='square',curCTA='Try it Wednesday!';
+
+function setFormat(f,el){curFormat=f;document.querySelectorAll('.format-opt').forEach(e=>e.classList.remove('active'));el.classList.add('active');const bg=document.getElementById('postBg');bg.className='post-bg '+f;updatePreview()}
+function setPlatform(p,el){document.querySelectorAll('.plat-tab').forEach(e=>e.classList.remove('active'));el.classList.add('active');toast('👁 Previewing as '+(p==='ig'?'Instagram':p==='tt'?'TikTok':'X / Twitter'))}
+function setBg(bg,color,el){curBg=bg;curColor=color;document.querySelectorAll('.bg-swatch').forEach(e=>e.classList.remove('active'));el.classList.add('active');updatePreview()}
+function setCTA(text,el){curCTA=text;document.querySelectorAll('.style-btn').forEach(e=>e.classList.remove('active'));el.classList.add('active');updatePreview()}
+
+function updatePreview(){
+  const head=document.getElementById('headline').value;
+  const sub=document.getElementById('subline').value;
+  const cap=document.getElementById('caption').value;
+  document.getElementById('postBg').style.background=curBg;
+  document.getElementById('postOverlay').style.color=curColor;
+  document.getElementById('pvHead').textContent=head;
+  document.getElementById('pvSub').textContent=sub;
+  const cta=document.getElementById('pvCTA');
+  if(curCTA){cta.style.display='inline-block';cta.textContent=curCTA;cta.style.background=curColor;cta.style.color=curBg.includes('#FFF')?'#FFFBEB':'#fff'}else{cta.style.display='none'}
+  // Caption split: text vs hashtags
+  const lines=cap.split('\n').filter(l=>l.trim());
+  const hashLines=lines.filter(l=>l.trim().startsWith('#'));
+  const textLines=lines.filter(l=>!l.trim().startsWith('#'));
+  document.getElementById('pvCaption').textContent=textLines.join(' ').substring(0,120);
+  document.getElementById('pvHash').textContent=hashLines.join(' ').substring(0,80);
+  document.getElementById('headCount').textContent=head.length;
+  document.getElementById('subCount').textContent=sub.length;
+  mu();
+}
+function mu(){document.getElementById('sD').className='sv-d sv-un';document.getElementById('sL').textContent='Unsaved';document.getElementById('sT').textContent='';clearTimeout(window._a);window._a=setTimeout(doSave,2000)}
+function doSave(){document.getElementById('sD').className='sv-d sv-ig';document.getElementById('sL').textContent='Saving…';document.getElementById('sT').textContent='';setTimeout(()=>{document.getElementById('sD').className='sv-d sv-ok';document.getElementById('sL').textContent='Saved';document.getElementById('sT').textContent='· just now';toast('💾 Post saved')},700)}
+function toast(m){const t=document.getElementById('tst');t.innerHTML=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2500)}
+</script>
+</body>
+</html>

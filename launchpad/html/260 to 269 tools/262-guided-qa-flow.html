@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hatchloom · 262 — Guided Q&A Flow</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#FF1F5A;--orange:#FF8C00;--cyan:#0891B2;--charcoal:#1E1E2E;--text:#2D2D2D;--text-soft:#6B7280;--muted:#9CA3AF;--bg:#F7F8FC;--card:#FFF;--border:#EDEEF2;--green:#059669;--green-bg:#F0FDF4;--green-bdr:#BBF7D0;--font-d:'Outfit',sans-serif;--font-b:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-b);font-size:14px;background:#1a1a2e;color:var(--text)}
+.backdrop{position:fixed;inset:0;background:rgba(30,30,46,.6);backdrop-filter:blur(4px);z-index:500}
+.panel{position:fixed;top:40px;left:50%;transform:translateX(-50%);width:calc(100% - 40px);max-width:1440px;height:calc(100vh - 56px);background:var(--card);border-radius:18px 18px 0 0;box-shadow:0 -8px 60px rgba(0,0,0,.35);z-index:600;display:flex;flex-direction:column;overflow:hidden;animation:su .35s cubic-bezier(.16,1,.3,1) both}
+@keyframes su{from{transform:translateX(-50%) translateY(40px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+.bc{padding:.4rem 1.5rem;background:var(--bg);border-bottom:1px solid var(--border);font-size:.72rem;color:var(--text-soft);font-weight:600;display:flex;align-items:center;gap:.35rem;flex-shrink:0}.bc a{color:var(--pink);cursor:pointer;text-decoration:none}.bc .sep{color:#D1D5DB}
+.hdr{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;border-bottom:1.5px solid var(--border);flex-shrink:0}
+.hdr-icon{width:40px;height:40px;border-radius:12px;background:var(--green-bg);border:1.5px solid var(--green-bdr);display:flex;align-items:center;justify-content:center;font-size:1.15rem}
+.hdr-meta{flex:1}.hdr-title{font-family:var(--font-d);font-weight:900;font-size:1.05rem;color:var(--charcoal)}.hdr-desc{font-size:.74rem;color:var(--text-soft);margin-top:1px}
+.pill{font-family:var(--font-d);font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:99px;display:inline-flex;align-items:center;gap:.3rem;flex-shrink:0}.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill-a{background:#FFF7ED;color:var(--orange);border:1.5px solid #FFD98A}.pill-x{background:#F0FBFD;color:var(--cyan);border:1.5px solid #BAE6F0}
+.hdr-close{width:34px;height:34px;border-radius:50%;background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;color:var(--text-soft);transition:all .15s;flex-shrink:0}.hdr-close:hover{background:#FFF0F5;border-color:var(--pink);color:var(--pink)}
+/* ACTION BAR */
+.abar{display:flex;align-items:center;padding:.4rem 1.5rem;border-bottom:1px solid var(--border);flex-shrink:0;gap:.5rem}
+.abar-l{display:flex;align-items:center;gap:.5rem;flex:1}.save-st{display:flex;align-items:center;gap:.25rem;font-size:.72rem;font-weight:600}
+.sv-d{width:7px;height:7px;border-radius:50%}.sv-ok{background:var(--green)}.sv-un{background:var(--pink)}.sv-ig{background:var(--orange);animation:p 1s infinite}@keyframes p{50%{opacity:.4}}
+.sv-l{color:var(--text-soft)}.sv-t{color:var(--muted);font-size:.68rem}
+.abar-r{display:flex;align-items:center;gap:.2rem}
+.ab{width:32px;height:32px;border-radius:7px;border:1.5px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;transition:all .15s;position:relative}.ab:hover{background:var(--bg)}.ab:hover .tp{opacity:1}.ab.on{background:#FFF7ED;border-color:#FFD98A;color:var(--orange)}
+.tp{position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:var(--charcoal);color:#fff;font-family:var(--font-d);font-size:.6rem;font-weight:600;padding:.15rem .45rem;border-radius:4px;white-space:nowrap;opacity:0;transition:opacity .15s;pointer-events:none;z-index:10}.tp::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:3px solid transparent;border-top-color:var(--charcoal)}
+.ab-s{width:1px;height:18px;background:var(--border);margin:0 .15rem}.ab-d:hover{background:#FFF0F5;border-color:var(--pink);color:var(--pink)}
+
+/* ─── Q&A FLOW CONTENT ─── */
+.flow-zone{flex:1;overflow:hidden;display:flex}
+
+/* Step rail (left) */
+.step-rail{width:240px;flex-shrink:0;background:var(--bg);border-right:1.5px solid var(--border);padding:1.25rem .75rem;overflow-y:auto;display:flex;flex-direction:column;gap:.15rem}
+.step-item{display:flex;align-items:center;gap:.6rem;padding:.55rem .65rem;border-radius:10px;cursor:pointer;transition:all .15s;position:relative}
+.step-item:hover{background:var(--card)}
+.step-item.active{background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.step-item.done .step-num{background:var(--green);color:#fff;border-color:var(--green)}
+.step-item.active .step-num{background:var(--orange);color:#fff;border-color:var(--orange)}
+.step-num{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-weight:800;font-size:.7rem;color:var(--muted);flex-shrink:0;background:var(--card);transition:all .15s}
+.step-info{flex:1;min-width:0}
+.step-label{font-family:var(--font-d);font-weight:700;font-size:.76rem;color:var(--charcoal);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step-sub{font-size:.64rem;color:var(--muted)}
+.step-check{color:var(--green);font-size:.75rem;flex-shrink:0}
+/* Connector line */
+.step-connector{width:2px;height:12px;background:var(--border);margin-left:1.55rem}
+.step-connector.done{background:var(--green)}
+
+/* Question panel (right) */
+.q-panel{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.q-scroll{flex:1;overflow-y:auto;display:flex;justify-content:center;padding:2rem 2rem}
+.q-card{width:100%;max-width:640px}
+.q-step-label{font-family:var(--font-d);font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--orange);margin-bottom:.35rem}
+.q-question{font-family:var(--font-d);font-weight:900;font-size:1.35rem;color:var(--charcoal);line-height:1.3;margin-bottom:.25rem}
+.q-hint{font-size:.82rem;color:var(--text-soft);line-height:1.5;margin-bottom:1.25rem}
+.q-input{width:100%;border:1.5px solid var(--border);border-radius:12px;padding:1rem;font-family:var(--font-b);font-size:.9rem;color:var(--text);line-height:1.6;resize:vertical;min-height:120px;outline:none;transition:border-color .15s}
+.q-input:focus{border-color:var(--green)}
+.q-input::placeholder{color:var(--muted)}
+.q-example{margin-top:.75rem;padding:.75rem 1rem;background:var(--bg);border-radius:10px;border:1px solid var(--border);font-size:.78rem;color:var(--text-soft);line-height:1.5}
+.q-example-label{font-family:var(--font-d);font-weight:800;font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.25rem}
+
+/* Summary (final step) */
+.summary-card{background:var(--green-bg);border:2px solid var(--green-bdr);border-radius:14px;padding:1.5rem;margin-top:1rem}
+.summary-label{font-family:var(--font-d);font-weight:800;font-size:.75rem;text-transform:uppercase;letter-spacing:.04em;color:var(--green);margin-bottom:.5rem}
+.summary-statement{font-family:var(--font-d);font-weight:700;font-size:1.1rem;color:var(--charcoal);line-height:1.5;padding:.75rem 1rem;background:var(--card);border-radius:10px;border:1.5px solid var(--green-bdr)}
+
+/* Nav buttons */
+.q-nav{padding:.75rem 2rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.q-progress{display:flex;align-items:center;gap:.5rem;font-family:var(--font-d);font-size:.72rem;font-weight:700;color:var(--muted)}
+.q-progress-bar{width:120px;height:6px;background:var(--border);border-radius:99px;overflow:hidden}
+.q-progress-fill{height:100%;background:var(--green);border-radius:99px;transition:width .3s ease}
+.q-nav-btns{display:flex;gap:.5rem}
+.btn-back{font-family:var(--font-d);font-weight:700;font-size:.78rem;padding:.45rem 1rem;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);cursor:pointer}.btn-back:hover{background:var(--bg)}
+.btn-next{font-family:var(--font-d);font-weight:700;font-size:.78rem;padding:.45rem 1.25rem;border-radius:8px;border:none;background:var(--green);color:#fff;cursor:pointer}.btn-next:hover{background:#047857}
+.btn-next:disabled{background:var(--border);color:var(--muted);cursor:not-allowed}
+
+/* Footer */
+.ftr{padding:.55rem 1.5rem;border-top:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.fi{font-size:.72rem;color:var(--muted)}.fb{display:flex;gap:.4rem}
+.bs{font-family:var(--font-d);font-weight:700;font-size:.76rem;padding:.4rem .9rem;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);cursor:pointer}.bs:hover{background:var(--bg)}
+.bp{font-family:var(--font-d);font-weight:700;font-size:.76rem;padding:.4rem 1.1rem;border-radius:8px;border:none;background:var(--green);color:#fff;cursor:pointer}.bp:hover{background:#047857}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--charcoal);color:#fff;font-family:var(--font-d);font-weight:600;font-size:.8rem;padding:.5rem 1.1rem;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:999;transition:transform .3s cubic-bezier(.16,1,.3,1);pointer-events:none}.toast.show{transform:translateX(-50%) translateY(0);pointer-events:auto}
+</style>
+</head>
+<body>
+<div class="backdrop" onclick="closePanel()"></div>
+<div class="panel">
+  <div class="bc"><a>🚀 LaunchPad</a><span class="sep">›</span><a>My Sandboxes</a><span class="sep">›</span><a>♻️ EcoSnack Packaging</a><span class="sep">›</span><span>🎯 Problem Statement Builder</span></div>
+  <div class="hdr">
+    <div class="hdr-icon">🎯</div>
+    <div class="hdr-meta"><div class="hdr-title">Problem Statement Builder</div><div class="hdr-desc">Nail the problem in one sentence — answer 4 questions and get a clear statement you can share</div></div>
+    <span class="pill pill-a"><span class="dot"></span>In Progress</span>
+    <span class="pill pill-x">⚡ 20 XP</span>
+    <div class="hdr-close" onclick="closePanel()">✕</div>
+  </div>
+  <div class="abar">
+    <div class="abar-l"><div class="save-st"><div class="sv-d sv-ok" id="sD"></div><span class="sv-l" id="sL">Saved</span><span class="sv-t" id="sT">· 4 min ago</span></div></div>
+    <div class="abar-r">
+      <div class="ab on" id="bE"><span class="tp">Edit</span>✏️</div>
+      <div class="ab" onclick="doSave()"><span class="tp">Save</span>💾</div><div class="ab-s"></div>
+      <div class="ab" onclick="toast('⬇️ Downloading as PDF…')"><span class="tp">Download PDF</span>⬇️</div>
+      <div class="ab" onclick="toast('📤 Export destination')"><span class="tp">Export to…</span>📤</div>
+      <div class="ab" onclick="toast('🔗 Link copied!')"><span class="tp">Share link</span>🔗</div><div class="ab-s"></div>
+      <div class="ab" onclick="toast('📋 Duplicated')"><span class="tp">Duplicate</span>📋</div>
+      <div class="ab ab-d" onclick="toast('🗑️ Moved to trash')"><span class="tp">Delete</span>🗑️</div>
+    </div>
+  </div>
+
+  <div class="flow-zone">
+    <!-- Step Rail -->
+    <div class="step-rail" id="stepRail">
+      <div class="step-item done" onclick="goStep(0)"><div class="step-num">✓</div><div class="step-info"><div class="step-label">Who has the problem?</div><div class="step-sub">Completed</div></div></div>
+      <div class="step-connector done"></div>
+      <div class="step-item done" onclick="goStep(1)"><div class="step-num">✓</div><div class="step-info"><div class="step-label">What is the problem?</div><div class="step-sub">Completed</div></div></div>
+      <div class="step-connector done"></div>
+      <div class="step-item active" onclick="goStep(2)"><div class="step-num">3</div><div class="step-info"><div class="step-label">Why does it matter?</div><div class="step-sub">Current step</div></div></div>
+      <div class="step-connector"></div>
+      <div class="step-item" onclick="goStep(3)"><div class="step-num">4</div><div class="step-info"><div class="step-label">One-sentence statement</div><div class="step-sub">Final output</div></div></div>
+    </div>
+
+    <!-- Question Panel -->
+    <div class="q-panel">
+      <div class="q-scroll">
+        <div class="q-card" id="qCard"></div>
+      </div>
+      <div class="q-nav">
+        <div class="q-progress">
+          <span id="progLabel">Step 3 of 4</span>
+          <div class="q-progress-bar"><div class="q-progress-fill" id="progFill" style="width:50%"></div></div>
+        </div>
+        <div class="q-nav-btns">
+          <button class="btn-back" id="btnBack" onclick="prevStep()">← Back</button>
+          <button class="btn-next" id="btnNext" onclick="nextStep()">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ftr"><div class="fi">Builder · 4 steps · Draft in progress</div><div class="fb"><button class="bs" onclick="closePanel()">Close</button><button class="bp" onclick="doSave()">💾 Save Draft</button></div></div>
+</div>
+<div class="toast" id="tst"></div>
+<script>
+document.head.appendChild(Object.assign(document.createElement('style'),{textContent:'@keyframes sd{to{transform:translateX(-50%) translateY(40px);opacity:0}}'}));
+function closePanel(){document.querySelector('.panel').style.animation='sd .25s ease forwards';document.querySelector('.backdrop').style.opacity='0';document.querySelector('.backdrop').style.transition='opacity .25s'}
+
+const steps=[
+  {label:'STEP 1 OF 4',q:'Who has this problem?',hint:'Think about the specific person or group who experiences this pain. Not "everyone" — be specific. A real name or role is great.',placeholder:'e.g. Mrs. Patterson, cafeteria manager at Ridgewood Academy',example:'Good: "School cafeteria managers in Calgary"\nToo vague: "People who care about the environment"',answer:'School cafeteria managers — specifically Mrs. Patterson at Ridgewood Academy, who manages lunch for 400+ students daily'},
+  {label:'STEP 2 OF 4',q:'What is the problem they face?',hint:'Describe the pain in plain language. What happens? How often? What have they tried that doesn\'t work?',placeholder:'e.g. They throw out 200+ single-use wrappers every lunch period and feel guilty about it',example:'Good: "200+ non-recyclable wrappers go to landfill every single lunch period"\nToo vague: "There\'s too much waste"',answer:'Every lunch period, 200+ single-use snack wrappers go straight to landfill. Reusable containers have been tried but students won\'t use them.'},
+  {label:'STEP 3 OF 4',q:'Why does this matter?',hint:'What\'s the impact if nothing changes? Think about the emotional, environmental, or financial cost.',placeholder:'e.g. The school fails its sustainability goals, staff feel guilty, and landfill waste keeps growing',example:'Good: "50,000+ wrappers per school year, guilt for staff, and the school misses its green certification target"\nToo vague: "It\'s bad for the planet"',answer:''},
+  {label:'FINAL STEP',q:'Your Problem Statement',hint:'We\'ve combined your answers into one clear sentence. Edit it until it feels right — this becomes the north star for your project.',placeholder:'',example:'',answer:'',isSummary:true}
+];
+
+let cur=2;
+
+function render(){
+  const s=steps[cur];
+  const card=document.getElementById('qCard');
+  if(s.isSummary){
+    const who=steps[0].answer||'[who]';
+    const what=steps[1].answer||'[what]';
+    const why=steps[2].answer||'[why]';
+    const generated=who+' face a problem: '+what+' This matters because '+why;
+    card.innerHTML=`<div class="q-step-label">${s.label}</div><div class="q-question">${s.q}</div><div class="q-hint">${s.hint}</div><div class="summary-card"><div class="summary-label">✨ Your Problem Statement</div><div class="summary-statement" contenteditable="true" oninput="mu()">${generated}</div></div>`;
+  } else {
+    card.innerHTML=`<div class="q-step-label">${s.label}</div><div class="q-question">${s.q}</div><div class="q-hint">${s.hint}</div><textarea class="q-input" id="qInput" placeholder="${s.placeholder}" oninput="onInput()">${s.answer}</textarea>${s.example?`<div class="q-example"><div class="q-example-label">💡 Example</div>${s.example.replace(/\n/g,'<br>')}</div>`:''}`;
+  }
+  // Update rail
+  document.querySelectorAll('.step-item').forEach((el,i)=>{
+    el.className='step-item';
+    if(i<cur)el.classList.add('done');
+    if(i===cur)el.classList.add('active');
+    const num=el.querySelector('.step-num');
+    if(i<cur)num.textContent='✓';
+    else if(i===cur)num.textContent=i+1;
+    else num.textContent=i+1;
+    const sub=el.querySelector('.step-sub');
+    if(i<cur)sub.textContent='Completed';
+    else if(i===cur)sub.textContent='Current step';
+    else sub.textContent='';
+  });
+  document.querySelectorAll('.step-connector').forEach((el,i)=>{el.className='step-connector';if(i<cur)el.classList.add('done')});
+  // Progress
+  document.getElementById('progLabel').textContent='Step '+(cur+1)+' of '+steps.length;
+  document.getElementById('progFill').style.width=(cur/(steps.length-1)*100)+'%';
+  document.getElementById('btnBack').style.visibility=cur>0?'visible':'hidden';
+  document.getElementById('btnNext').textContent=cur===steps.length-1?'✓ Complete':'Next →';
+}
+
+function onInput(){const v=document.getElementById('qInput').value;steps[cur].answer=v;mu()}
+function nextStep(){if(cur<steps.length-1){cur++;render()}}
+function prevStep(){if(cur>0){cur--;render()}}
+function goStep(i){cur=i;render()}
+
+function mu(){document.getElementById('sD').className='sv-d sv-un';document.getElementById('sL').textContent='Unsaved';document.getElementById('sT').textContent='';clearTimeout(window._a);window._a=setTimeout(doSave,2000)}
+function doSave(){document.getElementById('sD').className='sv-d sv-ig';document.getElementById('sL').textContent='Saving…';document.getElementById('sT').textContent='';setTimeout(()=>{document.getElementById('sD').className='sv-d sv-ok';document.getElementById('sL').textContent='Saved';document.getElementById('sT').textContent='· just now';toast('💾 Draft saved')},700)}
+function toast(m){const t=document.getElementById('tst');t.innerHTML=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2500)}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hatchloom · 269-007 — QR Code Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#FF1F5A;--orange:#FF8C00;--cyan:#0891B2;--charcoal:#1E1E2E;--text:#2D2D2D;--text-soft:#6B7280;--muted:#9CA3AF;--bg:#F7F8FC;--card:#FFF;--border:#EDEEF2;--hustle:#D97706;--hustle-bg:#FFFBEB;--hustle-bdr:#FDE68A;--green:#059669;--green-bg:#F0FDF4;--font-d:'Outfit',sans-serif;--font-b:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-b);font-size:14px;background:#1a1a2e;color:var(--text)}
+.backdrop{position:fixed;inset:0;background:rgba(30,30,46,.6);backdrop-filter:blur(4px);z-index:500}
+.panel{position:fixed;top:40px;left:50%;transform:translateX(-50%);width:calc(100% - 40px);max-width:1440px;height:calc(100vh - 56px);background:var(--card);border-radius:18px 18px 0 0;box-shadow:0 -8px 60px rgba(0,0,0,.35);z-index:600;display:flex;flex-direction:column;overflow:hidden;animation:su .35s cubic-bezier(.16,1,.3,1) both}
+@keyframes su{from{transform:translateX(-50%) translateY(40px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+.bc{padding:.4rem 1.5rem;background:var(--bg);border-bottom:1px solid var(--border);font-size:.72rem;color:var(--text-soft);font-weight:600;display:flex;align-items:center;gap:.35rem;flex-shrink:0}.bc a{color:var(--pink);cursor:pointer;text-decoration:none}.bc .sep{color:#D1D5DB}
+.hdr{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;border-bottom:1.5px solid var(--border);flex-shrink:0}
+.hdr-icon{width:40px;height:40px;border-radius:12px;background:var(--hustle-bg);border:1.5px solid var(--hustle-bdr);display:flex;align-items:center;justify-content:center;font-size:1.15rem}
+.hdr-meta{flex:1}.hdr-title{font-family:var(--font-d);font-weight:900;font-size:1.05rem;color:var(--charcoal)}.hdr-desc{font-size:.74rem;color:var(--text-soft);margin-top:1px}
+.pill{font-family:var(--font-d);font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:99px;display:inline-flex;align-items:center;gap:.3rem;flex-shrink:0}.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill-a{background:#FFF7ED;color:var(--orange);border:1.5px solid #FFD98A}.pill-x{background:#F0FBFD;color:var(--cyan);border:1.5px solid #BAE6F0}
+.hdr-close{width:34px;height:34px;border-radius:50%;background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;color:var(--text-soft);transition:all .15s;flex-shrink:0}.hdr-close:hover{background:#FFF0F5;border-color:var(--pink);color:var(--pink)}
+.abar{display:flex;align-items:center;padding:.4rem 1.5rem;border-bottom:1px solid var(--border);flex-shrink:0;gap:.5rem}
+.abar-l{display:flex;align-items:center;gap:.5rem;flex:1}.save-st{display:flex;align-items:center;gap:.25rem;font-size:.72rem;font-weight:600}
+.sv-d{width:7px;height:7px;border-radius:50%}.sv-ok{background:var(--green)}
+.sv-l{color:var(--text-soft)}.sv-t{color:var(--muted);font-size:.68rem}
+.abar-r{display:flex;align-items:center;gap:.2rem}
+.ab{width:32px;height:32px;border-radius:7px;border:1.5px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;transition:all .15s;position:relative}.ab:hover{background:var(--bg)}.ab:hover .tp{opacity:1}
+.tp{position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:var(--charcoal);color:#fff;font-family:var(--font-d);font-size:.6rem;font-weight:600;padding:.15rem .45rem;border-radius:4px;white-space:nowrap;opacity:0;transition:opacity .15s;pointer-events:none;z-index:10}.tp::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:3px solid transparent;border-top-color:var(--charcoal)}
+.ab-s{width:1px;height:18px;background:var(--border);margin:0 .15rem}.ab-d:hover{background:#FFF0F5;border-color:var(--pink);color:var(--pink)}
+
+/* ─── CONTENT ─── */
+.qr-zone{flex:1;overflow:auto;padding:2rem;display:flex;justify-content:center;align-items:flex-start}
+.qr-layout{display:flex;gap:2.5rem;width:100%;max-width:900px;align-items:flex-start}
+
+/* Left: inputs */
+.qr-inputs{flex:1;display:flex;flex-direction:column;gap:1.25rem}
+.qi-section{}
+.qi-label{font-family:var(--font-d);font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:.4rem}
+.qi-input{width:100%;padding:.6rem .85rem;border:1.5px solid var(--border);border-radius:10px;font-family:var(--font-b);font-size:.85rem;color:var(--text);outline:none;transition:border-color .15s;background:var(--card)}.qi-input:focus{border-color:var(--hustle)}.qi-input::placeholder{color:var(--muted)}
+.qi-textarea{min-height:60px;resize:vertical;line-height:1.5}
+.qi-hint{font-size:.68rem;color:var(--muted);margin-top:.25rem}
+
+/* Preset buttons */
+.preset-row{display:flex;gap:.3rem;flex-wrap:wrap}
+.preset{font-family:var(--font-d);font-size:.7rem;font-weight:700;padding:.35rem .7rem;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text-soft);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:.3rem}
+.preset:hover{border-color:var(--hustle-bdr);background:var(--hustle-bg)}
+.preset.active{border-color:var(--hustle);background:var(--hustle-bg);color:var(--hustle)}
+
+/* Color pickers */
+.color-row{display:flex;gap:.75rem;align-items:center}
+.color-pick{display:flex;flex-direction:column;gap:.2rem;align-items:center}
+.color-swatch{width:36px;height:36px;border-radius:8px;border:2px solid var(--border);cursor:pointer;overflow:hidden;position:relative}
+.color-swatch input{width:100%;height:100%;border:none;cursor:pointer;position:absolute;inset:0}
+.color-name{font-size:.6rem;font-weight:700;color:var(--muted);text-align:center}
+
+/* Size options */
+.size-row{display:flex;gap:.3rem}
+.size-opt{flex:1;font-family:var(--font-d);font-size:.7rem;font-weight:700;padding:.4rem;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text-soft);cursor:pointer;text-align:center;transition:all .15s}
+.size-opt:hover{border-color:#C4C8D4}
+.size-opt.active{border-color:var(--hustle);background:var(--hustle-bg);color:var(--hustle)}
+
+/* Right: preview */
+.qr-preview{width:320px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:1rem}
+.qr-frame{width:280px;height:280px;background:var(--card);border:2px solid var(--border);border-radius:16px;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 4px 24px rgba(0,0,0,.06)}
+.qr-canvas{border-radius:8px}
+.qr-label{font-family:var(--font-d);font-weight:700;font-size:.78rem;color:var(--charcoal);text-align:center;max-width:260px;word-break:break-all}
+.qr-sublabel{font-size:.68rem;color:var(--muted);text-align:center}
+.qr-btns{display:flex;gap:.5rem;width:100%}
+.qr-btn{flex:1;font-family:var(--font-d);font-weight:700;font-size:.78rem;padding:.5rem;border-radius:10px;border:1.5px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;text-align:center;transition:all .15s}.qr-btn:hover{background:var(--bg)}
+.qr-btn-primary{background:var(--hustle);color:#fff;border-color:var(--hustle)}.qr-btn-primary:hover{background:#B45309}
+
+/* Saved QR list */
+.saved-qr{width:100%;margin-top:.5rem}
+.saved-label{font-family:var(--font-d);font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:.4rem}
+.saved-list{display:flex;flex-direction:column;gap:.3rem}
+.saved-item{display:flex;align-items:center;gap:.5rem;padding:.45rem .6rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:.74rem;cursor:pointer;transition:all .15s}
+.saved-item:hover{border-color:var(--hustle-bdr);background:var(--hustle-bg)}
+.saved-icon{font-size:1rem}
+.saved-name{flex:1;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.saved-date{font-size:.64rem;color:var(--muted)}
+
+.ftr{padding:.55rem 1.5rem;border-top:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.fi{font-size:.72rem;color:var(--muted)}.fb{display:flex;gap:.4rem}
+.bs{font-family:var(--font-d);font-weight:700;font-size:.76rem;padding:.4rem .9rem;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);cursor:pointer}.bs:hover{background:var(--bg)}
+.bp{font-family:var(--font-d);font-weight:700;font-size:.76rem;padding:.4rem 1.1rem;border-radius:8px;border:none;background:var(--hustle);color:#fff;cursor:pointer}.bp:hover{background:#B45309}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--charcoal);color:#fff;font-family:var(--font-d);font-weight:600;font-size:.8rem;padding:.5rem 1.1rem;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:999;transition:transform .3s cubic-bezier(.16,1,.3,1);pointer-events:none}.toast.show{transform:translateX(-50%) translateY(0);pointer-events:auto}
+</style>
+</head>
+<body>
+<div class="backdrop" onclick="closePanel()"></div>
+<div class="panel">
+  <div class="bc"><a>🚀 LaunchPad</a><span class="sep">›</span><a>My SideHustles</a><span class="sep">›</span><a>🧈 Flavour Butter Co.</a><span class="sep">›</span><span>📱 QR Code Generator</span></div>
+  <div class="hdr">
+    <div class="hdr-icon">📱</div>
+    <div class="hdr-meta"><div class="hdr-title">QR Code Generator</div><div class="hdr-desc">Create QR codes that link to your products, order forms, or social profiles — print them anywhere</div></div>
+    <span class="pill pill-a"><span class="dot"></span>Ready</span>
+    <span class="pill pill-x">⚡ 10 XP</span>
+    <div class="hdr-close" onclick="closePanel()">✕</div>
+  </div>
+  <div class="abar">
+    <div class="abar-l"><div class="save-st"><div class="sv-d sv-ok"></div><span class="sv-l">Auto-save</span><span class="sv-t">· instant</span></div></div>
+    <div class="abar-r">
+      <div class="ab" onclick="toast('🔗 Link copied!')"><span class="tp">Share</span>🔗</div>
+      <div class="ab ab-d" onclick="toast('🗑️ Deleted')"><span class="tp">Delete</span>🗑️</div>
+    </div>
+  </div>
+
+  <div class="qr-zone">
+    <div class="qr-layout">
+
+      <!-- Inputs -->
+      <div class="qr-inputs">
+        <div class="qi-section">
+          <div class="qi-label">What should the QR code link to?</div>
+          <div class="preset-row" style="margin-bottom:.5rem">
+            <div class="preset active" onclick="setType('url',this)">🔗 URL</div>
+            <div class="preset" onclick="setType('text',this)">📝 Text</div>
+            <div class="preset" onclick="setType('email',this)">📧 Email</div>
+            <div class="preset" onclick="setType('wifi',this)">📶 Wi-Fi</div>
+          </div>
+          <input class="qi-input" id="qrInput" value="https://hatchloom.com/sidehustle/flavour-butter/order" oninput="generateQR()" placeholder="Paste a URL or type text…">
+          <div class="qi-hint">This is what people see when they scan your code</div>
+        </div>
+
+        <div class="qi-section">
+          <div class="qi-label">Label (optional)</div>
+          <input class="qi-input" id="qrLabel" value="Order Form — Flavour Butter Co." oninput="updateLabel()" placeholder="Give this QR a name so you remember what it's for">
+        </div>
+
+        <div class="qi-section">
+          <div class="qi-label">Colors</div>
+          <div class="color-row">
+            <div class="color-pick">
+              <div class="color-swatch"><input type="color" value="#1E1E2E" id="fgColor" onchange="generateQR()"></div>
+              <div class="color-name">Code</div>
+            </div>
+            <div class="color-pick">
+              <div class="color-swatch"><input type="color" value="#FFFFFF" id="bgColor" onchange="generateQR()"></div>
+              <div class="color-name">Background</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.25rem;margin-left:.5rem">
+              <div class="preset" onclick="setColors('#1E1E2E','#FFFFFF',this)" style="font-size:.62rem;padding:.25rem .5rem">Classic</div>
+              <div class="preset" onclick="setColors('#D97706','#FFFBEB',this)" style="font-size:.62rem;padding:.25rem .5rem">Butter</div>
+              <div class="preset" onclick="setColors('#059669','#F0FDF4',this)" style="font-size:.62rem;padding:.25rem .5rem">Eco</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qi-section">
+          <div class="qi-label">Size</div>
+          <div class="size-row">
+            <div class="size-opt" onclick="setSize(160,this)">Small<br><span style="font-size:.58rem;color:var(--muted)">160px</span></div>
+            <div class="size-opt active" onclick="setSize(240,this)">Medium<br><span style="font-size:.58rem;color:var(--muted)">240px</span></div>
+            <div class="size-opt" onclick="setSize(400,this)">Large<br><span style="font-size:.58rem;color:var(--muted)">400px</span></div>
+            <div class="size-opt" onclick="setSize(600,this)">Print<br><span style="font-size:.58rem;color:var(--muted)">600px</span></div>
+          </div>
+        </div>
+
+        <div class="qi-section">
+          <div class="qi-label">Where to use it</div>
+          <div class="qi-hint" style="margin-top:0;line-height:1.6">
+            Print on product labels, flyers, business cards, or posters. People scan with their phone camera and go straight to your link. Great for market stalls, school fairs, and packaging.
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div class="qr-preview">
+        <div class="qr-frame">
+          <canvas id="qrCanvas" class="qr-canvas" width="240" height="240"></canvas>
+        </div>
+        <div class="qr-label" id="qrLabelDisplay">Order Form — Flavour Butter Co.</div>
+        <div class="qr-sublabel" id="qrUrl">hatchloom.com/sidehustle/flavour-butter/order</div>
+        <div class="qr-btns">
+          <button class="qr-btn" onclick="toast('📋 URL copied to clipboard!')">📋 Copy URL</button>
+          <button class="qr-btn qr-btn-primary" onclick="toast('⬇️ Downloading QR as PNG…')">⬇️ Download PNG</button>
+        </div>
+
+        <div class="saved-qr">
+          <div class="saved-label">Your QR Codes</div>
+          <div class="saved-list">
+            <div class="saved-item" onclick="loadQR('https://hatchloom.com/sidehustle/flavour-butter/order','Order Form')"><span class="saved-icon">🔗</span><span class="saved-name">Order Form</span><span class="saved-date">Today</span></div>
+            <div class="saved-item" onclick="loadQR('https://instagram.com/flavourbutter','Instagram Profile')"><span class="saved-icon">📸</span><span class="saved-name">Instagram Profile</span><span class="saved-date">Feb 18</span></div>
+            <div class="saved-item" onclick="loadQR('https://hatchloom.com/sidehustle/flavour-butter/feedback','Feedback Form')"><span class="saved-icon">⭐</span><span class="saved-name">Feedback Form</span><span class="saved-date">Feb 12</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="ftr"><div class="fi">QR Generator · 3 codes saved</div><div class="fb"><button class="bs" onclick="closePanel()">Close</button><button class="bp" onclick="toast('⬇️ Downloading PNG…')">⬇️ Download QR</button></div></div>
+</div>
+<div class="toast" id="tst"></div>
+<script>
+document.head.appendChild(Object.assign(document.createElement('style'),{textContent:'@keyframes sd{to{transform:translateX(-50%) translateY(40px);opacity:0}}'}));
+function closePanel(){document.querySelector('.panel').style.animation='sd .25s ease forwards';document.querySelector('.backdrop').style.opacity='0';document.querySelector('.backdrop').style.transition='opacity .25s'}
+
+let qrSize=240;
+
+// Simple QR-like pattern generator (visual demo — not a real QR encoder)
+function generateQR(){
+  const canvas=document.getElementById('qrCanvas');
+  const ctx=canvas.getContext('2d');
+  const input=document.getElementById('qrInput').value;
+  const fg=document.getElementById('fgColor').value;
+  const bg=document.getElementById('bgColor').value;
+  const s=canvas.width;
+  const cellSize=Math.floor(s/25);
+  ctx.fillStyle=bg;ctx.fillRect(0,0,s,s);
+
+  // Generate deterministic pattern from input string
+  let hash=0;for(let i=0;i<input.length;i++){hash=((hash<<5)-hash)+input.charCodeAt(i);hash|=0}
+  const seed=Math.abs(hash);
+  function pseudoRand(n){return((seed*13+n*7+n*n*3)%100)/100}
+
+  ctx.fillStyle=fg;
+  // Draw finder patterns (corners)
+  function drawFinder(x,y){
+    const s7=cellSize*7;const s5=cellSize*5;const s3=cellSize*3;
+    ctx.fillRect(x,y,s7,s7);
+    ctx.fillStyle=bg;ctx.fillRect(x+cellSize,y+cellSize,s5,s5);
+    ctx.fillStyle=fg;ctx.fillRect(x+cellSize*2,y+cellSize*2,s3,s3);
+  }
+  const off=Math.floor((s-25*cellSize)/2);
+  drawFinder(off,off);
+  ctx.fillStyle=fg;drawFinder(off+(25-7)*cellSize,off);
+  ctx.fillStyle=fg;drawFinder(off,off+(25-7)*cellSize);
+
+  // Data cells
+  ctx.fillStyle=fg;
+  for(let r=0;r<25;r++){for(let c=0;c<25;c++){
+    // Skip finder areas
+    if((r<8&&c<8)||(r<8&&c>16)||(r>16&&c<8))continue;
+    if(pseudoRand(r*25+c)>0.5){ctx.fillRect(off+c*cellSize,off+r*cellSize,cellSize,cellSize)}
+  }}
+
+  // Update URL display
+  try{const url=new URL(input);document.getElementById('qrUrl').textContent=url.host+url.pathname}catch(e){document.getElementById('qrUrl').textContent=input.substring(0,50)}
+}
+
+function updateLabel(){document.getElementById('qrLabelDisplay').textContent=document.getElementById('qrLabel').value||'Untitled QR Code'}
+function setType(t,el){document.querySelectorAll('.preset-row:first-of-type .preset').forEach(e=>e.classList.remove('active'));el.classList.add('active');const ph={url:'Paste a URL…',text:'Type your message…',email:'Enter email address…',wifi:'Network name…'};document.getElementById('qrInput').placeholder=ph[t]||'';generateQR()}
+function setColors(fg,bg,el){document.getElementById('fgColor').value=fg;document.getElementById('bgColor').value=bg;generateQR()}
+function setSize(sz,el){qrSize=sz;document.querySelectorAll('.size-opt').forEach(e=>e.classList.remove('active'));el.classList.add('active');toast('📐 Export size: '+sz+'px')}
+function loadQR(url,label){document.getElementById('qrInput').value=url;document.getElementById('qrLabel').value=label;updateLabel();generateQR();toast('📱 Loaded: '+label)}
+function toast(m){const t=document.getElementById('tst');t.innerHTML=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2500)}
+
+generateQR();
+</script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hatchloom · 261 — Post-it / Simple Note</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#FF1F5A;--orange:#FF8C00;--cyan:#0891B2;--charcoal:#1E1E2E;--text:#2D2D2D;--text-soft:#6B7280;--muted:#9CA3AF;--bg:#F7F8FC;--card:#FFF;--border:#EDEEF2;--green:#059669;--green-bg:#F0FDF4;--green-bdr:#BBF7D0;--font-d:'Outfit',sans-serif;--font-b:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-b);font-size:14px;background:#1a1a2e;color:var(--text)}
+.backdrop{position:fixed;inset:0;background:rgba(30,30,46,.6);backdrop-filter:blur(4px);z-index:500}
+.panel{position:fixed;top:40px;left:50%;transform:translateX(-50%);width:calc(100% - 40px);max-width:1440px;height:calc(100vh - 56px);background:var(--card);border-radius:18px 18px 0 0;box-shadow:0 -8px 60px rgba(0,0,0,.35);z-index:600;display:flex;flex-direction:column;overflow:hidden;animation:su .35s cubic-bezier(.16,1,.3,1) both}
+@keyframes su{from{transform:translateX(-50%) translateY(40px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+.bc{padding:.4rem 1.5rem;background:var(--bg);border-bottom:1px solid var(--border);font-size:.72rem;color:var(--text-soft);font-weight:600;display:flex;align-items:center;gap:.35rem;flex-shrink:0}.bc a{color:var(--pink);cursor:pointer;text-decoration:none}.bc .sep{color:#D1D5DB}
+.hdr{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;border-bottom:1.5px solid var(--border);flex-shrink:0}
+.hdr-icon{width:40px;height:40px;border-radius:12px;background:var(--green-bg);border:1.5px solid var(--green-bdr);display:flex;align-items:center;justify-content:center;font-size:1.15rem}
+.hdr-meta{flex:1}.hdr-title{font-family:var(--font-d);font-weight:900;font-size:1.05rem;color:var(--charcoal)}.hdr-desc{font-size:.74rem;color:var(--text-soft);margin-top:1px}
+.pill{font-family:var(--font-d);font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:99px;display:inline-flex;align-items:center;gap:.3rem;flex-shrink:0}.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill-a{background:#FFF7ED;color:var(--orange);border:1.5px solid #FFD98A}.pill-x{background:#F0FBFD;color:var(--cyan);border:1.5px solid #BAE6F0}
+.hdr-close{width:34px;height:34px;border-radius:50%;background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;color:var(--text-soft);transition:all .15s;flex-shrink:0}.hdr-close:hover{background:#FFF0F5;border-color:var(--pink);color:var(--pink)}
+/* ACTION BAR */
+.abar{display:flex;align-items:center;padding:.4rem 1.5rem;border-bottom:1px solid var(--border);flex-shrink:0;gap:.5rem}
+.abar-l{display:flex;align-items:center;gap:.5rem;flex:1}.save-st{display:flex;align-items:center;gap:.25rem;font-size:.72rem;font-weight:600}
+.sv-d{width:7px;height:7px;border-radius:50%}.sv-ok{background:var(--green)}.sv-un{background:var(--pink)}.sv-ig{background:var(--orange);animation:p 1s infinite}@keyframes p{50%{opacity:.4}}
+.sv-l{color:var(--text-soft)}.sv-t{color:var(--muted);font-size:.68rem}
+.abar-r{display:flex;align-items:center;gap:.2rem}
+.ab{width:32px;height:32px;border-radius:7px;border:1.5px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;transition:all .15s;position:relative}.ab:hover{background:var(--bg)}.ab:hover .tp{opacity:1}.ab.on{background:#FFF7ED;border-color:#FFD98A;color:var(--orange)}
+.tp{position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:var(--charcoal);color:#fff;font-family:var(--font-d);font-size:.6rem;font-weight:600;padding:.15rem .45rem;border-radius:4px;white-space:nowrap;opacity:0;transition:opacity .15s;pointer-events:none;z-index:10}.tp::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:3px solid transparent;border-top-color:var(--charcoal)}
+.ab-s{width:1px;height:18px;background:var(--border);margin:0 .15rem}.ab-d:hover{background:#FFF0F5;border-color:var(--pink);color:var(--pink)}
+
+/* ─── NOTES CONTENT ─── */
+.notes-zone{flex:1;overflow:auto;padding:1.25rem 1.5rem 2rem;display:flex;gap:1.25rem}
+
+/* Left: note list */
+.note-list{width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:.5rem}
+.note-card{background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:.7rem .85rem;cursor:pointer;transition:all .15s;position:relative}
+.note-card:hover{border-color:#C4C8D4;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.note-card.active{border-color:var(--green);background:var(--green-bg);box-shadow:0 2px 12px rgba(5,150,105,.1)}
+.nc-date{font-family:var(--font-d);font-size:.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.nc-title{font-family:var(--font-d);font-weight:800;font-size:.82rem;color:var(--charcoal);margin:.15rem 0 .1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nc-preview{font-size:.72rem;color:var(--text-soft);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nc-tags{display:flex;gap:.25rem;margin-top:.35rem;flex-wrap:wrap}
+.nc-tag{font-family:var(--font-d);font-size:.58rem;font-weight:700;padding:.1rem .4rem;border-radius:99px;background:var(--card);border:1px solid var(--border);color:var(--text-soft)}
+.nc-tag.t-idea{background:#FFF7ED;border-color:#FFD98A;color:var(--orange)}
+.nc-tag.t-obs{background:#F0FBFD;border-color:#BAE6F0;color:var(--cyan)}
+.nc-tag.t-todo{background:#FFF0F5;border-color:#FECDD3;color:var(--pink)}
+.nc-tag.t-win{background:var(--green-bg);border-color:var(--green-bdr);color:var(--green)}
+.note-add{display:flex;align-items:center;justify-content:center;gap:.35rem;padding:.65rem;border:1.5px dashed var(--border);border-radius:12px;font-family:var(--font-d);font-size:.78rem;font-weight:700;color:var(--muted);cursor:pointer;transition:all .15s}
+.note-add:hover{border-color:var(--green-bdr);background:var(--green-bg);color:var(--green)}
+
+/* Right: note editor */
+.note-editor{flex:1;display:flex;flex-direction:column;background:var(--card);border:1.5px solid var(--border);border-radius:14px;overflow:hidden}
+.ne-header{padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg)}
+.ne-date{font-family:var(--font-d);font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.ne-title-input{font-family:var(--font-d);font-weight:900;font-size:1.15rem;color:var(--charcoal);border:none;background:transparent;outline:none;width:100%;margin:.2rem 0}
+.ne-tags{display:flex;gap:.25rem;align-items:center;flex-wrap:wrap}
+.ne-tag{font-family:var(--font-d);font-size:.6rem;font-weight:700;padding:.12rem .45rem;border-radius:99px;cursor:pointer;transition:all .15s}
+.ne-tag-add{border:1px dashed var(--border);color:var(--muted);background:transparent}
+.ne-tag-add:hover{border-color:var(--green-bdr);background:var(--green-bg);color:var(--green)}
+.ne-body{flex:1;padding:1rem;overflow-y:auto}
+.ne-textarea{width:100%;height:100%;border:none;outline:none;resize:none;font-family:var(--font-b);font-size:.88rem;color:var(--text);line-height:1.65;background:transparent}
+.ne-textarea::placeholder{color:var(--muted)}
+.ne-footer{padding:.5rem 1rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:.5rem;font-size:.68rem;color:var(--muted)}
+.ne-charcount{margin-left:auto}
+
+/* Footer */
+.ftr{padding:.55rem 1.5rem;border-top:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.fi{font-size:.72rem;color:var(--muted)}.fb{display:flex;gap:.4rem}
+.bs{font-family:var(--font-d);font-weight:700;font-size:.76rem;padding:.4rem .9rem;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);cursor:pointer}.bs:hover{background:var(--bg)}
+.bp{font-family:var(--font-d);font-weight:700;font-size:.76rem;padding:.4rem 1.1rem;border-radius:8px;border:none;background:var(--green);color:#fff;cursor:pointer}.bp:hover{background:#047857}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--charcoal);color:#fff;font-family:var(--font-d);font-weight:600;font-size:.8rem;padding:.5rem 1.1rem;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:999;transition:transform .3s cubic-bezier(.16,1,.3,1);pointer-events:none}.toast.show{transform:translateX(-50%) translateY(0);pointer-events:auto}
+</style>
+</head>
+<body>
+<div class="backdrop" onclick="closePanel()"></div>
+<div class="panel">
+  <div class="bc"><a>🚀 LaunchPad</a><span class="sep">›</span><a>My Sandboxes</a><span class="sep">›</span><a>♻️ EcoSnack Packaging</a><span class="sep">›</span><span>📓 Project Journal</span></div>
+  <div class="hdr">
+    <div class="hdr-icon">📓</div>
+    <div class="hdr-meta"><div class="hdr-title">Project Journal</div><div class="hdr-desc">Your logbook — date, write, reflect. Capture ideas, observations, and progress as you go.</div></div>
+    <span class="pill pill-a"><span class="dot"></span>4 entries</span>
+    <span class="pill pill-x">⚡ 5 XP / entry</span>
+    <div class="hdr-close" onclick="closePanel()">✕</div>
+  </div>
+  <div class="abar">
+    <div class="abar-l"><div class="save-st"><div class="sv-d sv-ok" id="sD"></div><span class="sv-l" id="sL">Saved</span><span class="sv-t" id="sT">· 1 min ago</span></div></div>
+    <div class="abar-r">
+      <div class="ab on" id="bE" onclick="togE()"><span class="tp">Edit</span>✏️</div>
+      <div class="ab" onclick="doSave()"><span class="tp">Save</span>💾</div><div class="ab-s"></div>
+      <div class="ab" onclick="toast('⬇️ Downloading as PDF…')"><span class="tp">Download PDF</span>⬇️</div>
+      <div class="ab" onclick="toast('📤 Export destination')"><span class="tp">Export to…</span>📤</div>
+      <div class="ab" onclick="toast('🔗 Link copied!')"><span class="tp">Share link</span>🔗</div><div class="ab-s"></div>
+      <div class="ab" onclick="toast('📋 Duplicated')"><span class="tp">Duplicate</span>📋</div>
+      <div class="ab ab-d" onclick="toast('🗑️ Moved to trash')"><span class="tp">Delete</span>🗑️</div>
+    </div>
+  </div>
+
+  <div class="notes-zone">
+    <!-- Note List (left) -->
+    <div class="note-list" id="noteList">
+      <div class="note-card active" onclick="selectNote(0)">
+        <div class="nc-date">Feb 20, 2026</div>
+        <div class="nc-title">Cafeteria visit — wow moment</div>
+        <div class="nc-preview">Counted 200+ wrappers in ONE lunch period. Mrs. Patterson said she feels guilty every day. This is the problem.</div>
+        <div class="nc-tags"><span class="nc-tag t-obs">Observation</span><span class="nc-tag t-win">Win</span></div>
+      </div>
+      <div class="note-card" onclick="selectNote(1)">
+        <div class="nc-date">Feb 15, 2026</div>
+        <div class="nc-title">Compostable materials research</div>
+        <div class="nc-preview">Found 3 suppliers. EcoWraps looks most promising — they do small orders for startups. Need to email them.</div>
+        <div class="nc-tags"><span class="nc-tag t-idea">Idea</span></div>
+      </div>
+      <div class="note-card" onclick="selectNote(2)">
+        <div class="nc-date">Feb 8, 2026</div>
+        <div class="nc-title">Competitor check — what's out there</div>
+        <div class="nc-preview">Most eco-packaging companies sell to big food brands, not schools. Nobody is targeting school cafeterias specifically.</div>
+        <div class="nc-tags"><span class="nc-tag t-obs">Observation</span></div>
+      </div>
+      <div class="note-card" onclick="selectNote(3)">
+        <div class="nc-date">Jan 30, 2026</div>
+        <div class="nc-title">Project kickoff — why I care</div>
+        <div class="nc-preview">Started EcoSnack because I'm tired of seeing the trash at lunch. If I can solve this for our school, maybe other schools want it too.</div>
+        <div class="nc-tags"><span class="nc-tag t-idea">Idea</span><span class="nc-tag t-todo">To-Do</span></div>
+      </div>
+      <div class="note-add" onclick="addNote()">+ New Entry</div>
+    </div>
+
+    <!-- Editor (right) -->
+    <div class="note-editor">
+      <div class="ne-header">
+        <div class="ne-date" id="neDate">FEBRUARY 20, 2026 · 3:42 PM</div>
+        <input class="ne-title-input" id="neTitle" value="Cafeteria visit — wow moment" oninput="mu()">
+        <div class="ne-tags" id="neTags">
+          <span class="ne-tag nc-tag t-obs">Observation</span>
+          <span class="ne-tag nc-tag t-win">Win</span>
+          <span class="ne-tag ne-tag-add" onclick="toast('🏷 Tag picker — choose a tag')">+ Tag</span>
+        </div>
+      </div>
+      <div class="ne-body">
+        <textarea class="ne-textarea" id="neBody" oninput="mu();updCount()">Went to the Ridgewood cafeteria during lunch today with @oceandive to observe.
+
+What we saw:
+- Over 200 single-use wrappers thrown out in ONE lunch period
+- Mostly chip bags, granola bar wrappers, fruit snack pouches
+- The bin was overflowing by 12:30
+
+Talked to Mrs. Patterson (cafeteria manager). Key quotes:
+- "I feel guilty throwing this out every day"
+- "We've tried reusable containers but kids won't use them"
+- "If something just composted in our school garden, that would be amazing"
+
+This is the problem. It's real, it's daily, and the person in charge WANTS a solution.
+
+Next steps:
+→ Research compostable materials that can hold snacks
+→ Check if school garden compost gets hot enough (60°C needed)
+→ Ask Mrs. P if she'd pilot test 1 week of eco wrappers</textarea>
+      </div>
+      <div class="ne-footer">
+        <span>📓 Entry 1 of 4</span>
+        <span class="ne-charcount" id="neCount">623 characters</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="ftr"><div class="fi" id="fi">Journal · 4 entries · Last updated Feb 20</div><div class="fb"><button class="bs" onclick="closePanel()">Close</button><button class="bp" onclick="doSave()">💾 Save Entry</button></div></div>
+</div>
+<div class="toast" id="tst"></div>
+<script>
+document.head.appendChild(Object.assign(document.createElement('style'),{textContent:'@keyframes sd{to{transform:translateX(-50%) translateY(40px);opacity:0}}'}));
+function closePanel(){document.querySelector('.panel').style.animation='sd .25s ease forwards';document.querySelector('.backdrop').style.opacity='0';document.querySelector('.backdrop').style.transition='opacity .25s'}
+
+const notes=[
+  {date:'FEBRUARY 20, 2026 · 3:42 PM',title:'Cafeteria visit — wow moment',tags:['Observation','Win'],body:`Went to the Ridgewood cafeteria during lunch today with @oceandive to observe.\n\nWhat we saw:\n- Over 200 single-use wrappers thrown out in ONE lunch period\n- Mostly chip bags, granola bar wrappers, fruit snack pouches\n- The bin was overflowing by 12:30\n\nTalked to Mrs. Patterson (cafeteria manager). Key quotes:\n- "I feel guilty throwing this out every day"\n- "We've tried reusable containers but kids won't use them"\n- "If something just composted in our school garden, that would be amazing"\n\nThis is the problem. It's real, it's daily, and the person in charge WANTS a solution.\n\nNext steps:\n→ Research compostable materials that can hold snacks\n→ Check if school garden compost gets hot enough (60°C needed)\n→ Ask Mrs. P if she'd pilot test 1 week of eco wrappers`},
+  {date:'FEBRUARY 15, 2026 · 5:10 PM',title:'Compostable materials research',tags:['Idea'],body:`Spent the afternoon researching compostable packaging suppliers.\n\nTop 3 options:\n1. EcoWraps (Calgary) — small-order friendly, samples available\n2. GreenPack Solutions (Vancouver) — better prices but minimum 1000 units\n3. BioPouch (online) — cheapest but ships from the US\n\nEcoWraps looks most promising because:\n- They work with startups and small businesses\n- Based in Calgary so no shipping delays\n- Their compostable film breaks down in 90 days\n- They'll send free samples!\n\n→ Email EcoWraps tomorrow to request samples`},
+  {date:'FEBRUARY 8, 2026 · 4:25 PM',title:'Competitor check — what\'s out there',tags:['Observation'],body:`Searched for eco-friendly school packaging companies.\n\nFindings:\n- Most companies target large food brands (Subway, Tim Hortons)\n- Nobody specifically targets school cafeterias\n- School-specific pain points are different (budget, compost access, kid-proof)\n\nThis could be our niche. Schools are underserved.\n\nPotential angle: "The packaging company built for schools"`},
+  {date:'JANUARY 30, 2026 · 7:00 PM',title:'Project kickoff — why I care',tags:['Idea','To-Do'],body:`Starting this project because I'm sick of seeing the overflowing trash at lunch.\n\nIf I can make packaging that:\n- Kids actually like using\n- Breaks down in our school compost\n- Costs about the same as what cafeterias buy now\n\n...then maybe every school could use it.\n\nFirst steps:\n→ Visit cafeteria and count waste (get real numbers)\n→ Talk to Mrs. Patterson\n→ Look into what "compostable" actually means scientifically`}
+];
+
+function selectNote(i){
+  document.querySelectorAll('.note-card').forEach((c,j)=>c.classList.toggle('active',j===i));
+  const n=notes[i];
+  document.getElementById('neDate').textContent=n.date;
+  document.getElementById('neTitle').value=n.title;
+  document.getElementById('neBody').value=n.body;
+  const tagMap={Observation:'t-obs',Idea:'t-idea','To-Do':'t-todo',Win:'t-win'};
+  document.getElementById('neTags').innerHTML=n.tags.map(t=>`<span class="ne-tag nc-tag ${tagMap[t]||''}">${t}</span>`).join('')+`<span class="ne-tag ne-tag-add" onclick="toast('🏷 Tag picker')">+ Tag</span>`;
+  document.querySelector('.ne-footer span').textContent='📓 Entry '+(i+1)+' of '+notes.length;
+  updCount();
+}
+
+function addNote(){
+  const cards=document.getElementById('noteList');
+  const add=cards.querySelector('.note-add');
+  const card=document.createElement('div');
+  card.className='note-card';
+  card.innerHTML='<div class="nc-date">'+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}).toUpperCase()+'</div><div class="nc-title">New entry</div><div class="nc-preview">Start writing…</div><div class="nc-tags"><span class="nc-tag t-idea">Idea</span></div>';
+  cards.insertBefore(card,add);
+  notes.push({date:new Date().toLocaleString('en-US',{month:'long',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}).toUpperCase(),title:'New entry',tags:['Idea'],body:''});
+  const idx=notes.length-1;
+  card.onclick=()=>selectNote(idx);
+  selectNote(idx);
+  toast('📓 New entry created');
+}
+
+function updCount(){document.getElementById('neCount').textContent=document.getElementById('neBody').value.length+' characters'}
+function togE(){const on=document.getElementById('bE').classList.toggle('on');document.getElementById('neTitle').readOnly=!on;document.getElementById('neBody').readOnly=!on;toast(on?'✏️ Edit mode':'👁 View mode')}
+function mu(){document.getElementById('sD').className='sv-d sv-un';document.getElementById('sL').textContent='Unsaved';document.getElementById('sT').textContent='';clearTimeout(window._a);window._a=setTimeout(doSave,2000)}
+function doSave(){document.getElementById('sD').className='sv-d sv-ig';document.getElementById('sL').textContent='Saving…';document.getElementById('sT').textContent='';setTimeout(()=>{document.getElementById('sD').className='sv-d sv-ok';document.getElementById('sL').textContent='Saved';document.getElementById('sT').textContent='· just now';toast('💾 Entry saved')},700)}
+function toast(m){const t=document.getElementById('tst');t.innerHTML=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2500)}
+updCount();
+</script>
+</body>
+</html>

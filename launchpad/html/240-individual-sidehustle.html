@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hatchloom — Flavour Butter Co. · SideHustle</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{--pink:#FF1F5A;--orange:#FF8C00;--charcoal:#1E1E2E;--text:#2D2D2D;--text-soft:#6B7280;--bg:#F7F8FC;--card:#FFFFFF;--border:#EDEEF2;--green:#059669;--amber:#D97706;--amber-bg:#FFFBEB;--amber-border:#FDE68A;--pro:#A855F7;--font-d:'Outfit',sans-serif;--font-b:'DM Sans',sans-serif}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--font-b);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+
+  /* NAV */
+  .topnav{background:var(--card);border-bottom:1.5px solid var(--border);padding:0 1.75rem;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.04)}
+  .logo{font-family:var(--font-d);font-weight:900;font-size:1.35rem;color:var(--pink);letter-spacing:-.03em}.logo span{color:var(--charcoal)}
+  .nav-links{display:flex;gap:.125rem}
+  .nav-link{font-family:var(--font-d);font-weight:600;font-size:.875rem;padding:.45rem .9rem;border-radius:8px;color:var(--text-soft);cursor:pointer;transition:all .2s}
+  .nav-link:hover{background:#F3F4F6;color:var(--text)}.nav-link.active{background:#FFF7ED;color:var(--orange)}
+  .nav-right{display:flex;align-items:center;gap:.625rem}
+  .gp{display:flex;align-items:center;gap:.35rem;padding:.35rem .75rem;border-radius:99px;font-family:var(--font-d);font-weight:800;font-size:.78rem;border:1.5px solid transparent;cursor:pointer}
+  .gp-s{background:linear-gradient(135deg,#FFF7E6,#FFF0CC);border-color:#FFD98A;color:#B45309}
+  .gp-x{background:linear-gradient(135deg,#F0FBFD,#E0F5F9);border-color:#BAE6F0;color:#0891B2}
+  .nb{width:34px;height:34px;border-radius:50%;background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;font-size:1rem}
+  .nb-d{position:absolute;top:-3px;right:-3px;background:var(--pink);color:white;font-size:.55rem;font-weight:800;width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid white}
+  .av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1E1E2E,#3D3060);display:flex;align-items:center;justify-content:center;font-size:1.2rem;border:2.5px solid white;box-shadow:0 2px 8px rgba(255,31,90,.2);cursor:pointer}
+  .nav-left{display:flex;align-items:center;gap:.75rem}
+  .rp{font-family:var(--font-d);font-size:.68rem;font-weight:700;padding:.25rem .6rem;border-radius:99px;background:#F0FBFD;color:#0891B2;border:1.5px solid #BAE6F0}
+  .sn{font-family:var(--font-d);font-size:.78rem;font-weight:600;color:var(--text-soft)}
+
+  .layout{display:grid;grid-template-columns:215px 1fr;min-height:calc(100vh - 58px)}
+
+  /* SIDE */
+  .side{background:var(--card);border-right:1.5px solid var(--border);padding:1.25rem 0 2rem;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;display:flex;flex-direction:column}
+  .side-sec{padding:0 .875rem}
+  .side-lbl{font-family:var(--font-d);font-size:.63rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:#C4C8D4;margin:1rem 0 .35rem .5rem}
+  .si{display:flex;align-items:center;gap:.5rem;padding:.525rem .75rem;border-radius:9px;font-size:.8125rem;font-weight:600;color:var(--text-soft);cursor:pointer;transition:all .18s;margin-bottom:.1rem}
+  .si:hover{background:#F3F4F6;color:var(--text)}.si.active{background:#FFF7ED;color:var(--orange)}
+  .si .ico{font-size:.9375rem;width:18px;text-align:center;flex-shrink:0}
+  .si .bc{margin-left:auto;background:var(--pink);color:white;font-size:.6rem;font-weight:800;padding:.1rem .4rem;border-radius:99px}
+  .si .bn{margin-left:auto;background:#FFF0F5;color:var(--pink);font-size:.58rem;font-weight:800;padding:.1rem .4rem;border-radius:4px}
+  .side-div{height:1px;background:var(--border);margin:.625rem .875rem}
+  .side-sp{flex:1}
+  .side-cta{margin:0 .875rem;font-family:var(--font-d);font-size:.78rem;font-weight:700;padding:.6rem 1rem;border-radius:10px;cursor:pointer;background:var(--pink);color:white;border:none;text-align:center;display:block;width:calc(100% - 1.75rem)}
+
+  .main{padding:1.5rem 1.75rem 2rem;overflow-y:auto}
+  .breadcrumb{display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--text-soft);font-weight:600;margin-bottom:.6rem}
+  .breadcrumb .bl{color:var(--pink);cursor:pointer}.breadcrumb .bs{color:#D1D5DB}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+  /* HERO — compact */
+  .hero{background:var(--card);border:1.5px solid var(--border);border-radius:16px;overflow:visible;margin-bottom:1rem;box-shadow:0 2px 10px rgba(0,0,0,.04);animation:fadeUp .35s ease both}
+  .banner{height:60px;background:linear-gradient(150deg,#FDE68A,#D97706);display:flex;align-items:center;padding:0 1.25rem;border-radius:16px 16px 0 0}
+  .banner-emoji{width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-size:1.3rem;box-shadow:0 2px 8px rgba(0,0,0,.1);flex-shrink:0}
+  .banner-meta{margin-left:.75rem;display:flex;flex-direction:column;gap:.08rem}
+  .banner-badge{font-family:var(--font-d);font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;background:rgba(255,255,255,.25);color:white;padding:.08rem .4rem;border-radius:99px;width:fit-content}
+  .banner-status{font-family:var(--font-d);font-size:.55rem;font-weight:800;padding:.08rem .4rem;border-radius:99px;background:rgba(255,255,255,.92);color:var(--amber);width:fit-content;display:flex;align-items:center;gap:.2rem}
+  .banner-status .dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
+  .banner-right{margin-left:auto;display:flex;align-items:center;gap:.75rem}
+  .banner-btn{width:26px;height:26px;border-radius:6px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:.8rem;cursor:pointer;transition:background .15s}
+  .banner-btn:hover{background:rgba(255,255,255,.35)}
+  .banner-dates{font-family:var(--font-d);font-size:.55rem;font-weight:600;color:rgba(255,255,255,.7);text-align:right;line-height:1.4}
+  .ts{display:flex;align-items:center;cursor:pointer}.ts:hover{opacity:.85}
+  .ts-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;border:2px solid rgba(255,255,255,.8);margin-left:-4px;box-shadow:0 1px 2px rgba(0,0,0,.15);position:relative}
+  .ts-av:first-child{margin-left:0}
+  .ts-av .tip{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:var(--charcoal);color:white;font-family:var(--font-d);font-size:.55rem;font-weight:600;padding:.15rem .35rem;border-radius:4px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;z-index:50}
+  .ts-av .tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:2.5px solid transparent;border-top-color:var(--charcoal)}
+  .ts-av:hover .tip{opacity:1}
+  .ts-n{font-family:var(--font-d);font-size:.55rem;font-weight:800;color:rgba(255,255,255,.85);margin-left:.3rem}
+
+  .hero-body{padding:.6rem 1.25rem .6rem;display:flex;align-items:baseline;gap:.75rem}
+  .hero-title{font-family:var(--font-d);font-weight:900;font-size:1.15rem;color:var(--charcoal);letter-spacing:-.02em;border:none;background:none;outline:none;flex-shrink:0;cursor:text;padding:0}
+  .hero-title:focus{border-bottom:2px solid var(--amber)}
+  .hero-desc{font-size:.78rem;color:var(--text-soft);line-height:1.4;border:none;background:none;outline:none;flex:1;resize:none;cursor:text;font-family:var(--font-b);min-height:1.2em}
+  .hero-desc:focus{border-bottom:1px solid var(--amber)}
+
+  /* CARD */
+  .card{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:.75rem 1rem;box-shadow:0 1px 6px rgba(0,0,0,.03);margin-bottom:1rem;animation:fadeUp .35s ease both}
+  .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem}
+  .card-title{font-family:var(--font-d);font-weight:800;font-size:.82rem;color:var(--charcoal);display:flex;align-items:center;gap:.35rem}
+  .card-period{font-family:var(--font-d);font-size:.58rem;font-weight:700;color:#C4C8D4;background:#F3F4F6;padding:.1rem .4rem;border-radius:4px;margin-left:.25rem}
+  .card-sub{font-family:var(--font-d);font-size:.55rem;font-weight:600;color:#C4C8D4}
+
+  /* MONEY ROW — all inline */
+  .money-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem;padding-bottom:.6rem;border-bottom:1px solid var(--border)}
+  .money-chart-wrap{position:relative;flex-shrink:0}
+  .money-chart-wrap canvas{display:block}
+  .chart-cf{position:absolute;top:0;right:0;font-family:var(--font-d);font-size:.65rem;font-weight:900;line-height:1}
+  .chart-cf-lbl{font-size:.42rem;font-weight:700;color:#C4C8D4;text-transform:uppercase;letter-spacing:.03em;display:block;text-align:right;margin-bottom:1px}
+  .chart-cf.pos{color:var(--green)}.chart-cf.neg{color:#EF4444}
+  .money-metrics{display:flex;gap:.35rem;flex:1}
+  .mm{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.35rem .5rem;cursor:pointer;transition:all .15s;text-align:center}
+  .mm:hover{border-color:var(--amber);background:white;box-shadow:0 2px 6px rgba(217,119,6,.08)}
+  .mm-lbl{font-family:var(--font-d);font-size:.5rem;font-weight:700;color:#C4C8D4;text-transform:uppercase;letter-spacing:.03em}
+  .mm-val{font-family:var(--font-d);font-size:.95rem;font-weight:900;color:var(--charcoal);line-height:1.1}
+  .mm-val.profit{color:var(--green)}
+
+  /* TILES — compact, card-like */
+  .tile-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:.35rem .5rem}
+  .tile{background:var(--card);border:1.5px solid var(--border);border-left:3px solid var(--border);border-radius:8px;padding:.45rem .4rem;cursor:pointer;transition:all .15s;position:relative}
+  .tile:hover{box-shadow:0 3px 10px rgba(0,0,0,.07);transform:translateY(-1px)}
+  .tile.tg{border-left-color:#22C55E}.tile.tg:hover{border-color:#22C55E;border-left-color:#22C55E}
+  .tile.ty{border-left-color:#EAB308}.tile.ty:hover{border-color:#EAB308;border-left-color:#EAB308}
+  .tile.tr{border-left-color:#EF4444}.tile.tr:hover{border-color:#EF4444;border-left-color:#EF4444}
+  .tile-label{font-family:var(--font-d);font-weight:800;font-size:.5rem;color:var(--text-soft);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.1rem}
+  .tile-metric{font-family:var(--font-d);font-weight:900;font-size:.75rem;color:var(--charcoal);line-height:1}
+  .tile-metric.alert{color:#EF4444}
+  .tile-detail{font-size:.5rem;color:var(--text-soft);line-height:1.15;margin-top:.06rem}
+  .tile-arrow{position:absolute;top:.3rem;right:.3rem;font-size:.4rem;color:#D1D5DB;transition:color .15s}
+  .tile:hover .tile-arrow{color:var(--charcoal)}
+  .tile-add{background:var(--bg);border:1.5px dashed #D1D5DB;border-radius:8px;padding:.35rem .4rem;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:.15rem;font-family:var(--font-d);font-size:.55rem;font-weight:700;color:#C4C8D4}
+  .tile-add:hover{border-color:var(--amber);background:var(--amber-bg);color:var(--amber)}
+  .tile-footer{display:flex;align-items:center;margin-top:.35rem}
+  .tf-link{font-family:var(--font-d);font-size:.58rem;font-weight:700;color:var(--pro);cursor:pointer}
+
+  .grow-tile.tg:hover{border-color:#059669;border-left-color:#059669;box-shadow:0 3px 10px rgba(5,150,105,.08)}
+  .grow-tile.ty:hover{border-color:#CA8A04;border-left-color:#CA8A04}
+  .grow-tile.tr:hover{border-color:#DC2626;border-left-color:#DC2626}
+
+  /* TWO COL */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+  .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem}
+  .sec-title{font-family:var(--font-d);font-weight:800;font-size:.8rem;color:var(--charcoal);display:flex;align-items:center;gap:.3rem}
+  .sec-count{font-family:var(--font-d);font-size:.58rem;font-weight:700;color:#C4C8D4;background:#F3F4F6;padding:.06rem .35rem;border-radius:99px}
+  .sec-actions{display:flex;gap:.5rem}
+  .sec-link{font-family:var(--font-d);font-size:.65rem;font-weight:700;color:var(--amber);cursor:pointer}
+  .sec-link-p{color:var(--pink)}
+
+  .todo-list{display:flex;flex-direction:column;gap:.2rem}
+  .todo{display:flex;align-items:center;gap:.4rem;font-size:.74rem;font-weight:500;color:var(--text);padding:.2rem 0;cursor:pointer}.todo:hover{color:var(--amber)}
+  .todo-ck{width:13px;height:13px;border-radius:3px;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.48rem;color:white}
+  .todo-ck.done{background:var(--amber);border-color:var(--amber)}
+  .todo.done-i{color:#C4C8D4;text-decoration:line-through}
+  .todo-dt{margin-left:auto;font-size:.55rem;font-weight:600;color:#C4C8D4;flex-shrink:0}
+  .todo-dt.urg{color:var(--pink);background:#FFF0F5;padding:.05rem .25rem;border-radius:3px}
+
+  .comms-tabs{display:flex;align-items:center;gap:0;margin-bottom:.5rem;border-bottom:1.5px solid var(--border)}
+  .ctab{display:flex;align-items:center;gap:.2rem;padding:.35rem .55rem;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;font-size:.8rem}
+  .ctab:hover{background:var(--bg);border-radius:5px 5px 0 0}.ctab.active{border-bottom-color:var(--amber)}
+  .ctab-b{font-family:var(--font-d);font-size:.45rem;font-weight:800;background:var(--pink);color:white;width:12px;height:12px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+  .cpanel{display:none}.cpanel.active{display:block}
+  .msg{display:flex;align-items:flex-start;gap:.4rem;padding:.3rem 0;border-bottom:1px solid var(--border);cursor:pointer}
+  .msg:last-child{border-bottom:none}
+  .msg:hover{background:var(--bg);border-radius:4px;padding:.3rem .35rem;margin:0 -.35rem}
+  .msg-av{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.55rem;flex-shrink:0}
+  .msg-body{flex:1;min-width:0}
+  .msg-from{font-family:var(--font-d);font-weight:700;font-size:.65rem;color:var(--charcoal)}
+  .msg-txt{font-size:.6rem;color:var(--text-soft);line-height:1.25;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .msg-time{font-size:.52rem;color:#C4C8D4;flex-shrink:0;margin-top:1px}
+  .msg-unread{width:4px;height:4px;border-radius:50%;background:var(--pink);flex-shrink:0;margin-top:4px}
+  .ai-badge{font-size:.45rem;font-weight:800;padding:.03rem .2rem;border-radius:2px;background:#FAF0FF;color:var(--pro);margin-left:.08rem}
+  .contact-grid{display:flex;flex-direction:column;gap:.25rem}
+  .contact{display:flex;align-items:center;gap:.4rem;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:.3rem .45rem;cursor:pointer;transition:all .15s}
+  .contact:hover{border-color:var(--amber);background:var(--amber-bg)}
+  .contact-ico{width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.55rem;flex-shrink:0}
+  .contact-name{font-family:var(--font-d);font-weight:700;font-size:.65rem;color:var(--charcoal)}
+  .contact-type{font-size:.52rem;color:var(--text-soft)}
+  .contact-add{font-family:var(--font-d);font-size:.58rem;font-weight:700;color:var(--amber);cursor:pointer;padding:.2rem 0;margin-top:.1rem}
+
+  .nudge{display:flex;align-items:center;gap:.55rem;background:var(--amber-bg);border:1.5px solid var(--amber-border);border-radius:9px;padding:.4rem .75rem;cursor:pointer;transition:all .15s;margin-bottom:1.25rem;animation:fadeUp .35s ease .2s both}
+  .nudge:hover{border-color:var(--amber);box-shadow:0 2px 6px rgba(217,119,6,.12)}
+  .nudge-txt{font-family:var(--font-d);font-weight:700;font-size:.7rem;color:var(--charcoal)}
+  .nudge-sub{font-size:.58rem;color:var(--text-soft)}
+
+  /* SHELF */
+  .shelf{margin-bottom:1.25rem;animation:fadeUp .35s ease .24s both}
+  .shelf-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem}
+  .shelf-title{font-family:var(--font-d);font-weight:800;font-size:.82rem;color:var(--charcoal);display:flex;align-items:center;gap:.3rem}
+  .shelf-link{font-size:.65rem;font-weight:700;color:var(--pink);cursor:pointer}
+  .shelf-track{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.3rem;scroll-snap-type:x mandatory}
+  .shelf-track::-webkit-scrollbar{height:2px}.shelf-track::-webkit-scrollbar-thumb{background:#E5E7EB;border-radius:99px}
+  .rc{flex-shrink:0;width:155px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:.6rem;cursor:pointer;transition:all .18s;scroll-snap-align:start}
+  .rc:hover{border-color:var(--amber);box-shadow:0 2px 10px rgba(0,0,0,.06);transform:translateY(-1px)}
+  .rc-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.9rem;margin-bottom:.3rem}
+  .rc-name{font-family:var(--font-d);font-weight:700;font-size:.68rem;color:var(--charcoal);margin-bottom:.1rem}
+  .rc-sub{font-size:.58rem;color:var(--text-soft);line-height:1.2}
+  .rc-tag{display:inline-flex;margin-top:.3rem;font-size:.5rem;font-weight:700;padding:.06rem .3rem;border-radius:3px}
+  .cc{flex-shrink:0;width:175px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:.5rem .7rem;cursor:pointer;transition:all .18s;scroll-snap-align:start;display:flex;align-items:center;gap:.5rem}
+  .cc:hover{border-color:var(--amber);box-shadow:0 2px 10px rgba(0,0,0,.06)}
+  .cc-ico{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+  .cc-name{font-family:var(--font-d);font-weight:700;font-size:.68rem;color:var(--charcoal)}
+  .cc-status{font-size:.58rem;color:var(--text-soft);margin-top:1px;display:flex;align-items:center;gap:.2rem}
+  .cc-dot{width:4px;height:4px;border-radius:50%}
+
+  /* Team dropdown */
+  .td{position:fixed;background:#FFF;border:1.5px solid var(--border);border-radius:9px;padding:.4rem;width:220px;box-shadow:0 10px 28px rgba(0,0,0,.2);z-index:99999;display:none}.td.open{display:block}
+  .trow{display:flex;align-items:center;gap:.4rem;padding:.2rem .15rem;border-radius:4px}
+  .trow-av{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;flex-shrink:0;border:1.5px solid white;box-shadow:0 1px 2px rgba(0,0,0,.1)}
+  .trow-info{font-family:var(--font-d);font-size:.68rem;font-weight:700;color:var(--charcoal);flex:1}
+  .trow-info span{font-weight:500;color:var(--text-soft);font-size:.6rem}
+  .trow-btn{height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.55rem;cursor:pointer;background:transparent;border:1.5px solid transparent;transition:all .15s;color:#C4C8D4;padding:0 .3rem}
+  .trow-btn:hover{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber)}
+  .trow-btn.ai-c{font-family:var(--font-d);font-size:.55rem;font-weight:700}
+  .trow-btn.ai-c:hover{background:#FAF0FF;border-color:#DDD6FE;color:var(--pro)}
+  .trow-div{height:1px;background:var(--border);margin:.2rem 0}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-left"><div class="logo">hatch<span>loom</span></div><div class="rp">Student</div><div class="sn">Ridgewood Academy</div></div>
+  <div class="nav-links"><div class="nav-link">🔭 Explore</div><div class="nav-link">🤝 Connect</div><div class="nav-link active">🚀 Launch</div></div>
+  <div class="nav-right"><div class="gp gp-s">🔥 18-day streak</div><div class="gp gp-x">⚡ 2,450 XP</div><div class="nb">✉️<div class="nb-d">3</div></div><div class="nb">🔔<div class="nb-d">3</div></div><div class="av">🦊</div></div>
+</nav>
+
+<div class="layout">
+  <aside class="side">
+    <div class="side-sec">
+      <div class="si"><span class="ico">🚀</span> Launchpad Home</div>
+      <div class="side-div"></div>
+      <div class="side-lbl">Launchpad</div>
+      <div class="si"><span class="ico">🧪</span> My Sandboxes</div>
+      <div class="si active"><span class="ico">💼</span> My SideHustles</div>
+      <div class="side-div"></div>
+      <div class="side-lbl">Community</div>
+      <div class="si"><span class="ico">👥</span> My Teams</div>
+      <div class="si"><span class="ico">📅</span> Upcoming Events <span class="bn">2 NEW</span></div>
+      <div class="si"><span class="ico">📋</span> Classifieds <span class="bc">4</span></div>
+      <div class="si"><span class="ico">🏪</span> Market Square</div>
+      <div class="side-div"></div>
+      <div class="side-lbl">Library</div>
+      <div class="si"><span class="ico">🛠</span> Tools</div>
+      <div class="si"><span class="ico">🤝</span> Organizations</div>
+      <div class="si"><span class="ico">📚</span> Learning Paths</div>
+    </div>
+    <div class="side-sp"></div>
+    <button class="side-cta">💬 Contact Hatchloom</button>
+  </aside>
+
+  <main class="main">
+    <div class="breadcrumb"><span class="bl">Student Home</span><span class="bs">›</span><span class="bl">Launchpad</span><span class="bs">›</span><span class="bl">My SideHustles</span><span class="bs">›</span><span>🧈 Flavour Butter Co.</span></div>
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="banner">
+        <div class="banner-emoji">🧈</div>
+        <div class="banner-meta"><div class="banner-badge">💼 SideHustle</div><div class="banner-status"><span class="dot"></span> Live</div></div>
+        <div class="banner-right">
+          <div class="banner-btn" title="Business Journal">📓</div>
+          <div class="banner-dates">Launched Jan 15, 2026<br>Updated 1 hour ago</div>
+          <div class="ts" id="teamStack" onclick="toggleTeam(event)">
+            <div class="ts-av" style="background:linear-gradient(135deg,#1E1E2E,#3D3060)">🦊<span class="tip">@firefox_hl</span></div>
+            <div class="ts-av" style="background:linear-gradient(135deg,#3B82F6,#60A5FA)">🎓<span class="tip">@oceandive</span></div>
+            <div class="ts-av" style="background:linear-gradient(135deg,#7C3AED,#A78BFA)">💡<span class="tip">Spark</span></div>
+            <div class="ts-av" style="background:linear-gradient(135deg,#22C55E,#15803D)">🌍<span class="tip">Scout</span></div>
+            <div class="ts-av" style="background:linear-gradient(135deg,#0891B2,#7DD3E0)">📊<span class="tip">Barry</span></div>
+            <div class="ts-n">5</div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-body">
+        <input class="hero-title" type="text" value="Flavour Butter Co." spellcheck="false">
+        <textarea class="hero-desc" rows="1" spellcheck="false">Artisan flavoured butter · local markets & online · First product: garlic herb</textarea>
+      </div>
+    </div>
+
+    <!-- 📊 RUNNING MY BUSINESS -->
+    <div class="card" style="animation-delay:.06s">
+      <div class="card-head">
+        <div class="card-title">📊 Running My Business <span class="card-period">Feb 2026</span></div>
+        <div class="card-sub">Suggested by Barry · Tap to open</div>
+      </div>
+
+      <!-- Money: inline chart + 3 metrics -->
+      <div class="money-row">
+        <div class="money-chart-wrap">
+          <div class="chart-cf pos">
+            <span class="chart-cf-lbl">Cashflow since launch</span>
+            +$9
+          </div>
+          <canvas id="moneyChart"></canvas>
+        </div>
+        <div class="money-metrics">
+          <div class="mm" onclick="alert('Earnings → Feb')"><div class="mm-lbl">Earned</div><div class="mm-val">$64</div></div>
+          <div class="mm" onclick="alert('Expenses → Feb')"><div class="mm-lbl">Spent</div><div class="mm-val">$27</div></div>
+          <div class="mm" onclick="alert('Profit → Feb')"><div class="mm-lbl">Profit</div><div class="mm-val profit">$37</div></div>
+        </div>
+      </div>
+
+      <!-- Compact tiles -->
+      <div class="tile-grid">
+        <div class="tile tg" onclick="alert('Open → Pricing')">
+          <div class="tile-label">Per-Unit Profit</div>
+          <div class="tile-metric">$4.50 / jar</div>
+          <div class="tile-detail">$3.50 cost · $8 sell</div>
+          <div class="tile-arrow">→</div>
+        </div>
+        <div class="tile tr" onclick="alert('Open → Stock')">
+          <div class="tile-label">Stock</div>
+          <div class="tile-metric alert">0 jars</div>
+          <div class="tile-detail">Sold out at market!</div>
+          <div class="tile-arrow">→</div>
+        </div>
+        <div class="tile tg" onclick="alert('Open → Orders')">
+          <div class="tile-label">Orders</div>
+          <div class="tile-metric">1 pending</div>
+          <div class="tile-detail">@bake_lover · 2 jars</div>
+          <div class="tile-arrow">→</div>
+        </div>
+        <div class="tile tr" onclick="alert('Open → Time')">
+          <div class="tile-label">Time Spent</div>
+          <div class="tile-metric alert">Not tracked</div>
+          <div class="tile-detail">Start logging hours</div>
+          <div class="tile-arrow">→</div>
+        </div>
+        <div class="tile ty" onclick="alert('Open → Supplies')">
+          <div class="tile-label">Supplies</div>
+          <div class="tile-metric"><span style="color:#EAB308">LOW</span> (3 items)</div>
+          <div class="tile-detail">Butter · Jars · Labels</div>
+          <div class="tile-arrow">→</div>
+        </div>
+        <div class="tile-add" onclick="alert('Add tile')">+ Add tile</div>
+      </div>
+      <div class="tile-footer"><div class="tf-link">🔄 Barry can suggest more</div></div>
+    </div>
+
+    <!-- 🌱 GROWING MY BUSINESS -->
+    <div class="card" style="animation-delay:.1s">
+      <div class="card-head">
+        <div class="card-title">🌱 Growing My Business <span class="card-period">Feb 2026</span></div>
+        <div class="card-sub">Suggested by Barry · Tap to open</div>
+      </div>
+      <div class="tile-grid">
+        <div class="tile grow-tile ty" onclick="alert('→ Reach')">
+          <div class="tile-label">Reach</div>
+          <div class="tile-metric">23 followers</div>
+          <div class="tile-detail">+4 this week</div>
+          <div class="tile-arrow">→</div>
+        </div>
+        <div class="tile grow-tile ty" onclick="alert('→ Repeat Buyers')">
+          <div class="tile-label">Repeat Buyers</div>
+          <div class="tile-metric">1 of 8</div>
+          <div class="tile-detail">Dad's coworker!</div>
+          <div class="tile-arrow">→</div>
+        </div>
+        <div class="tile grow-tile tg" onclick="alert('→ Opportunities')">
+          <div class="tile-label">Next Opportunity</div>
+          <div class="tile-metric">Mar 1 market</div>
+          <div class="tile-detail">+ Mar 8 bake sale</div>
+          <div class="tile-arrow">→</div>
+        </div>
+        <div class="tile grow-tile tr" onclick="alert('→ Feedback')">
+          <div class="tile-label">Feedback</div>
+          <div class="tile-metric alert">None yet</div>
+          <div class="tile-detail">Ask buyers!</div>
+          <div class="tile-arrow">→</div>
+        </div>
+        <div class="tile grow-tile ty" onclick="alert('→ Visibility')">
+          <div class="tile-label">Visibility</div>
+          <div class="tile-metric">1 post this week</div>
+          <div class="tile-detail">2 channels active</div>
+          <div class="tile-arrow">→</div>
+        </div>
+        <div class="tile-add" onclick="alert('Add growth tile')">+ Add tile</div>
+      </div>
+      <div class="tile-footer"><div class="tf-link">🔄 Barry can suggest more</div></div>
+    </div>
+
+    <!-- TODOS + COMMS -->
+    <div class="two-col">
+      <div class="card" style="margin-bottom:0;animation-delay:.14s">
+        <div class="sec-head">
+          <div class="sec-title">✅ Todos <span class="sec-count">4</span></div>
+          <div class="sec-actions"><div class="sec-link">+ Add</div><div class="sec-link sec-link-p">See all →</div></div>
+        </div>
+        <div class="todo-list">
+          <div class="todo done-i"><div class="todo-ck done">✓</div> Make 12 jars garlic herb for market <span class="todo-dt">Feb 20</span></div>
+          <div class="todo done-i"><div class="todo-ck done">✓</div> Set up booth at Farmers Market <span class="todo-dt">Feb 22</span></div>
+          <div class="todo"><div class="todo-ck"></div> Buy jars + butter from Superstore <span class="todo-dt urg">Feb 24</span></div>
+          <div class="todo"><div class="todo-ck"></div> Reply to @bake_lover about 2-jar order <span class="todo-dt">Feb 25</span></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:0;animation-delay:.14s">
+        <div class="comms-tabs">
+          <div class="ctab active" onclick="switchTab('msgs',this)">💬 <span class="ctab-b">2</span></div>
+          <div class="ctab" onclick="switchTab('emails',this)">✉️ <span class="ctab-b">1</span></div>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:.2rem;padding:.35rem .45rem;cursor:pointer;font-size:.8rem;color:var(--text-soft)" onclick="switchTab('phonebook',null)">📇 <span class="ctab-b" style="background:var(--amber)">3</span></div>
+        </div>
+        <div class="cpanel active" id="msgs">
+          <div class="msg"><div class="msg-av" style="background:linear-gradient(135deg,#3B82F6,#60A5FA)">🎓</div><div class="msg-body"><div class="msg-from">@oceandive</div><div class="msg-txt">We sold ALL 12 jars!!! Your garlic herb is 🔥</div></div><div class="msg-time">1h</div><div class="msg-unread"></div></div>
+          <div class="msg"><div class="msg-av" style="background:linear-gradient(135deg,#0891B2,#7DD3E0)">📊</div><div class="msg-body"><div class="msg-from">Barry <span class="ai-badge">AI</span></div><div class="msg-txt">Nice market day! I've updated your numbers — check your Running tiles.</div></div><div class="msg-time">4h</div><div class="msg-unread"></div></div>
+        </div>
+        <div class="cpanel" id="emails">
+          <div class="msg"><div class="msg-av" style="background:linear-gradient(135deg,#059669,#34D399)">🏪</div><div class="msg-body"><div class="msg-from">Calgary Farmers Market</div><div class="msg-txt">Spring season vendor registration opens March 1…</div></div><div class="msg-time">4h</div><div class="msg-unread"></div></div>
+          <div class="msg"><div class="msg-av" style="background:linear-gradient(135deg,#3B82F6,#60A5FA)">🏫</div><div class="msg-body"><div class="msg-from">Ridgewood Parent Council</div><div class="msg-txt">RE: Bake sale booth — interested in your butter for March 8.</div></div><div class="msg-time">2d</div></div>
+        </div>
+        <div class="cpanel" id="phonebook">
+          <div class="contact-grid">
+            <div class="contact"><div class="contact-ico" style="background:#F0FDF4">🛒</div><div><div class="contact-name">Superstore Crowfoot</div><div class="contact-type">Supplier</div></div></div>
+            <div class="contact"><div class="contact-ico" style="background:#FFF7ED">🏪</div><div><div class="contact-name">Calgary Farmers Market</div><div class="contact-type">Sales Channel</div></div></div>
+            <div class="contact"><div class="contact-ico" style="background:#EFF6FF">🏫</div><div><div class="contact-name">Ridgewood Parent Council</div><div class="contact-type">Customer</div></div></div>
+          </div>
+          <div class="contact-add">+ Add contact</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nudge" onclick="alert('Post to Classifieds')"><div>👋</div><div><div class="nudge-txt">Need help at your next market?</div><div class="nudge-sub">Post to Classifieds and find a teammate</div></div><div style="margin-left:auto;color:var(--amber)">→</div></div>
+
+    <!-- SHELF -->
+    <div class="shelf">
+      <div class="shelf-head"><div class="shelf-title">📌 Tagged Resources</div><div class="shelf-link">See all →</div></div>
+      <div class="shelf-track">
+        <div class="rc"><div class="rc-icon" style="background:#FFF7ED">📋</div><div class="rc-name">My Business Canvas</div><div class="rc-sub">Last edited Feb 20</div><div class="rc-tag" style="background:#FFF7ED;color:var(--orange)">Editable</div></div>
+        <div class="rc"><div class="rc-icon" style="background:#F0FDF4">📄</div><div class="rc-name">Alberta Cottage Food Rules</div><div class="rc-sub">External link</div><div class="rc-tag" style="background:#F3F4F6;color:var(--text-soft)">Reference</div></div>
+        <div class="rc"><div class="rc-icon" style="background:#F0FBFD">🎬</div><div class="rc-name">How Packaging Sells</div><div class="rc-sub">Video · 8 min</div><div class="rc-tag" style="background:#EFF6FF;color:#1D4ED8">Video</div></div>
+        <div class="rc"><div class="rc-icon" style="background:#FFF7ED">🏷</div><div class="rc-name">Pricing 101</div><div class="rc-sub">Course · 4 blocks</div><div class="rc-tag" style="background:#EFF6FF;color:#1D4ED8">Course</div></div>
+        <div class="rc"><div class="rc-icon" style="background:#FAF0FF">📸</div><div class="rc-name">Product Photos</div><div class="rc-sub">Article</div><div class="rc-tag" style="background:#F0FDF4;color:#15803D">Learning</div></div>
+      </div>
+    </div>
+    <div class="shelf">
+      <div class="shelf-head"><div class="shelf-title">📡 Active Channels</div><div class="shelf-link">Manage →</div></div>
+      <div class="shelf-track">
+        <div class="cc"><div class="cc-ico" style="background:#FFF7ED">🏪</div><div><div class="cc-name">Calgary Farmers Market</div><div class="cc-status"><span class="cc-dot" style="background:var(--green)"></span> Active</div></div></div>
+        <div class="cc"><div class="cc-ico" style="background:#F0FDF4">🏫</div><div><div class="cc-name">Ridgewood Entrepreneurs Club</div><div class="cc-status"><span class="cc-dot" style="background:var(--green)"></span> Collaborating</div></div></div>
+        <div class="cc"><div class="cc-ico" style="background:#FAF0FF">🧈</div><div><div class="cc-name">Alberta Young Makers</div><div class="cc-status"><span class="cc-dot" style="background:#C4C8D4"></span> Exploring</div></div></div>
+      </div>
+    </div>
+    <div class="shelf">
+      <div class="shelf-head"><div class="shelf-title">✨ Recommended</div></div>
+      <div class="shelf-track">
+        <div class="rc"><div class="rc-icon" style="background:#FFF7ED">🎉</div><div class="rc-name">After Your First Sale</div><div class="rc-sub">Mini-course</div><div class="rc-tag" style="background:#EFF6FF;color:#1D4ED8">Course</div></div>
+        <div class="rc"><div class="rc-icon" style="background:#F0FBFD">📝</div><div class="rc-name">Customer Feedback Template</div><div class="rc-sub">Get reviews</div><div class="rc-tag" style="background:#FFF7ED;color:var(--orange)">Tool</div></div>
+        <div class="rc"><div class="rc-icon" style="background:#F0FDF4">💰</div><div class="rc-name">Simple Money Tracking</div><div class="rc-sub">Course · 3 blocks</div><div class="rc-tag" style="background:#EFF6FF;color:#1D4ED8">Course</div></div>
+        <div class="rc"><div class="rc-icon" style="background:#FFF0F5">🌟</div><div class="rc-name">Teens Past $500/mo</div><div class="rc-sub">Peer stories</div><div class="rc-tag" style="background:#F0FDF4;color:#15803D">Stories</div></div>
+        <div class="rc"><div class="rc-icon" style="background:#FAF0FF">🧮</div><div class="rc-name">Batch Planner</div><div class="rc-sub">Calculator tool</div><div class="rc-tag" style="background:#FFF7ED;color:var(--orange)">Tool</div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Team dropdown -->
+<div class="td" id="teamDD" onclick="event.stopPropagation()">
+  <div class="trow"><div class="trow-av" style="background:linear-gradient(135deg,#1E1E2E,#3D3060)">🦊</div><div class="trow-info">@firefox_hl <span>· You</span></div><div style="display:flex;gap:.1rem"><div class="trow-btn">✉️</div><div class="trow-btn">@</div></div></div>
+  <div class="trow"><div class="trow-av" style="background:linear-gradient(135deg,#3B82F6,#60A5FA)">🎓</div><div class="trow-info">@oceandive <span>· Helper</span></div><div style="display:flex;gap:.1rem"><div class="trow-btn">✉️</div><div class="trow-btn">@</div></div></div>
+  <div class="trow-div"></div>
+  <div class="trow"><div class="trow-av" style="background:linear-gradient(135deg,#7C3AED,#A78BFA)">💡</div><div class="trow-info">Spark <span>· Ideas</span> <span class="ai-badge">AI</span></div><div><div class="trow-btn ai-c">💬 Ask</div></div></div>
+  <div class="trow"><div class="trow-av" style="background:linear-gradient(135deg,#22C55E,#15803D)">🌍</div><div class="trow-info">Scout <span>· Market</span> <span class="ai-badge">AI</span></div><div><div class="trow-btn ai-c">💬 Ask</div></div></div>
+  <div class="trow"><div class="trow-av" style="background:linear-gradient(135deg,#0891B2,#7DD3E0)">📊</div><div class="trow-info">Barry <span>· Mentor</span> <span class="ai-badge">AI</span></div><div><div class="trow-btn ai-c">💬 Ask</div></div></div>
+</div>
+
+<script>
+(function(){
+  var c=document.getElementById('moneyChart');if(!c)return;
+  var ctx=c.getContext('2d'),dpr=window.devicePixelRatio||1;
+  // Tight chart: ~160px wide, 55px tall
+  var W=160,H=55;
+  c.width=W*dpr;c.height=H*dpr;
+  c.style.width=W+'px';c.style.height=H+'px';
+  ctx.scale(dpr,dpr);
+
+  var data=[[0,14],[0,9],[0,5],[0,4],[16,5],[48,18]];
+  var max=52;
+  var pad={l:2,r:2,t:2,b:10};
+  var cw=W-pad.l-pad.r,ch=H-pad.t-pad.b,bw=cw/data.length;
+  var barW=Math.min(bw*0.35,8);
+
+  for(var i=0;i<data.length;i++){
+    var cx=pad.l+i*bw+bw/2;
+    if(data[i][0]>0){
+      var eh=(data[i][0]/max)*ch;
+      var g=ctx.createLinearGradient(0,pad.t+ch-eh,0,pad.t+ch);
+      g.addColorStop(0,'#FCD34D');g.addColorStop(1,'#D97706');
+      ctx.fillStyle=g;
+      ctx.beginPath();ctx.roundRect(cx-barW-1,pad.t+ch-eh,barW,eh,[1.5,1.5,0,0]);ctx.fill();
+    }
+    if(data[i][1]>0){
+      var sh=(data[i][1]/max)*ch;
+      ctx.fillStyle='#E5E7EB';
+      ctx.beginPath();ctx.roundRect(cx+1,pad.t+ch-sh,barW,sh,[1.5,1.5,0,0]);ctx.fill();
+    }
+    ctx.font='700 6px Outfit';ctx.fillStyle=i===5?'#D97706':'#D1D5DB';ctx.textAlign='center';
+    ctx.fillText('W'+(i+1),cx,H-1);
+  }
+  // Cumulative cashflow line
+  ctx.strokeStyle='#22C55E';ctx.lineWidth=1.2;ctx.setLineDash([2,1.5]);ctx.beginPath();
+  var cum=0;
+  for(var i=0;i<data.length;i++){
+    cum+=data[i][0]-data[i][1];
+    var x=pad.l+i*bw+bw/2,y=pad.t+ch-((cum+32)/64)*ch;
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  }
+  ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#22C55E';ctx.beginPath();
+  ctx.arc(pad.l+5*bw+bw/2,pad.t+ch-((9+32)/64)*ch,2,0,Math.PI*2);ctx.fill();
+  // Zero line
+  var zy=pad.t+ch-((0+32)/64)*ch;
+  ctx.strokeStyle='#EDEEF2';ctx.lineWidth=.5;ctx.setLineDash([1.5,1.5]);
+  ctx.beginPath();ctx.moveTo(pad.l,zy);ctx.lineTo(W-pad.r,zy);ctx.stroke();ctx.setLineDash([]);
+})();
+
+function switchTab(id,el){
+  document.querySelectorAll('.cpanel').forEach(function(p){p.classList.remove('active')});
+  document.getElementById(id).classList.add('active');
+  if(el){document.querySelectorAll('.ctab').forEach(function(t){t.classList.remove('active')});el.classList.add('active')}
+  else document.querySelectorAll('.ctab').forEach(function(t){t.classList.remove('active')});
+}
+function toggleTeam(e){
+  e.stopPropagation();var dd=document.getElementById('teamDD'),r=document.getElementById('teamStack').getBoundingClientRect();
+  dd.style.top=(r.bottom+5)+'px';dd.style.right=(window.innerWidth-r.right)+'px';dd.classList.toggle('open');
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.ts')&&!e.target.closest('.td'))document.getElementById('teamDD').classList.remove('open');
+});
+</script>
+</body>
+</html>

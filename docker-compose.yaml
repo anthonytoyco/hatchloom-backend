@@ -1,0 +1,104 @@
+services:
+  launchpad-postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: launchpad_db
+      POSTGRES_USER: launchpad_user
+      POSTGRES_PASSWORD: launchpad_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - launchpad_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U launchpad_user -d launchpad_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth-postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: user_service_db
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5433:5432"
+    volumes:
+      - auth_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myuser -d user_service_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth-service:
+    build:
+      context: ./user-service
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-postgres:5432/user_service_db
+      SPRING_DATASOURCE_USERNAME: myuser
+      SPRING_DATASOURCE_PASSWORD: secret
+      JWT_ACCESS_TOKEN_EXPIRY_MINUTES: 30
+      JWT_REFRESH_TOKEN_EXPIRY_DAYS: 7
+      JWT_ISSUER_URI: http://auth-service:8080
+    depends_on:
+      auth-postgres:
+        condition: service_healthy
+    networks:
+      default:
+        aliases:
+          - user-service
+
+  launchpad:
+    build:
+      context: ./launchpad/backend
+    ports:
+      - "8082:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://launchpad-postgres:5432/launchpad_db
+      SPRING_DATASOURCE_USERNAME: launchpad_user
+      SPRING_DATASOURCE_PASSWORD: launchpad_pass
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://auth-service:8080
+    depends_on:
+      launchpad-postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+
+  launchpad-frontend:
+    build:
+      context: ./launchpad/frontend
+      args:
+        VITE_API_BASE_URL: /api
+    ports:
+      - "4173:80"
+    depends_on:
+      - launchpad
+
+  auth-frontend:
+    build:
+      context: ./user-service/frontend
+      args:
+        VITE_API_BASE_URL: /api
+    ports:
+      - "3000:80"
+    depends_on:
+      - auth-service
+
+  auth-pgadmin:
+    image: dpage/pgadmin4:latest
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: secret
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    depends_on:
+      - auth-postgres
+
+volumes:
+  launchpad_postgres_data:
+  auth_postgres_data:

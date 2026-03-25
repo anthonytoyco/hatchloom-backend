@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hatchloom — My Launchpad</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --pink: #FF1F5A;
+      --cyan: #7DD3E0;
+      --yellow: #FFF56D;
+      --orange: #FF8C00;
+      --charcoal: #1E1E2E;
+      --text: #2D2D2D;
+      --text-soft: #6B7280;
+      --bg: #F7F8FC;
+      --card: #FFFFFF;
+      --border: #EDEEF2;
+      --rookie: #22C55E;
+      --explorer: #3B82F6;
+      --challenger: #F97316;
+      --pro: #A855F7;
+      --legend: #EAB308;
+      --sw-ei: #FF1F5A;
+      --sw-ss: #0891B2;
+      --sw-rb: #FF8C00;
+      --sw-ee: #A855F7;
+      --launch: #FF8C00;
+      --font-display: 'Outfit', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 14px;
+    }
+
+    /* TOP NAV */
+    .topnav {
+      background: var(--card);
+      border-bottom: 1.5px solid var(--border);
+      padding: 0 1.75rem;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    .logo {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 1.35rem;
+      color: var(--pink);
+      letter-spacing: -0.03em;
+    }
+
+    .logo span {
+      color: var(--charcoal);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.125rem;
+    }
+
+    .nav-link {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.875rem;
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      color: var(--text-soft);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-link:hover {
+      background: #F3F4F6;
+      color: var(--text);
+    }
+
+    .nav-link.active {
+      background: #FFF7ED;
+      color: var(--orange);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+    }
+
+    .gamif-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 99px;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.78rem;
+      border: 1.5px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .streak-pill {
+      background: linear-gradient(135deg, #FFF7E6, #FFF0CC);
+      border-color: #FFD98A;
+      color: #B45309;
+    }
+
+    .xp-pill {
+      background: linear-gradient(135deg, #F0FBFD, #E0F5F9);
+      border-color: #BAE6F0;
+      color: #0891B2;
+    }
+
+    .notif-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      font-size: 1rem;
+    }
+
+    .notif-badge {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      background: var(--pink);
+      color: white;
+      font-size: 0.55rem;
+      font-weight: 800;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid white;
+    }
+
+    .avatar-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1E1E2E, #3D3060);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      border: 2.5px solid white;
+      box-shadow: 0 2px 8px rgba(255, 31, 90, 0.2);
+      cursor: pointer;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .role-pill {
+      font-family: var(--font-display);
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 99px;
+      background: #F0FBFD;
+      color: var(--teal);
+      border: 1.5px solid #BAE6F0;
+    }
+
+    .school-name {
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-soft);
+    }
+
+    .sidebar-spacer {
+      flex: 1;
+    }
+
+    .sidebar-cta {
+      margin: 0 0.875rem;
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.6rem 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      background: var(--pink);
+      color: white;
+      border: none;
+      text-align: center;
+      transition: background 0.18s;
+      display: block;
+      width: calc(100% - 1.75rem);
+    }
+
+    .sidebar-cta:hover {
+      background: #E6004E;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      color: var(--text-soft);
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .breadcrumb .bc-link {
+      color: var(--pink);
+      cursor: pointer;
+    }
+
+    .breadcrumb .bc-sep {
+      color: #D1D5DB;
+    }
+
+    /* LAYOUT */
+    .layout {
+      display: grid;
+      grid-template-columns: 215px 1fr;
+      min-height: calc(100vh - 58px);
+    }
+
+    /* SIDE MENU */
+    .sidemenu {
+      background: var(--card);
+      border-right: 1.5px solid var(--border);
+      padding: 1.25rem 0 2rem;
+      position: sticky;
+      top: 58px;
+      height: calc(100vh - 58px);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidemenu-section {
+      padding: 0 0.875rem;
+    }
+
+    .sidemenu-label {
+      font-family: var(--font-display);
+      font-size: 0.63rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: #C4C8D4;
+      margin: 1rem 0 0.35rem 0.5rem;
+    }
+
+    .sidemenu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.525rem 0.75rem;
+      border-radius: 9px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-soft);
+      cursor: pointer;
+      transition: all 0.18s;
+      margin-bottom: 0.1rem;
+    }
+
+    .sidemenu-item:hover {
+      background: #F3F4F6;
+      color: var(--text);
+    }
+
+    .sidemenu-item.active {
+      background: #FFF7ED;
+      color: var(--orange);
+    }
+
+    .sidemenu-item .si {
+      font-size: 0.9375rem;
+      width: 18px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .sidemenu-item .badge-count {
+      margin-left: auto;
+      background: var(--pink);
+      color: white;
+      font-size: 0.6rem;
+      font-weight: 800;
+      padding: 0.1rem 0.4rem;
+      border-radius: 99px;
+      min-width: 18px;
+      text-align: center;
+    }
+
+    .sidemenu-item .badge-new {
+      margin-left: auto;
+      background: #FFF0F5;
+      color: var(--pink);
+      font-size: 0.58rem;
+      font-weight: 800;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      letter-spacing: 0.03em;
+    }
+
+    .sidemenu-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0.625rem 0.875rem;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main {
+      padding: 1.75rem 0;
+      overflow-y: auto;
+    }
+
+    .page-header {
+      padding: 0 2rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .page-header h1 {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: var(--charcoal);
+      margin-bottom: 0.2rem;
+    }
+
+    .page-header h1 span {
+      color: var(--orange);
+    }
+
+    .page-header p {
+      font-size: 0.875rem;
+      color: var(--text-soft);
+      font-weight: 500;
+    }
+
+    /* ── STATUS BAR ── */
+    .status-bar {
+      margin: 0 2rem 1.75rem;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 1rem 1.25rem;
+      display: grid;
+      grid-template-columns: 1fr 1px 1fr 1px 1fr;
+      gap: 0;
+      align-items: center;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    .status-divider {
+      background: var(--border);
+      height: 40px;
+      width: 1px;
+    }
+
+    .status-block {
+      padding: 0 1.25rem;
+    }
+
+    .status-block:first-child {
+      padding-left: 0;
+    }
+
+    .status-block:last-child {
+      padding-right: 0;
+    }
+
+    .status-label {
+      font-family: var(--font-display);
+      font-size: 0.62rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #C4C8D4;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .status-items {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      transition: color 0.18s;
+    }
+
+    .status-item:hover {
+      color: var(--pink);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-msg {
+      background: var(--sw-ss);
+    }
+
+    .dot-task {
+      background: var(--pink);
+    }
+
+    .dot-mile {
+      background: var(--orange);
+    }
+
+    .status-count {
+      margin-left: auto;
+      font-family: var(--font-display);
+      font-size: 0.65rem;
+      font-weight: 800;
+      background: #F3F4F6;
+      color: var(--text-soft);
+      padding: 0.08rem 0.45rem;
+      border-radius: 99px;
+    }
+
+    .status-count.urgent {
+      background: #FFF0F5;
+      color: var(--pink);
+    }
+
+    .status-empty {
+      font-size: 0.78rem;
+      color: #C4C8D4;
+      font-style: italic;
+    }
+
+    /* ── CAROUSEL ROW ── */
+    .carousel-row {
+      margin-bottom: 2rem;
+    }
+
+    .carousel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      margin-bottom: 0.875rem;
+    }
+
+    .carousel-title {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--charcoal);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .carousel-title-badge {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+    }
+
+    .badge-sandbox {
+      background: #F0FDF4;
+      color: #15803D;
+    }
+
+    .badge-sidehustle {
+      background: #FFF7ED;
+      color: var(--orange);
+    }
+
+    .carousel-count {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-soft);
+      margin-left: 0.3rem;
+    }
+
+    .carousel-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .carousel-see-all {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--pink);
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .carousel-see-all:hover {
+      opacity: 0.7;
+    }
+
+    .carousel-new-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.3rem 0.75rem;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      color: var(--text-soft);
+      cursor: pointer;
+      transition: all 0.18s;
+      background: var(--card);
+    }
+
+    .carousel-new-btn:hover {
+      border-color: var(--orange);
+      color: var(--orange);
+      background: #FFF7ED;
+    }
+
+    .carousel-track {
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      padding: 0.25rem 2rem 1rem;
+      scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .carousel-track::-webkit-scrollbar {
+      height: 3px;
+    }
+
+    .carousel-track::-webkit-scrollbar-thumb {
+      background: #E5E7EB;
+      border-radius: 99px;
+    }
+
+    /* ── SANDBOX CARD ── */
+    .project-tile {
+      flex-shrink: 0;
+      width: 240px;
+      background: var(--card);
+      border-radius: 18px;
+      border: 1.5px solid var(--border);
+      overflow: hidden;
+      cursor: pointer;
+      transition: box-shadow 0.25s, transform 0.25s, border-color 0.25s;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      animation: tileIn 0.4s ease both;
+    }
+
+    .project-tile:nth-child(1) {
+      animation-delay: .04s
+    }
+
+    .project-tile:nth-child(2) {
+      animation-delay: .09s
+    }
+
+    .project-tile:nth-child(3) {
+      animation-delay: .14s
+    }
+
+    .project-tile:nth-child(4) {
+      animation-delay: .19s
+    }
+
+    @keyframes tileIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .project-tile:hover {
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.12);
+      transform: translateY(-4px);
+      border-color: #D1D5DB;
+    }
+
+    /* Tile visual header */
+    .tile-visual {
+      height: 90px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .tile-emoji {
+      font-size: 2rem;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
+      z-index: 1;
+    }
+
+    .tile-status-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-family: var(--font-display);
+      font-size: 0.6rem;
+      font-weight: 800;
+      padding: 0.15rem 0.5rem;
+      border-radius: 99px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-active {
+      background: rgba(255, 255, 255, 0.9);
+      color: #15803D;
+    }
+
+    .badge-lab {
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--sw-ss);
+    }
+
+    .badge-paused {
+      background: rgba(255, 255, 255, 0.9);
+      color: #B45309;
+    }
+
+    .tile-body {
+      padding: 0.875rem 1rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex: 1;
+    }
+
+    .tile-name {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.9rem;
+      color: var(--charcoal);
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+    }
+
+    .tile-desc {
+      font-size: 0.74rem;
+      color: var(--text-soft);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .tile-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .tile-date {
+      font-size: 0.68rem;
+      color: #C4C8D4;
+      font-weight: 500;
+    }
+
+    .tile-team {
+      display: flex;
+      align-items: center;
+      gap: -2px;
+    }
+
+    .tile-avatar {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1.5px solid white;
+      margin-left: -4px;
+      font-size: 0.65rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1E1E2E, #3D3060);
+    }
+
+    .tile-avatar:first-child {
+      margin-left: 0;
+    }
+
+    .tile-advisor-count {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-soft);
+      margin-left: 4px;
+    }
+
+    .tile-milestone {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-soft);
+      background: #F7F8FC;
+      border-radius: 6px;
+      padding: 0.28rem 0.5rem;
+    }
+
+    .tile-milestone .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* New project tile */
+    .project-tile-new {
+      flex-shrink: 0;
+      width: 200px;
+      border: 2px dashed var(--border);
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      scroll-snap-align: start;
+      padding: 1.5rem;
+      min-height: 200px;
+    }
+
+    .project-tile-new:hover {
+      border-color: var(--orange);
+      background: #FFF7ED;
+    }
+
+    .new-tile-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #F3F4F6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      transition: all 0.2s;
+    }
+
+    .project-tile-new:hover .new-tile-icon {
+      background: #FFE8CC;
+    }
+
+    .new-tile-label {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      text-align: center;
+      transition: color 0.2s;
+    }
+
+    .project-tile-new:hover .new-tile-label {
+      color: var(--orange);
+    }
+
+    /* ── RIGHT PANEL ── */
+    .rightpanel {
+      background: var(--card);
+      border-left: 1.5px solid var(--border);
+      padding: 1.25rem 1rem 2rem;
+      position: sticky;
+      top: 58px;
+      height: calc(100vh - 58px);
+      overflow-y: auto;
+    }
+
+    .rightpanel::-webkit-scrollbar {
+      width: 3px;
+    }
+
+    .rightpanel::-webkit-scrollbar-thumb {
+      background: #E5E7EB;
+      border-radius: 99px;
+    }
+
+    .rp-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .rp-title {
+      font-family: var(--font-display);
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: #C4C8D4;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* Getting started smart prompt */
+    .gs-prompt {
+      background: linear-gradient(135deg, #FFF7ED, #FFFBF5);
+      border: 1.5px solid rgba(255, 140, 0, 0.2);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .gs-prompt.collapsed {
+      display: none;
+    }
+
+    .gs-prompt-title {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: var(--charcoal);
+      margin-bottom: 0.25rem;
+    }
+
+    .gs-prompt-sub {
+      font-size: 0.74rem;
+      color: var(--text-soft);
+      line-height: 1.4;
+      margin-bottom: 0.75rem;
+    }
+
+    .gs-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .gs-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.625rem;
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 0.625rem 0.75rem;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+
+    .gs-option:hover {
+      border-color: var(--orange);
+      box-shadow: 0 2px 8px rgba(255, 140, 0, 0.1);
+    }
+
+    .gs-opt-icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .gs-opt-label {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.8rem;
+      color: var(--charcoal);
+    }
+
+    .gs-opt-sub {
+      font-size: 0.7rem;
+      color: var(--text-soft);
+      margin-top: 1px;
+      line-height: 1.3;
+    }
+
+    .gs-dismiss {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 0.625rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-soft);
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+
+    .gs-dismiss:hover {
+      color: var(--pink);
+    }
+
+    /* Collapsed pills */
+    .gs-pills {
+      display: none;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .gs-pills.visible {
+      display: flex;
+    }
+
+    .gs-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #F7F8FC;
+      border: 1.5px solid var(--border);
+      border-radius: 99px;
+      padding: 0.3rem 0.75rem;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--text-soft);
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+
+    .gs-pill:hover {
+      border-color: var(--orange);
+      color: var(--orange);
+      background: #FFF7ED;
+    }
+
+    /* Featured tools */
+    .tool-card {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 0.6rem 0.75rem;
+      cursor: pointer;
+      transition: all 0.18s;
+      margin-bottom: 0.5rem;
+    }
+
+    .tool-card:hover {
+      border-color: #D1D5DB;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      background: white;
+    }
+
+    .tool-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+    }
+
+    .tool-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .tool-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.78rem;
+      color: var(--charcoal);
+    }
+
+    .tool-sub {
+      font-size: 0.68rem;
+      color: var(--text-soft);
+      margin-top: 1px;
+    }
+
+    .tool-arrow {
+      font-size: 0.75rem;
+      color: var(--border);
+      flex-shrink: 0;
+    }
+
+    .tool-card:hover .tool-arrow {
+      color: var(--orange);
+    }
+
+    /* Org cards */
+    .org-card {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 0.6rem 0.75rem;
+      cursor: pointer;
+      transition: all 0.18s;
+      margin-bottom: 0.5rem;
+    }
+
+    .org-card:hover {
+      border-color: #D1D5DB;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      background: white;
+    }
+
+    .org-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+      font-weight: 900;
+      font-family: var(--font-display);
+    }
+
+    .org-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .org-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.78rem;
+      color: var(--charcoal);
+    }
+
+    .org-sub {
+      font-size: 0.67rem;
+      color: var(--text-soft);
+      margin-top: 1px;
+    }
+
+    .org-tag {
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .tag-banking {
+      background: #EFF6FF;
+      color: #1D4ED8;
+    }
+
+    .tag-gov {
+      background: #F0FDF4;
+      color: #15803D;
+    }
+
+    .tag-accel {
+      background: #FFF7ED;
+      color: var(--orange);
+    }
+
+    .tag-mentor {
+      background: #FAF0FF;
+      color: var(--pro);
+    }
+
+    /* Project icon + tooltip */
+    .proj-icon-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      cursor: default;
+      flex-shrink: 0;
+    }
+
+    .proj-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      border: 1.5px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .proj-icon-wrap .proj-tooltip {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--charcoal);
+      color: white;
+      font-family: var(--font-display);
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 50;
+    }
+
+    .proj-icon-wrap .proj-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 4px solid transparent;
+      border-top-color: var(--charcoal);
+    }
+
+    .proj-icon-wrap:hover .proj-tooltip {
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- TOP NAV -->
+  <nav class="topnav">
+    <div class="nav-left">
+      <div class="logo">hatch<span>loom</span></div>
+      <div class="role-pill">Student</div>
+      <div class="school-name">Ridgewood Academy</div>
+    </div>
+    <div class="nav-links">
+      <div class="nav-link" onclick="window.location='000-explore-home.html'">🔭 Explore</div>
+      <div class="nav-link" onclick="window.location='100-connecthub-home.html'">🔗 Connect</div>
+      <div class="nav-link active" onclick="window.location='200-launchpad-home.html'">🚀 Launch</div>
+    </div>
+    <div class="nav-right">
+      <div class="gamif-pill streak-pill">🔥 18-day streak</div>
+      <div class="gamif-pill xp-pill">⚡ 2,450 XP</div>
+      <div class="notif-btn" title="Messages">✉️<div class="notif-badge">3</div>
+      </div>
+      <div class="notif-btn">🔔<div class="notif-badge">3</div>
+      </div>
+      <div class="avatar-btn">🦊</div>
+    </div>
+  </nav>
+
+  <div class="layout">
+
+    <!-- LEFT NAV — Launchpad -->
+    <aside class="sidemenu">
+      <div class="sidemenu-section">
+
+        <div class="sidemenu-item active" onclick="window.location='200-launchpad-home.html'">
+          <span class="si">🚀</span> Launchpad Home
+        </div>
+
+        <div class="sidemenu-divider"></div>
+        <div class="sidemenu-label">Launchpad</div>
+        <div class="sidemenu-item">
+          <span class="si">🧪</span> My Sandboxes
+        </div>
+        <div class="sidemenu-item">
+          <span class="si">💼</span> My SideHustles
+        </div>
+
+        <div class="sidemenu-divider"></div>
+        <div class="sidemenu-label">Community</div>
+        <div class="sidemenu-item">
+          <span class="si">👥</span> My Teams
+        </div>
+        <div class="sidemenu-item">
+          <span class="si">📅</span> Upcoming Events
+          <span class="badge-new">2 NEW</span>
+        </div>
+        <div class="sidemenu-item">
+          <span class="si">📋</span> Classifieds
+          <span class="badge-count">4</span>
+        </div>
+        <div class="sidemenu-item">
+          <span class="si">🏪</span> Market Square
+        </div>
+
+        <div class="sidemenu-divider"></div>
+        <div class="sidemenu-label">Library</div>
+        <div class="sidemenu-item">
+          <span class="si">🛠</span> Tools
+        </div>
+        <div class="sidemenu-item">
+          <span class="si">🤝</span> Organizations
+        </div>
+        <div class="sidemenu-item">
+          <span class="si">📚</span> Learning Paths
+        </div>
+
+      </div>
+      <div class="sidebar-spacer"></div>
+      <button class="sidebar-cta" onclick="alert('Contact form or support channel')">💬 Contact Hatchloom</button>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main">
+
+      <div class="page-header">
+        <div class="breadcrumb">
+          <span class="bc-link" onclick="window.location='999-student-home.html'">Student Home</span>
+          <span class="bc-sep">›</span>
+          <span>Launchpad</span>
+        </div>
+        <h1>My <span>Launchpad</span> 🚀</h1>
+        <p>Where ideas become real — nurture your Sandboxes, grow your SideHustles.</p>
+      </div>
+
+      <!-- STATUS BAR -->
+      <div class="status-bar">
+
+        <div class="status-block">
+          <div class="status-label">✉️ New</div>
+          <div class="status-items">
+            <div class="status-item">
+              ✉️ ms.rivera@ridgewoodacademy.ca · Feedback on packaging mockup
+              <div class="proj-icon-wrap">
+                <div class="proj-icon" style="background:#D1FAE5">♻️</div>
+                <div class="proj-tooltip">EcoSnack Packaging</div>
+              </div>
+            </div>
+            <div class="status-item">
+              @ jordan_hl · Supplier quote for shea butter
+              <div class="proj-icon-wrap">
+                <div class="proj-icon" style="background:#FEF3C7">🧈</div>
+                <div class="proj-tooltip">Flavour Butter Co.</div>
+              </div>
+            </div>
+            <div class="status-item">
+              @ mr.hoffman_hl · Great work on your pitch draft
+              <div class="proj-icon-wrap">
+                <div class="proj-icon" style="background:#D1FAE5">♻️</div>
+                <div class="proj-tooltip">EcoSnack Packaging</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="status-divider"></div>
+
+        <div class="status-block">
+          <div class="status-label">✅ Tasks Due</div>
+          <div class="status-items">
+            <div class="status-item">
+              <div class="proj-icon-wrap">
+                <div class="proj-icon" style="background:#FEE2E2">🧈</div>
+                <div class="proj-tooltip">Flavour Butter Co.</div>
+              </div>
+              Define target customer
+              <span class="status-count urgent">Today</span>
+            </div>
+            <div class="status-item">
+              <div class="proj-icon-wrap">
+                <div class="proj-icon" style="background:#FEF3C7">🧈</div>
+                <div class="proj-tooltip">Flavour Butter Co.</div>
+              </div>
+              Update pricing model
+              <span class="status-count">Thu</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="status-divider"></div>
+
+        <div class="status-block">
+          <div class="status-label">🏁 Upcoming Milestones</div>
+          <div class="status-items">
+            <div class="status-item">
+              <div class="proj-icon-wrap">
+                <div class="proj-icon" style="background:#FEF3C7">🧈</div>
+                <div class="proj-tooltip">Flavour Butter Co.</div>
+              </div>
+              First sale
+              <span class="status-count urgent">Feb 22</span>
+            </div>
+            <div class="status-item">
+              <div class="proj-icon-wrap">
+                <div class="proj-icon" style="background:#D1FAE5">♻️</div>
+                <div class="proj-tooltip">EcoSnack Packaging</div>
+              </div>
+              MVP sketch
+              <span class="status-count">Mar 1</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- MY SANDBOXES CAROUSEL -->
+      <div class="carousel-row">
+        <div class="carousel-header">
+          <div class="carousel-title">
+            🧪 My Sandboxes
+            <span class="carousel-title-badge badge-sandbox">Idea Lab</span>
+            <span class="carousel-count">3 projects</span>
+          </div>
+          <div class="carousel-actions">
+            <div class="carousel-see-all">See all →</div>
+          </div>
+        </div>
+        <div class="carousel-track">
+
+          <!-- Sandbox card 1 -->
+          <div class="project-tile" onclick="alert('Opening EcoSnack Packaging workspace...')">
+            <div class="tile-visual" style="background:linear-gradient(150deg,#34D399,#059669)">
+              <div class="tile-emoji">♻️</div>
+              <div class="tile-status-badge badge-lab">In Lab</div>
+            </div>
+            <div class="tile-body">
+              <div class="tile-name">EcoSnack Packaging</div>
+              <div class="tile-desc">Exploring sustainable packaging alternatives for local snack brands. Can we make it
+                cheaper than plastic?</div>
+              <div class="tile-milestone">
+                <div class="dot" style="background:var(--orange)"></div>
+                Next: MVP sketch · Mar 1
+              </div>
+              <div class="tile-meta">
+                <div class="tile-date">Started Feb 13</div>
+                <div class="tile-team">
+                  <div class="tile-avatar">🦊</div>
+                  <div class="tile-avatar" style="background:linear-gradient(135deg,#7C3AED,#A78BFA)">💡</div>
+                  <div class="tile-avatar" style="background:linear-gradient(135deg,#0891B2,#7DD3E0)">👥</div>
+                  <span class="tile-advisor-count">+2 AI</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sandbox card 2 -->
+          <div class="project-tile" onclick="alert('Opening Local Artist Merch workspace...')">
+            <div class="tile-visual" style="background:linear-gradient(150deg,#F472B6,#EC4899)">
+              <div class="tile-emoji">🎨</div>
+              <div class="tile-status-badge badge-lab">In Lab</div>
+            </div>
+            <div class="tile-body">
+              <div class="tile-name">Local Artist Merch</div>
+              <div class="tile-desc">Connecting Calgary artists with teens who want unique merch. Print-on-demand model
+                exploration.</div>
+              <div class="tile-milestone">
+                <div class="dot" style="background:var(--text-soft)"></div>
+                No milestone set yet
+              </div>
+              <div class="tile-meta">
+                <div class="tile-date">Started Feb 4</div>
+                <div class="tile-team">
+                  <div class="tile-avatar">🦊</div>
+                  <div class="tile-avatar" style="background:linear-gradient(135deg,#7C3AED,#A78BFA)">💡</div>
+                  <span class="tile-advisor-count">+1 AI</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sandbox card 3 -->
+          <div class="project-tile" onclick="alert('Opening Dog Walking App workspace...')">
+            <div class="tile-visual" style="background:linear-gradient(150deg,#FDBA74,#F97316)">
+              <div class="tile-emoji">🐕</div>
+              <div class="tile-status-badge badge-paused">Paused</div>
+            </div>
+            <div class="tile-body">
+              <div class="tile-name">Dog Walking App</div>
+              <div class="tile-desc">Neighbourhood app connecting dog owners with teen walkers. Need to validate
+                pricing.</div>
+              <div class="tile-milestone">
+                <div class="dot" style="background:#C4C8D4"></div>
+                Paused — Feb 1
+              </div>
+              <div class="tile-meta">
+                <div class="tile-date">Started Jan 20</div>
+                <div class="tile-team">
+                  <div class="tile-avatar">🦊</div>
+                  <div class="tile-avatar" style="background:linear-gradient(135deg,#22C55E,#15803D)">🌍</div>
+                  <span class="tile-advisor-count">+2 AI</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- New Sandbox tile -->
+          <div class="project-tile-new" onclick="alert('Start a new Sandbox...')">
+            <div class="new-tile-icon">💡</div>
+            <div class="new-tile-label">New Sandbox<br><span style="font-weight:500;color:#C4C8D4;font-size:0.7rem">Got
+                an idea? Start here.</span></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- MY SIDEHUSTLES CAROUSEL -->
+      <div class="carousel-row">
+        <div class="carousel-header">
+          <div class="carousel-title">
+            💼 My SideHustles
+            <span class="carousel-title-badge badge-sidehustle">Real Ventures</span>
+            <span class="carousel-count">1 active</span>
+          </div>
+          <div class="carousel-actions">
+            <div class="carousel-see-all">See all →</div>
+          </div>
+        </div>
+        <div class="carousel-track">
+
+          <!-- SideHustle card 1 — ACTIVE -->
+          <div class="project-tile" onclick="alert('Opening Flavour Butter Co. workspace...')">
+            <div class="tile-visual" style="background:linear-gradient(150deg,#FDE68A,#D97706)">
+              <div class="tile-emoji">🧈</div>
+              <div class="tile-status-badge badge-active">● Live</div>
+            </div>
+            <div class="tile-body">
+              <div class="tile-name">Flavour Butter Co.</div>
+              <div class="tile-desc">Artisan flavoured butter made at home, sold at local markets and online. First
+                product: garlic herb.</div>
+              <div class="tile-milestone">
+                <div class="dot" style="background:var(--orange)"></div>
+                Next: First sale · Feb 22
+              </div>
+              <div class="tile-meta">
+                <div class="tile-date">Launched Jan 15</div>
+                <div class="tile-team">
+                  <div class="tile-avatar">🦊</div>
+                  <div class="tile-avatar" style="background:linear-gradient(135deg,#3B82F6,#60A5FA)">🎓</div>
+                  <div class="tile-avatar" style="background:linear-gradient(135deg,#7C3AED,#A78BFA)">💡</div>
+                  <div class="tile-avatar" style="background:linear-gradient(135deg,#0891B2,#7DD3E0)">👥</div>
+                  <div class="tile-avatar" style="background:linear-gradient(135deg,#22C55E,#15803D)">🌍</div>
+                  <span class="tile-advisor-count">+3 AI</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- New SideHustle tile -->
+          <div class="project-tile-new"
+            onclick="alert('Ready to turn a Sandbox into a real venture? Launch a SideHustle...')">
+            <div class="new-tile-icon">💼</div>
+            <div class="new-tile-label">New SideHustle<br><span
+                style="font-weight:500;color:#C4C8D4;font-size:0.7rem">Ready to make money?</span></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- GETTING STARTED + FEATURED TOOLS (moved from right panel) -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;padding:0 2rem 2rem;">
+
+        <!-- GETTING STARTED -->
+        <div>
+          <div class="rp-title">✦ Getting Started</div>
+          <div class="gs-prompt" id="gsPrompt">
+            <div class="gs-prompt-title">What's the difference?</div>
+            <div class="gs-prompt-sub">Not sure where to start? Here's the quick version:</div>
+            <div class="gs-options" style="flex-direction:row;">
+              <div class="gs-option" style="flex:1;">
+                <div class="gs-opt-icon">🧪</div>
+                <div>
+                  <div class="gs-opt-label">Sandbox</div>
+                  <div class="gs-opt-sub">Got an idea but not sure yet? Explore it safely here.</div>
+                </div>
+              </div>
+              <div class="gs-option" style="flex:1;">
+                <div class="gs-opt-icon">💼</div>
+                <div>
+                  <div class="gs-opt-label">SideHustle</div>
+                  <div class="gs-opt-sub">Ready to actually sell something? This is your real venture.</div>
+                </div>
+              </div>
+            </div>
+            <div class="gs-dismiss" onclick="dismissGS()">Got it, hide this ×</div>
+          </div>
+          <div class="gs-pills" id="gsPills">
+            <div class="gs-pill" onclick="alert('What is a Sandbox?')">🧪 What's a Sandbox?</div>
+            <div class="gs-pill" onclick="alert('What is a SideHustle?')">💼 What's a SideHustle?</div>
+          </div>
+        </div>
+
+        <!-- FEATURED TOOLS -->
+        <div>
+          <div class="rp-title">🛠 Featured Tools</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+            <div class="tool-card">
+              <div class="tool-icon" style="background:#FFF0F5">📋</div>
+              <div class="tool-info">
+                <div class="tool-name">Business Model Canvas</div>
+                <div class="tool-sub">Map your whole business on one page</div>
+              </div>
+              <div class="tool-arrow">→</div>
+            </div>
+            <div class="tool-card">
+              <div class="tool-icon" style="background:#F0FBFD">🧠</div>
+              <div class="tool-info">
+                <div class="tool-name">Brainstorm Board</div>
+                <div class="tool-sub">Dump ideas, find the best one</div>
+              </div>
+              <div class="tool-arrow">→</div>
+            </div>
+            <div class="tool-card">
+              <div class="tool-icon" style="background:#FFF7ED">💰</div>
+              <div class="tool-info">
+                <div class="tool-name">Simple Cash Flow</div>
+                <div class="tool-sub">What comes in vs. what goes out</div>
+              </div>
+              <div class="tool-arrow">→</div>
+            </div>
+            <div class="tool-card">
+              <div class="tool-icon" style="background:#F0FDF4">👤</div>
+              <div class="tool-info">
+                <div class="tool-name">Customer Profile</div>
+                <div class="tool-sub">Who actually buys your thing?</div>
+              </div>
+              <div class="tool-arrow">→</div>
+            </div>
+            <div class="tool-card" style="grid-column:1/-1;">
+              <div class="tool-icon" style="background:#FAF0FF">📊</div>
+              <div class="tool-info">
+                <div class="tool-name">Pitch Deck Starter</div>
+                <div class="tool-sub">Tell your story to investors</div>
+              </div>
+              <div class="tool-arrow">→</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    function dismissGS() {
+      document.getElementById('gsPrompt').style.display = 'none';
+      document.getElementById('gsPills').style.display = 'flex';
+    }
+  </script>
+
+</body>
+
+</html>

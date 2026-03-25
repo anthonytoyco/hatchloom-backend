@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hatchloom · 265 — Calculator / Spreadsheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#FF1F5A;--orange:#FF8C00;--cyan:#0891B2;--charcoal:#1E1E2E;--text:#2D2D2D;--text-soft:#6B7280;--muted:#9CA3AF;--bg:#F7F8FC;--card:#FFF;--border:#EDEEF2;--hustle:#D97706;--hustle-bg:#FFFBEB;--hustle-bdr:#FDE68A;--green:#059669;--green-bg:#F0FDF4;--red:#DC2626;--font-d:'Outfit',sans-serif;--font-b:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-b);font-size:14px;background:#1a1a2e;color:var(--text)}
+.backdrop{position:fixed;inset:0;background:rgba(30,30,46,.6);backdrop-filter:blur(4px);z-index:500}
+.panel{position:fixed;top:40px;left:50%;transform:translateX(-50%);width:calc(100% - 40px);max-width:1440px;height:calc(100vh - 56px);background:var(--card);border-radius:18px 18px 0 0;box-shadow:0 -8px 60px rgba(0,0,0,.35);z-index:600;display:flex;flex-direction:column;overflow:hidden;animation:su .35s cubic-bezier(.16,1,.3,1) both}
+@keyframes su{from{transform:translateX(-50%) translateY(40px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+.bc{padding:.4rem 1.5rem;background:var(--bg);border-bottom:1px solid var(--border);font-size:.72rem;color:var(--text-soft);font-weight:600;display:flex;align-items:center;gap:.35rem;flex-shrink:0}.bc a{color:var(--pink);cursor:pointer;text-decoration:none}.bc .sep{color:#D1D5DB}
+.hdr{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;border-bottom:1.5px solid var(--border);flex-shrink:0}
+.hdr-icon{width:40px;height:40px;border-radius:12px;background:var(--hustle-bg);border:1.5px solid var(--hustle-bdr);display:flex;align-items:center;justify-content:center;font-size:1.15rem}
+.hdr-meta{flex:1}.hdr-title{font-family:var(--font-d);font-weight:900;font-size:1.05rem;color:var(--charcoal)}.hdr-desc{font-size:.74rem;color:var(--text-soft);margin-top:1px}
+.pill{font-family:var(--font-d);font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:99px;display:inline-flex;align-items:center;gap:.3rem;flex-shrink:0}.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill-a{background:#FFF7ED;color:var(--orange);border:1.5px solid #FFD98A}.pill-x{background:#F0FBFD;color:var(--cyan);border:1.5px solid #BAE6F0}
+.hdr-close{width:34px;height:34px;border-radius:50%;background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;color:var(--text-soft);transition:all .15s;flex-shrink:0}.hdr-close:hover{background:#FFF0F5;border-color:var(--pink);color:var(--pink)}
+/* ACTION BAR */
+.abar{display:flex;align-items:center;padding:.4rem 1.5rem;border-bottom:1px solid var(--border);flex-shrink:0;gap:.5rem}
+.abar-l{display:flex;align-items:center;gap:.5rem;flex:1}.save-st{display:flex;align-items:center;gap:.25rem;font-size:.72rem;font-weight:600}
+.sv-d{width:7px;height:7px;border-radius:50%}.sv-ok{background:var(--green)}.sv-un{background:var(--pink)}.sv-ig{background:var(--orange);animation:p 1s infinite}@keyframes p{50%{opacity:.4}}
+.sv-l{color:var(--text-soft)}.sv-t{color:var(--muted);font-size:.68rem}
+.abar-r{display:flex;align-items:center;gap:.2rem}
+.ab{width:32px;height:32px;border-radius:7px;border:1.5px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;transition:all .15s;position:relative}.ab:hover{background:var(--bg)}.ab:hover .tp{opacity:1}.ab.on{background:#FFF7ED;border-color:#FFD98A;color:var(--orange)}
+.tp{position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:var(--charcoal);color:#fff;font-family:var(--font-d);font-size:.6rem;font-weight:600;padding:.15rem .45rem;border-radius:4px;white-space:nowrap;opacity:0;transition:opacity .15s;pointer-events:none;z-index:10}.tp::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:3px solid transparent;border-top-color:var(--charcoal)}
+.ab-s{width:1px;height:18px;background:var(--border);margin:0 .15rem}.ab-d:hover{background:#FFF0F5;border-color:var(--pink);color:var(--pink)}
+/* CALCULATOR */
+.calc{flex:1;overflow:auto;padding:1.25rem 1.5rem 2rem}
+/* Summary row */
+.sumrow{display:flex;gap:.75rem;margin-bottom:1.25rem}
+.scard{flex:1;border-radius:12px;padding:.85rem 1rem;position:relative;overflow:hidden}
+.scard-in{background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1.5px solid #BBF7D0}
+.scard-out{background:linear-gradient(135deg,#FFF5F5,#FEE2E2);border:1.5px solid #FECACA}
+.scard-net{background:linear-gradient(135deg,var(--hustle-bg),#FEF3C7);border:1.5px solid var(--hustle-bdr)}
+.scard-bal{background:linear-gradient(135deg,#F0FBFD,#E0F5F9);border:1.5px solid #BAE6F0}
+.scard-lb{font-family:var(--font-d);font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}.scard-v{font-family:var(--font-d);font-weight:900;font-size:1.4rem;margin:.1rem 0}.scard-sub{font-size:.68rem;color:var(--text-soft)}
+.v-green{color:var(--green)}.v-red{color:var(--red)}.v-amber{color:var(--hustle)}.v-cyan{color:var(--cyan)}
+
+/* Month grid */
+.months{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1.5rem}
+.mcard{background:var(--card);border:1.5px solid var(--border);border-radius:12px;overflow:hidden;transition:box-shadow .15s}
+.mcard:hover{box-shadow:0 4px 16px rgba(0,0,0,.06)}
+.mcard-hd{font-family:var(--font-d);font-weight:800;font-size:.75rem;padding:.5rem .75rem;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.mcard-net{font-family:var(--font-d);font-weight:800;font-size:.72rem}
+.mcard-body{padding:.6rem .75rem}
+.mrow{display:flex;align-items:center;justify-content:space-between;padding:.2rem 0;font-size:.76rem}
+.mrow-lb{color:var(--text);display:flex;align-items:center;gap:.3rem}
+.mrow-lb .ic{font-size:.7rem}
+.mrow-v{font-variant-numeric:tabular-nums;font-weight:600}
+.mrow-in{color:var(--green)}.mrow-out{color:var(--red)}
+.mrow-add{color:var(--muted);cursor:pointer;font-size:.72rem;padding:.15rem 0;transition:color .15s}.mrow-add:hover{color:var(--hustle)}
+.mdiv{border-top:1.5px solid var(--border);margin:.3rem 0;padding-top:.3rem}
+.mrow-total .mrow-lb{font-family:var(--font-d);font-weight:800;font-size:.76rem;color:var(--charcoal)}
+.mrow-total .mrow-v{font-family:var(--font-d);font-weight:800}
+
+/* Mini bar chart */
+.chart-wrap{border:1.5px solid var(--border);border-radius:14px;padding:1rem 1.25rem;background:var(--card)}
+.chart-title{font-family:var(--font-d);font-weight:800;font-size:.82rem;color:var(--charcoal);margin-bottom:.75rem}
+.chart{display:flex;align-items:flex-end;gap:1rem;height:140px;padding:0 .5rem}
+.bar-group{flex:1;display:flex;flex-direction:column;align-items:center;gap:.25rem}
+.bars{display:flex;align-items:flex-end;gap:3px;height:110px}
+.bar{width:18px;border-radius:4px 4px 0 0;transition:height .4s ease}
+.bar-in{background:var(--green)}.bar-out{background:#FECACA}
+.bar-lbl{font-family:var(--font-d);font-size:.62rem;font-weight:700;color:var(--muted)}
+
+/* Footer */
+.ftr{padding:.55rem 1.5rem;border-top:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.fi{font-size:.72rem;color:var(--muted)}.fb{display:flex;gap:.4rem}
+.bs{font-family:var(--font-d);font-weight:700;font-size:.76rem;padding:.4rem .9rem;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);cursor:pointer}.bs:hover{background:var(--bg)}
+.bp{font-family:var(--font-d);font-weight:700;font-size:.76rem;padding:.4rem 1.1rem;border-radius:8px;border:none;background:var(--hustle);color:#fff;cursor:pointer}.bp:hover{background:#B45309}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--charcoal);color:#fff;font-family:var(--font-d);font-weight:600;font-size:.8rem;padding:.5rem 1.1rem;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:999;transition:transform .3s cubic-bezier(.16,1,.3,1);pointer-events:none}.toast.show{transform:translateX(-50%) translateY(0);pointer-events:auto}
+</style>
+</head>
+<body>
+<div class="backdrop" onclick="closePanel()"></div>
+<div class="panel">
+  <div class="bc"><a>🚀 LaunchPad</a><span class="sep">›</span><a>My SideHustles</a><span class="sep">›</span><a>🧈 Flavour Butter Co.</a><span class="sep">›</span><span>💰 Simple Cash Flow</span></div>
+  <div class="hdr">
+    <div class="hdr-icon">💰</div>
+    <div class="hdr-meta"><div class="hdr-title">Simple Cash Flow</div><div class="hdr-desc">What comes in vs what goes out — see if you're making or losing money each month</div></div>
+    <span class="pill pill-a"><span class="dot"></span>Active</span>
+    <span class="pill pill-x">⚡ 20 XP</span>
+    <div class="hdr-close" onclick="closePanel()">✕</div>
+  </div>
+  <div class="abar">
+    <div class="abar-l"><div class="save-st"><div class="sv-d sv-ok" id="sD"></div><span class="sv-l" id="sL">Saved</span><span class="sv-t" id="sT">· 3 min ago</span></div></div>
+    <div class="abar-r">
+      <div class="ab on" id="bE" onclick="togE()"><span class="tp">Edit</span>✏️</div>
+      <div class="ab" onclick="doSave()"><span class="tp">Save</span>💾</div><div class="ab-s"></div>
+      <div class="ab" onclick="toast('⬇️ Downloading CSV…')"><span class="tp">Download CSV</span>⬇️</div>
+      <div class="ab" onclick="toast('📤 Export destination')"><span class="tp">Export to…</span>📤</div>
+      <div class="ab" onclick="toast('🔗 Link copied!')"><span class="tp">Share link</span>🔗</div><div class="ab-s"></div>
+      <div class="ab" onclick="toast('📋 Duplicated')"><span class="tp">Duplicate</span>📋</div>
+      <div class="ab ab-d" onclick="toast('🗑️ Moved to trash')"><span class="tp">Delete</span>🗑️</div>
+    </div>
+  </div>
+
+  <div class="calc">
+    <!-- Summary -->
+    <div class="sumrow">
+      <div class="scard scard-in"><div class="scard-lb">Total Income</div><div class="scard-v v-green" id="tIn">$310.00</div><div class="scard-sub">across 4 months</div></div>
+      <div class="scard scard-out"><div class="scard-lb">Total Expenses</div><div class="scard-v v-red" id="tOut">$173.50</div><div class="scard-sub">across 4 months</div></div>
+      <div class="scard scard-net"><div class="scard-lb">Net Profit</div><div class="scard-v v-amber" id="tNet">$136.50</div><div class="scard-sub">you're in the green!</div></div>
+      <div class="scard scard-bal"><div class="scard-lb">Running Balance</div><div class="scard-v v-cyan" id="tBal">$136.50</div><div class="scard-sub">end of Feb 2026</div></div>
+    </div>
+
+    <!-- Month Cards -->
+    <div class="months" id="months">
+      <!-- Nov 2025 -->
+      <div class="mcard" data-m="0">
+        <div class="mcard-hd">Nov 2025 <span class="mcard-net v-green">+$22.50</span></div>
+        <div class="mcard-body">
+          <div class="mrow"><span class="mrow-lb"><span class="ic">📦</span> Butter sales (6 jars)</span><span class="mrow-v mrow-in">+$54.00</span></div>
+          <div class="mrow-add" onclick="addLine(this,true)">+ Add income</div>
+          <div class="mdiv"></div>
+          <div class="mrow"><span class="mrow-lb"><span class="ic">🧈</span> Ingredients</span><span class="mrow-v mrow-out">-$18.50</span></div>
+          <div class="mrow"><span class="mrow-lb"><span class="ic">🏷</span> Labels + jars</span><span class="mrow-v mrow-out">-$13.00</span></div>
+          <div class="mrow-add" onclick="addLine(this,false)">+ Add expense</div>
+          <div class="mdiv"></div>
+          <div class="mrow mrow-total"><span class="mrow-lb">Net</span><span class="mrow-v v-green">+$22.50</span></div>
+        </div>
+      </div>
+
+      <!-- Dec 2025 -->
+      <div class="mcard" data-m="1">
+        <div class="mcard-hd">Dec 2025 <span class="mcard-net v-green">+$46.00</span></div>
+        <div class="mcard-body">
+          <div class="mrow"><span class="mrow-lb"><span class="ic">📦</span> Butter sales (10 jars)</span><span class="mrow-v mrow-in">+$90.00</span></div>
+          <div class="mrow"><span class="mrow-lb"><span class="ic">🎁</span> Holiday gift sets (3)</span><span class="mrow-v mrow-in">+$36.00</span></div>
+          <div class="mrow-add" onclick="addLine(this,true)">+ Add income</div>
+          <div class="mdiv"></div>
+          <div class="mrow"><span class="mrow-lb"><span class="ic">🧈</span> Ingredients</span><span class="mrow-v mrow-out">-$32.00</span></div>
+          <div class="mrow"><span class="mrow-lb"><span class="ic">🏷</span> Labels + jars</span><span class="mrow-v mrow-out">-$22.00</span></div>
+          <div class="mrow"><span class="mrow-lb"><span class="ic">🎀</span> Gift box packaging</span><span class="mrow-v mrow-out">-$26.00</span></div>
+          <div class="mrow-add" onclick="addLine(this,false)">+ Add expense</div>
+          <div class="mdiv"></div>
+          <div class="mrow mrow-total"><span class="mrow-lb">Net</span><span class="mrow-v v-green">+$46.00</span></div>
+        </div>
+      </div>
+
+      <!-- Jan 2026 -->
+      <div class="mcard" data-m="2">
+        <div class="mcard-hd">Jan 2026 <span class="mcard-net v-red">-$12.00</span></div>
+        <div class="mcard-body">
+          <div class="mrow"><span class="mrow-lb"><span class="ic">📦</span> Butter sales (4 jars)</span><span class="mrow-v mrow-in">+$36.00</span></div>
+          <div class="mrow-add" onclick="addLine(this,true)">+ Add income</div>
+          <div class="mdiv"></div>
+          <div class="mrow"><span class="mrow-lb"><span class="ic">🧈</span> Ingredients</span><span class="mrow-v mrow-out">-$15.00</span></div>
+          <div class="mrow"><span class="mrow-lb"><span class="ic">🏷</span> Labels + jars</span><span class="mrow-v mrow-out">-$8.00</span></div>
+          <div class="mrow"><span class="mrow-lb"><span class="ic">📱</span> Social media ads</span><span class="mrow-v mrow-out">-$25.00</span></div>
+          <div class="mrow-add" onclick="addLine(this,false)">+ Add expense</div>
+          <div class="mdiv"></div>
+          <div class="mrow mrow-total"><span class="mrow-lb">Net</span><span class="mrow-v v-red">-$12.00</span></div>
+        </div>
+      </div>
+
+      <!-- Feb 2026 -->
+      <div class="mcard" data-m="3">
+        <div class="mcard-hd">Feb 2026 <span class="mcard-net v-green">+$80.00</span></div>
+        <div class="mcard-body">
+          <div class="mrow"><span class="mrow-lb"><span class="ic">📦</span> Butter sales (8 jars)</span><span class="mrow-v mrow-in">+$72.00</span></div>
+          <div class="mrow"><span class="mrow-lb"><span class="ic">🏫</span> School fair booth</span><span class="mrow-v mrow-in">+$22.00</span></div>
+          <div class="mrow-add" onclick="addLine(this,true)">+ Add income</div>
+          <div class="mdiv"></div>
+          <div class="mrow"><span class="mrow-lb"><span class="ic">🧈</span> Ingredients</span><span class="mrow-v mrow-out">-$14.00</span></div>
+          <div class="mrow-add" onclick="addLine(this,false)">+ Add expense</div>
+          <div class="mdiv"></div>
+          <div class="mrow mrow-total"><span class="mrow-lb">Net</span><span class="mrow-v v-green">+$80.00</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bar Chart -->
+    <div class="chart-wrap">
+      <div class="chart-title">📊 Income vs Expenses</div>
+      <div class="chart">
+        <div class="bar-group"><div class="bars"><div class="bar bar-in" style="height:40px"></div><div class="bar bar-out" style="height:23px"></div></div><div class="bar-lbl">Nov</div></div>
+        <div class="bar-group"><div class="bars"><div class="bar bar-in" style="height:93px"></div><div class="bar bar-out" style="height:59px"></div></div><div class="bar-lbl">Dec</div></div>
+        <div class="bar-group"><div class="bars"><div class="bar bar-in" style="height:27px"></div><div class="bar bar-out" style="height:35px"></div></div><div class="bar-lbl">Jan</div></div>
+        <div class="bar-group"><div class="bars"><div class="bar bar-in" style="height:69px"></div><div class="bar bar-out" style="height:10px"></div></div><div class="bar-lbl">Feb</div></div>
+      </div>
+      <div style="display:flex;gap:1rem;margin-top:.5rem;justify-content:center">
+        <div style="display:flex;align-items:center;gap:.3rem;font-size:.68rem;color:var(--text-soft)"><div style="width:10px;height:10px;border-radius:2px;background:var(--green)"></div>Income</div>
+        <div style="display:flex;align-items:center;gap:.3rem;font-size:.68rem;color:var(--text-soft)"><div style="width:10px;height:10px;border-radius:2px;background:#FECACA"></div>Expenses</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ftr"><div class="fi">Calculator · 4 months · Net profit: $136.50</div><div class="fb"><button class="bs" onclick="closePanel()">Close</button><button class="bp" onclick="doSave()">💾 Save Cash Flow</button></div></div>
+</div>
+<div class="toast" id="tst"></div>
+<script>
+document.head.appendChild(Object.assign(document.createElement('style'),{textContent:'@keyframes sd{to{transform:translateX(-50%) translateY(40px);opacity:0}}'}));
+function closePanel(){document.querySelector('.panel').style.animation='sd .25s ease forwards';document.querySelector('.backdrop').style.opacity='0';document.querySelector('.backdrop').style.transition='opacity .25s'}
+function togE(){const on=document.getElementById('bE').classList.toggle('on');document.querySelectorAll('.mrow-add').forEach(e=>e.style.display=on?'':'none');toast(on?'✏️ Edit mode':'👁 View mode')}
+function addLine(btn,isIncome){const row=document.createElement('div');row.className='mrow';row.innerHTML='<span class="mrow-lb"><span class="ic">'+(isIncome?'💵':'📝')+'</span> <span contenteditable="true" style="outline:none">New item</span></span><span class="mrow-v '+(isIncome?'mrow-in':'mrow-out')+'" contenteditable="true" style="outline:none">'+(isIncome?'+$0.00':'-$0.00')+'</span>';btn.parentElement.insertBefore(row,btn);toast('Added — edit the label and amount')}
+function mu(){document.getElementById('sD').className='sv-d sv-un';document.getElementById('sL').textContent='Unsaved';document.getElementById('sT').textContent='';clearTimeout(window._a);window._a=setTimeout(doSave,2000)}
+function doSave(){document.getElementById('sD').className='sv-d sv-ig';document.getElementById('sL').textContent='Saving…';document.getElementById('sT').textContent='';setTimeout(()=>{document.getElementById('sD').className='sv-d sv-ok';document.getElementById('sL').textContent='Saved';document.getElementById('sT').textContent='· just now';toast('💾 Cash flow saved')},700)}
+function toast(m){const t=document.getElementById('tst');t.innerHTML=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2500)}
+</script>
+</body>
+</html>

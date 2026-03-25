@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hatchloom · 267 — Template / Form</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#FF1F5A;--orange:#FF8C00;--cyan:#0891B2;--charcoal:#1E1E2E;--text:#2D2D2D;--text-soft:#6B7280;--muted:#9CA3AF;--bg:#F7F8FC;--card:#FFF;--border:#EDEEF2;--hustle:#D97706;--hustle-bg:#FFFBEB;--hustle-bdr:#FDE68A;--green:#059669;--green-bg:#F0FDF4;--red:#DC2626;--font-d:'Outfit',sans-serif;--font-b:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-b);font-size:14px;background:#1a1a2e;color:var(--text)}
+.backdrop{position:fixed;inset:0;background:rgba(30,30,46,.6);backdrop-filter:blur(4px);z-index:500}
+.panel{position:fixed;top:40px;left:50%;transform:translateX(-50%);width:calc(100% - 40px);max-width:1440px;height:calc(100vh - 56px);background:var(--card);border-radius:18px 18px 0 0;box-shadow:0 -8px 60px rgba(0,0,0,.35);z-index:600;display:flex;flex-direction:column;overflow:hidden;animation:su .35s cubic-bezier(.16,1,.3,1) both}
+@keyframes su{from{transform:translateX(-50%) translateY(40px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+.bc{padding:.4rem 1.5rem;background:var(--bg);border-bottom:1px solid var(--border);font-size:.72rem;color:var(--text-soft);font-weight:600;display:flex;align-items:center;gap:.35rem;flex-shrink:0}.bc a{color:var(--pink);cursor:pointer;text-decoration:none}.bc .sep{color:#D1D5DB}
+.hdr{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;border-bottom:1.5px solid var(--border);flex-shrink:0}
+.hdr-icon{width:40px;height:40px;border-radius:12px;background:var(--hustle-bg);border:1.5px solid var(--hustle-bdr);display:flex;align-items:center;justify-content:center;font-size:1.15rem}
+.hdr-meta{flex:1}.hdr-title{font-family:var(--font-d);font-weight:900;font-size:1.05rem;color:var(--charcoal)}.hdr-desc{font-size:.74rem;color:var(--text-soft);margin-top:1px}
+.pill{font-family:var(--font-d);font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:99px;display:inline-flex;align-items:center;gap:.3rem;flex-shrink:0}.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill-a{background:#FFF7ED;color:var(--orange);border:1.5px solid #FFD98A}.pill-x{background:#F0FBFD;color:var(--cyan);border:1.5px solid #BAE6F0}
+.hdr-close{width:34px;height:34px;border-radius:50%;background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;color:var(--text-soft);transition:all .15s;flex-shrink:0}.hdr-close:hover{background:#FFF0F5;border-color:var(--pink);color:var(--pink)}
+.abar{display:flex;align-items:center;padding:.4rem 1.5rem;border-bottom:1px solid var(--border);flex-shrink:0;gap:.5rem}
+.abar-l{display:flex;align-items:center;gap:.5rem;flex:1}.save-st{display:flex;align-items:center;gap:.25rem;font-size:.72rem;font-weight:600}
+.sv-d{width:7px;height:7px;border-radius:50%}.sv-ok{background:var(--green)}.sv-un{background:var(--pink)}.sv-ig{background:var(--orange);animation:p 1s infinite}@keyframes p{50%{opacity:.4}}
+.sv-l{color:var(--text-soft)}.sv-t{color:var(--muted);font-size:.68rem}
+.abar-r{display:flex;align-items:center;gap:.2rem}
+.ab{width:32px;height:32px;border-radius:7px;border:1.5px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;transition:all .15s;position:relative}.ab:hover{background:var(--bg)}.ab:hover .tp{opacity:1}.ab.on{background:#FFF7ED;border-color:#FFD98A;color:var(--orange)}
+.tp{position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:var(--charcoal);color:#fff;font-family:var(--font-d);font-size:.6rem;font-weight:600;padding:.15rem .45rem;border-radius:4px;white-space:nowrap;opacity:0;transition:opacity .15s;pointer-events:none;z-index:10}.tp::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:3px solid transparent;border-top-color:var(--charcoal)}
+.ab-s{width:1px;height:18px;background:var(--border);margin:0 .15rem}.ab-d:hover{background:#FFF0F5;border-color:var(--pink);color:var(--pink)}
+
+/* ─── FORM CONTENT ─── */
+.form-zone{flex:1;overflow:auto;padding:1.5rem 2rem 2rem;display:flex;justify-content:center}
+.form-card{width:100%;max-width:720px}
+
+/* Responses summary */
+.resp-bar{display:flex;align-items:center;gap:1rem;padding:.75rem 1rem;background:var(--bg);border:1.5px solid var(--border);border-radius:12px;margin-bottom:1.25rem}
+.resp-stat{display:flex;flex-direction:column;align-items:center;gap:.1rem}
+.resp-num{font-family:var(--font-d);font-weight:900;font-size:1.3rem;color:var(--charcoal)}
+.resp-lbl{font-size:.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.resp-div{width:1px;height:30px;background:var(--border)}
+.resp-avg{color:var(--hustle)}
+
+/* Form sections */
+.form-section{margin-bottom:1.5rem}
+.fs-title{font-family:var(--font-d);font-weight:800;font-size:.82rem;color:var(--charcoal);margin-bottom:.1rem;display:flex;align-items:center;gap:.4rem}
+.fs-desc{font-size:.74rem;color:var(--text-soft);margin-bottom:.75rem}
+.fs-num{font-family:var(--font-d);font-size:.6rem;font-weight:800;color:var(--muted);background:var(--bg);padding:.1rem .4rem;border-radius:99px}
+
+/* Field types */
+.field{margin-bottom:.85rem}
+.field-label{font-family:var(--font-d);font-weight:700;font-size:.76rem;color:var(--charcoal);margin-bottom:.3rem;display:flex;align-items:center;gap:.3rem}
+.field-req{color:var(--pink);font-size:.7rem}
+.field-hint{font-size:.68rem;color:var(--muted);margin-bottom:.3rem}
+.field-input{width:100%;padding:.55rem .75rem;border:1.5px solid var(--border);border-radius:9px;font-family:var(--font-b);font-size:.82rem;color:var(--text);outline:none;transition:border-color .15s;background:var(--card)}
+.field-input:focus{border-color:var(--hustle)}
+.field-input::placeholder{color:var(--muted)}
+.field-textarea{min-height:80px;resize:vertical;line-height:1.5}
+.field-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center;padding-right:2rem;cursor:pointer}
+
+/* Star rating */
+.stars{display:flex;gap:.25rem;margin-bottom:.15rem}
+.star{font-size:1.5rem;cursor:pointer;transition:transform .1s;color:var(--border)}
+.star:hover{transform:scale(1.15)}
+.star.active{color:#FBBF24}
+.star-label{font-size:.68rem;color:var(--muted)}
+
+/* Radio/check options */
+.options{display:flex;flex-direction:column;gap:.35rem}
+.opt{display:flex;align-items:center;gap:.5rem;padding:.4rem .6rem;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;font-size:.82rem}
+.opt:hover{border-color:var(--hustle-bdr);background:var(--hustle-bg)}
+.opt.selected{border-color:var(--hustle);background:var(--hustle-bg)}
+.opt-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.opt.selected .opt-dot{border-color:var(--hustle);background:var(--hustle)}
+.opt.selected .opt-dot::after{content:'';width:6px;height:6px;border-radius:50%;background:#fff}
+.opt-check{width:18px;height:18px;border-radius:5px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.65rem;color:transparent;transition:all .15s}
+.opt.selected .opt-check{border-color:var(--hustle);background:var(--hustle);color:#fff}
+
+/* Entries list */
+.entries{border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-top:1rem}
+.entry{padding:.65rem .85rem;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:.75rem}
+.entry:last-child{border-bottom:none}
+.entry:hover{background:rgba(217,119,6,.02)}
+.entry-stars{display:flex;gap:.1rem;font-size:.85rem;flex-shrink:0}
+.entry-body{flex:1;min-width:0}
+.entry-name{font-family:var(--font-d);font-weight:700;font-size:.76rem;color:var(--charcoal)}
+.entry-date{font-size:.65rem;color:var(--muted)}
+.entry-text{font-size:.78rem;color:var(--text);line-height:1.4;margin-top:.15rem}
+.entry-action{font-size:.68rem;color:var(--hustle);font-weight:600;margin-top:.2rem;display:flex;align-items:center;gap:.2rem}
+
+/* Divider */
+.form-divider{height:1.5px;background:var(--border);margin:1.5rem 0}
+
+.ftr{padding:.55rem 1.5rem;border-top:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.fi{font-size:.72rem;color:var(--muted)}.fb{display:flex;gap:.4rem}
+.bs{font-family:var(--font-d);font-weight:700;font-size:.76rem;padding:.4rem .9rem;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);cursor:pointer}.bs:hover{background:var(--bg)}
+.bp{font-family:var(--font-d);font-weight:700;font-size:.76rem;padding:.4rem 1.1rem;border-radius:8px;border:none;background:var(--hustle);color:#fff;cursor:pointer}.bp:hover{background:#B45309}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--charcoal);color:#fff;font-family:var(--font-d);font-weight:600;font-size:.8rem;padding:.5rem 1.1rem;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.25);z-index:999;transition:transform .3s cubic-bezier(.16,1,.3,1);pointer-events:none}.toast.show{transform:translateX(-50%) translateY(0);pointer-events:auto}
+</style>
+</head>
+<body>
+<div class="backdrop" onclick="closePanel()"></div>
+<div class="panel">
+  <div class="bc"><a>🚀 LaunchPad</a><span class="sep">›</span><a>My SideHustles</a><span class="sep">›</span><a>🧈 Flavour Butter Co.</a><span class="sep">›</span><span>⭐ Customer Feedback</span></div>
+  <div class="hdr">
+    <div class="hdr-icon">⭐</div>
+    <div class="hdr-meta"><div class="hdr-title">Customer Feedback</div><div class="hdr-desc">What buyers say about your stuff — collect ratings, comments, and track what to improve</div></div>
+    <span class="pill pill-a"><span class="dot"></span>3 responses</span>
+    <span class="pill pill-x">⚡ 10 XP</span>
+    <div class="hdr-close" onclick="closePanel()">✕</div>
+  </div>
+  <div class="abar">
+    <div class="abar-l"><div class="save-st"><div class="sv-d sv-ok" id="sD"></div><span class="sv-l" id="sL">Saved</span><span class="sv-t" id="sT">· 1 min ago</span></div></div>
+    <div class="abar-r">
+      <div class="ab on" id="bE"><span class="tp">Edit</span>✏️</div>
+      <div class="ab" onclick="doSave()"><span class="tp">Save</span>💾</div><div class="ab-s"></div>
+      <div class="ab" onclick="toast('⬇️ Downloading as PDF…')"><span class="tp">Download PDF</span>⬇️</div>
+      <div class="ab" onclick="toast('📤 Export destination')"><span class="tp">Export to…</span>📤</div>
+      <div class="ab" onclick="toast('🔗 Link copied!')"><span class="tp">Share link</span>🔗</div><div class="ab-s"></div>
+      <div class="ab" onclick="toast('📋 Duplicated')"><span class="tp">Duplicate</span>📋</div>
+      <div class="ab ab-d" onclick="toast('🗑️ Moved to trash')"><span class="tp">Delete</span>🗑️</div>
+    </div>
+  </div>
+
+  <div class="form-zone">
+    <div class="form-card">
+
+      <!-- Summary bar -->
+      <div class="resp-bar">
+        <div class="resp-stat"><div class="resp-num">3</div><div class="resp-lbl">Responses</div></div>
+        <div class="resp-div"></div>
+        <div class="resp-stat"><div class="resp-num resp-avg">4.3 ⭐</div><div class="resp-lbl">Avg Rating</div></div>
+        <div class="resp-div"></div>
+        <div class="resp-stat"><div class="resp-num" style="color:var(--green)">2</div><div class="resp-lbl">Actions Taken</div></div>
+        <div class="resp-div"></div>
+        <div class="resp-stat"><div class="resp-num" style="color:var(--pink)">1</div><div class="resp-lbl">Pending</div></div>
+      </div>
+
+      <!-- New Response Form -->
+      <div class="form-section">
+        <div class="fs-title"><span class="fs-num">NEW</span> Log New Feedback</div>
+        <div class="fs-desc">Got feedback from a customer? Log it here so you don't forget.</div>
+
+        <div class="field">
+          <div class="field-label">Customer Name <span class="field-req">*</span></div>
+          <input class="field-input" placeholder="Who gave you feedback?" value="">
+        </div>
+
+        <div class="field">
+          <div class="field-label">Rating <span class="field-req">*</span></div>
+          <div class="field-hint">How happy were they overall?</div>
+          <div class="stars" id="newStars">
+            <span class="star" onclick="setStars(1)">☆</span>
+            <span class="star" onclick="setStars(2)">☆</span>
+            <span class="star" onclick="setStars(3)">☆</span>
+            <span class="star" onclick="setStars(4)">☆</span>
+            <span class="star" onclick="setStars(5)">☆</span>
+          </div>
+          <div class="star-label" id="starLabel">Click to rate</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">What did they say?</div>
+          <textarea class="field-input field-textarea" placeholder="Write down what the customer told you — exact words are best"></textarea>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Which product?</div>
+          <select class="field-input field-select">
+            <option value="">Select a product…</option>
+            <option>Garlic Herb Butter</option>
+            <option>Honey Cinnamon Butter</option>
+            <option>Classic Salted Butter</option>
+            <option>Chili Lime Butter</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="field-label">How did they buy?</div>
+          <div class="options">
+            <div class="opt" onclick="selOpt(this)"><div class="opt-dot"></div>In person (at school/market)</div>
+            <div class="opt" onclick="selOpt(this)"><div class="opt-dot"></div>Through a friend</div>
+            <div class="opt" onclick="selOpt(this)"><div class="opt-dot"></div>Online order</div>
+            <div class="opt" onclick="selOpt(this)"><div class="opt-dot"></div>Other</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Your action plan</div>
+          <div class="field-hint">What will you do about this feedback?</div>
+          <textarea class="field-input field-textarea" placeholder="e.g. Adjust recipe, follow up with customer, change packaging…" style="min-height:50px"></textarea>
+        </div>
+      </div>
+
+      <div class="form-divider"></div>
+
+      <!-- Past Entries -->
+      <div class="form-section">
+        <div class="fs-title">📋 Previous Feedback <span class="fs-num">3</span></div>
+        <div class="entries">
+          <div class="entry">
+            <div class="entry-stars">⭐⭐⭐⭐⭐</div>
+            <div class="entry-body">
+              <div class="entry-name">Mrs. Kim (teacher) <span class="entry-date">· Feb 18</span></div>
+              <div class="entry-text">"The garlic herb butter is incredible! I bought 3 jars for my family. The only thing — the label came off in my fridge."</div>
+              <div class="entry-action">✅ Action taken: Switched to waterproof labels</div>
+            </div>
+          </div>
+          <div class="entry">
+            <div class="entry-stars">⭐⭐⭐⭐</div>
+            <div class="entry-body">
+              <div class="entry-name">Jake (@skateboard_jake) <span class="entry-date">· Feb 12</span></div>
+              <div class="entry-text">"Pretty good on toast. Wish you had a spicy version though."</div>
+              <div class="entry-action">✅ Action taken: Added Chili Lime flavour to lineup</div>
+            </div>
+          </div>
+          <div class="entry">
+            <div class="entry-stars">⭐⭐⭐⭐</div>
+            <div class="entry-body">
+              <div class="entry-name">Coach Davies <span class="entry-date">· Feb 5</span></div>
+              <div class="entry-text">"Bought at the school fair. Good quality. Price is fair but I'd buy more if there was a discount for 3+."</div>
+              <div class="entry-action" style="color:var(--pink)">⏳ Pending: Consider multi-buy discount</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="ftr"><div class="fi">Form · 3 responses logged · Avg 4.3 ⭐</div><div class="fb"><button class="bs" onclick="closePanel()">Close</button><button class="bp" onclick="doSave()">💾 Save Feedback</button></div></div>
+</div>
+<div class="toast" id="tst"></div>
+<script>
+document.head.appendChild(Object.assign(document.createElement('style'),{textContent:'@keyframes sd{to{transform:translateX(-50%) translateY(40px);opacity:0}}'}));
+function closePanel(){document.querySelector('.panel').style.animation='sd .25s ease forwards';document.querySelector('.backdrop').style.opacity='0';document.querySelector('.backdrop').style.transition='opacity .25s'}
+let rating=0;
+function setStars(n){rating=n;const stars=document.querySelectorAll('#newStars .star');const labels=['','Terrible','Not great','OK','Good','Amazing!'];stars.forEach((s,i)=>{s.textContent=i<n?'★':'☆';s.classList.toggle('active',i<n)});document.getElementById('starLabel').textContent=labels[n]+' ('+n+'/5)'}
+function selOpt(el){el.parentElement.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));el.classList.add('selected')}
+function mu(){document.getElementById('sD').className='sv-d sv-un';document.getElementById('sL').textContent='Unsaved';document.getElementById('sT').textContent='';clearTimeout(window._a);window._a=setTimeout(doSave,2000)}
+function doSave(){document.getElementById('sD').className='sv-d sv-ig';document.getElementById('sL').textContent='Saving…';document.getElementById('sT').textContent='';setTimeout(()=>{document.getElementById('sD').className='sv-d sv-ok';document.getElementById('sL').textContent='Saved';document.getElementById('sT').textContent='· just now';toast('💾 Feedback saved')},700)}
+function toast(m){const t=document.getElementById('tst');t.innerHTML=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2500)}
+document.querySelectorAll('.field-input,.field-textarea').forEach(e=>e.addEventListener('input',mu));
+</script>
+</body>
+</html>

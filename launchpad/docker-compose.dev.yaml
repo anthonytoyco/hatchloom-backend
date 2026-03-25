@@ -1,0 +1,15 @@
+# Dev override: activates the Spring 'dev' profile to skip JWT/auth requirements.
+# All requests are authenticated as a fixed mock user (UUID 00000000-0000-0000-0000-000000000001).
+# The external auth service is NOT needed.
+#
+# Usage:
+#   docker compose -f docker-compose.yaml -f docker-compose.dev.yaml up --build
+#
+# To run the backend locally without Docker:
+#   SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
+#   (or pass -Dspring-boot.run.profiles=dev)
+
+services:
+  launchpad:
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
