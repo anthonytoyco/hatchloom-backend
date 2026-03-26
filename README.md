@@ -4,11 +4,11 @@ HatchLoom is an education platform monorepo composed of three microservices and 
 
 ## Services
 
-| Service | Description | API Port | Frontend Port |
-|---|---|---|---|
-| [user-service](./user-service/) | Authentication and user profile management | 8081 | 3000 |
-| [launchpad](./launchpad/) | Student entrepreneurship workspace (Sandboxes, SideHustles, BMCs, Teams) | 8082 | 4173 |
-| [connecthub](./connecthub/) | Social feed, posts, classified listings, and messaging | 8083 | 5173 |
+| Service                         | Description                                                              | API Port | Frontend Port |
+| ------------------------------- | ------------------------------------------------------------------------ | -------- | ------------- |
+| [user-service](./user-service/) | Authentication and user profile management                               | 8081     | 3000          |
+| [launchpad](./launchpad/)       | Student entrepreneurship workspace (Sandboxes, SideHustles, BMCs, Teams) | 8082     | 4173          |
+| [connecthub](./connecthub/)     | Social feed, posts, classified listings, and messaging                   | 8083     | 5173          |
 
 A pgAdmin instance is also available at **http://localhost:5050** for database management.
 
@@ -40,15 +40,15 @@ docker compose down
 
 ## Service URLs (full-stack compose)
 
-| URL | Service |
-|---|---|
+| URL                   | Service               |
+| --------------------- | --------------------- |
 | http://localhost:3000 | User Service Frontend |
-| http://localhost:4173 | LaunchPad Frontend |
-| http://localhost:5173 | ConnectHub Frontend |
-| http://localhost:8081 | User Service API |
-| http://localhost:8082 | LaunchPad API |
-| http://localhost:8083 | ConnectHub API |
-| http://localhost:5050 | pgAdmin |
+| http://localhost:4173 | LaunchPad Frontend    |
+| http://localhost:5173 | ConnectHub Frontend   |
+| http://localhost:8081 | User Service API      |
+| http://localhost:8082 | LaunchPad API         |
+| http://localhost:8083 | ConnectHub API        |
+| http://localhost:5050 | pgAdmin               |
 
 ## Running Services Individually
 
