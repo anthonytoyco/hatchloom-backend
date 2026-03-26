@@ -405,9 +405,9 @@ export function PositionsSection({
     Record<string, ClassifiedInfo | null>
   >({})
 
-  const loadClassifieds = useCallback(async () => {
+  const fetchClassifieds = useCallback(async () => {
     const openPositions = positions.filter((p) => p.status === "OPEN")
-    if (openPositions.length === 0) return
+    if (openPositions.length === 0) return null
     const token = getAuthToken()
     const results = await Promise.allSettled(
       openPositions.map(async (p) => {
@@ -427,16 +427,22 @@ export function PositionsSection({
     for (const r of results) {
       if (r.status === "fulfilled") map[r.value.positionId] = r.value.classified
     }
-    setClassifiedMap((prev) => ({ ...prev, ...map }))
+    return map
   }, [positions])
 
   useEffect(() => {
-    void loadClassifieds()
+    void fetchClassifieds().then((map) => {
+      if (map) setClassifiedMap((prev) => ({ ...prev, ...map }))
+    })
     // Re-check when the user returns from another tab (e.g. after posting a classified in ConnectHub)
-    const onFocus = () => void loadClassifieds()
+    const onFocus = () => {
+      void fetchClassifieds().then((map) => {
+        if (map) setClassifiedMap((prev) => ({ ...prev, ...map }))
+      })
+    }
     window.addEventListener("focus", onFocus)
     return () => window.removeEventListener("focus", onFocus)
-  }, [loadClassifieds])
+  }, [fetchClassifieds])
 
   // Best-effort sync: when a position transitions, update the linked classified post status too.
   // Always does a fresh GET to avoid stale classifiedMap (e.g. classified was created in another tab).
