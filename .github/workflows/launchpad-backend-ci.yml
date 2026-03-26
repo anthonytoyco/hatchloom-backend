@@ -99,13 +99,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Convert owner name to lowercase
+        run: |
+          echo "OWNER_LC=${OWNER,,}" >> $GITHUB_ENV
+        env:
+          OWNER: ${{ github.repository_owner }}
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: ./launchpad/backend
           file: ./launchpad/backend/Dockerfile
           push: true
-          provenance: false
           tags: |
-            ghcr.io/${{ github.repository_owner }}/hatchloom-launchpad:latest
-            ghcr.io/${{ github.repository_owner }}/hatchloom-launchpad:${{ github.sha }}
+            ghcr.io/${{ env.OWNER_LC }}/hatchloom-launchpad:latest
+            ghcr.io/${{ env.OWNER_LC }}/hatchloom-launchpad:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
