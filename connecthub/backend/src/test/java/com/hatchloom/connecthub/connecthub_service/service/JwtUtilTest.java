@@ -18,7 +18,7 @@ public class JwtUtilTest {
                 .subject(userId.toString())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 3600000))
-                .signWith(k)
+                .signWith(k, Jwts.SIG.HS256)
                 .compact();
     }
 }

@@ -68,7 +68,7 @@ function Connecthub() {
       <div className="overflow-y-auto px-0 py-7">
         <TopHeader
           title="ConnectHub"
-          description="Everything happening outside your venture — people, markets, opportunities."
+          description="Everything happening outside your venture - people, markets, opportunities."
         />
         <StatusBar />
         <section className="mb-6 grid grid-cols-1 gap-5 px-8 py-0 md:grid-cols-2">

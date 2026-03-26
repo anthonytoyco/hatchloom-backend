@@ -351,7 +351,7 @@ function Classifieds() {
                 <label className="font-display text-text-soft mb-1 block text-xs font-extrabold uppercase">
                   Position ID{" "}
                   <span className="text-text-soft font-semibold normal-case">
-                    (optional — links to LaunchPad position)
+                    (optional - links to LaunchPad position)
                   </span>
                 </label>
                 <input
