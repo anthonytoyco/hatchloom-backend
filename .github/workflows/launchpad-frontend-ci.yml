@@ -60,6 +60,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
+      attestations: write
 
     steps:
       - name: Checkout
@@ -90,5 +92,6 @@ jobs:
           tags: |
             ghcr.io/${{ env.OWNER_LC }}/hatchloom-frontend:latest
             ghcr.io/${{ env.OWNER_LC }}/hatchloom-frontend:${{ github.sha }}
+          provenance: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
