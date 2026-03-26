@@ -8,6 +8,15 @@ import { SideHustleDetail } from "@/pages/SideHustleDetail"
 import { ToolPage } from "@/pages/ToolPage"
 import { BrowserRouter, Navigate, Route, Routes } from "react-router"
 
+const CONNECTHUB_URL: string =
+  (import.meta.env.VITE_CONNECTHUB_URL as string | undefined) ??
+  "http://localhost:5173"
+
+function ClassifiedsRedirect() {
+  window.location.replace(`${CONNECTHUB_URL}/classifieds`)
+  return null
+}
+
 function RequireAuth({ children }: { children: React.ReactNode }) {
   if (!getAuthToken()) {
     redirectToLogin()
@@ -73,12 +82,7 @@ export function App() {
         />
         <Route
           path="/launchpad/classifieds"
-          element={
-            <PlaceholderPage
-              title="Classifieds"
-              description="Classifieds belongs to ConnectHub integration and is currently a placeholder route."
-            />
-          }
+          element={<ClassifiedsRedirect />}
         />
         <Route
           path="/launchpad/market"

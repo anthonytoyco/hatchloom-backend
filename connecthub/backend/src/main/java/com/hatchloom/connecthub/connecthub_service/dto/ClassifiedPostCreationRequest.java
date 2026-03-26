@@ -16,6 +16,7 @@ import java.util.UUID;
 public record ClassifiedPostCreationRequest(
         @Valid @NotNull BasePostRequest basePost,
         @NotNull(message = "Project ID must not be null") UUID projectId,
+        UUID positionId,
         @Pattern(regexp = "^(open|filled|closed)$", message = "Status must be 'open', 'filled', or 'closed'")
         String status
 ) {

@@ -10,9 +10,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import com.hatchloom.connecthub.connecthub_service.config.TestSecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -30,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(TestSecurityConfig.class)
 public class NotificationServiceTest {
 
     @Autowired
@@ -87,7 +90,7 @@ public class NotificationServiceTest {
                         .header("Authorization", "Bearer " + thirdUserToken))
                 .andExpect(status().isCreated());
 
-        ClassifiedPostCreationRequest request = new ClassifiedPostCreationRequest(new BasePostRequest("Test classified", "Classified post"), project.id, "open");
+        ClassifiedPostCreationRequest request = new ClassifiedPostCreationRequest(new BasePostRequest("Test classified", "Classified post"), project.id, null, "open");
         mockMvc.perform(post("/api/classified")
         .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
@@ -139,7 +142,7 @@ public class NotificationServiceTest {
                         .header("Authorization", "Bearer " + thirdUserToken))
                 .andExpect(status().isCreated());
 
-        ClassifiedPostCreationRequest request = new ClassifiedPostCreationRequest(new BasePostRequest("Test classified", "Classified post"), project.id, "open");
+        ClassifiedPostCreationRequest request = new ClassifiedPostCreationRequest(new BasePostRequest("Test classified", "Classified post"), project.id, null, "open");
         mockMvc.perform(post("/api/classified")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
@@ -238,7 +241,7 @@ public class NotificationServiceTest {
                         .header("Authorization", "Bearer " + thirdUserToken))
                 .andExpect(status().isCreated());
 
-        ClassifiedPostCreationRequest request = new ClassifiedPostCreationRequest(new BasePostRequest("Test classified", "Classified post"), project.id, "open");
+        ClassifiedPostCreationRequest request = new ClassifiedPostCreationRequest(new BasePostRequest("Test classified", "Classified post"), project.id, null, "open");
         mockMvc.perform(post("/api/classified")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))

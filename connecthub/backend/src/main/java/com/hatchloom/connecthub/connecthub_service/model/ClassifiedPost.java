@@ -38,6 +38,9 @@ public class ClassifiedPost {
     @Column(name = "project_id", nullable = false, columnDefinition = "UUID")
     private UUID projectId;
 
+    @Column(name = "position_id", columnDefinition = "UUID")
+    private UUID positionId;
+
     @Column(name = "assigned_to", columnDefinition = "UUID")
     private UUID assignedTo;
 

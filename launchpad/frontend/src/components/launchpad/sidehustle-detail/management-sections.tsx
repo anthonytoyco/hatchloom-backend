@@ -369,6 +369,14 @@ export function BMCSection({
   )
 }
 
+const CONNECTHUB_URL: string =
+  (import.meta.env.VITE_CONNECTHUB_URL as string | undefined) ??
+  "http://localhost:5173"
+
+function buildClassifiedsUrl(positionId: string, sideHustleId: string): string {
+  return `${CONNECTHUB_URL}/classifieds?positionId=${positionId}&projectId=${sideHustleId}`
+}
+
 export function PositionsSection({
   positions,
   sideHustleId,
@@ -477,27 +485,39 @@ export function PositionsSection({
                   </p>
                 )}
               </div>
-              <button
-                onClick={() => {
-                  const nextStatus = NEXT_STATUS[p.status]
-                  if (!nextStatus) return
-                  void updateStatus.mutateAsync({
-                    positionId: p.id,
-                    status: nextStatus,
-                    sideHustleId,
-                  })
-                }}
-                disabled={!NEXT_STATUS[p.status] || updateStatus.isPending}
-                className={cn(
-                  "rounded-full border px-2 py-0.5 font-heading text-[0.6rem] font-bold transition-all",
-                  NEXT_STATUS[p.status]
-                    ? "hover:opacity-80"
-                    : "cursor-not-allowed opacity-80",
-                  STATUS_STYLE[p.status]
+              <div className="flex shrink-0 items-center gap-1.5">
+                {p.status === "OPEN" && (
+                  <a
+                    href={buildClassifiedsUrl(p.id, sideHustleId)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 font-heading text-[0.6rem] font-bold text-blue-700 transition-all hover:opacity-80"
+                  >
+                    Post to Classifieds ↗
+                  </a>
                 )}
-              >
-                {p.status}
-              </button>
+                <button
+                  onClick={() => {
+                    const nextStatus = NEXT_STATUS[p.status]
+                    if (!nextStatus) return
+                    void updateStatus.mutateAsync({
+                      positionId: p.id,
+                      status: nextStatus,
+                      sideHustleId,
+                    })
+                  }}
+                  disabled={!NEXT_STATUS[p.status] || updateStatus.isPending}
+                  className={cn(
+                    "rounded-full border px-2 py-0.5 font-heading text-[0.6rem] font-bold transition-all",
+                    NEXT_STATUS[p.status]
+                      ? "hover:opacity-80"
+                      : "cursor-not-allowed opacity-80",
+                    STATUS_STYLE[p.status]
+                  )}
+                >
+                  {p.status}
+                </button>
+              </div>
             </div>
           ))}
         </div>

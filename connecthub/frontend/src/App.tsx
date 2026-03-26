@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import Protected from "./components/Protected";
 import AuthCallback from "./pages/AuthCallback";
 import ConnecthubProvider from "./context/ConnecthubProvider";
+import Classifieds from "./pages/Classifieds";
 import Connecthub from "./pages/Connecthub";
 import Feed from "./pages/Feed";
 import Message from "./pages/Message";
@@ -35,6 +36,14 @@ function App() {
             element={
               <Protected>
                 <Message />
+              </Protected>
+            }
+          />
+          <Route
+            path="/classifieds"
+            element={
+              <Protected>
+                <Classifieds />
               </Protected>
             }
           />

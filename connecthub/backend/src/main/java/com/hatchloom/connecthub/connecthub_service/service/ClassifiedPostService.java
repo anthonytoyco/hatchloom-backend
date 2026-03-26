@@ -1,5 +1,6 @@
 package com.hatchloom.connecthub.connecthub_service.service;
 
+import com.hatchloom.connecthub.connecthub_service.client.LaunchPadClient;
 import com.hatchloom.connecthub.connecthub_service.dto.ClassifiedPostCreationRequest;
 import com.hatchloom.connecthub.connecthub_service.dto.CursorResponse;
 import com.hatchloom.connecthub.connecthub_service.enums.ApplicationStatus;
@@ -26,12 +27,14 @@ public class ClassifiedPostService {
     private final ClassifiedPostFeed classifiedPostFeed;
     private final CursorPaginationService cursorPaginationService;
     private final ClassifiedPostApplicationRepository classifiedPostApplicationRepository;
+    private final LaunchPadClient launchPadClient;
 
-    public ClassifiedPostService(ClassifiedPostRepository classifiedPostRepository, ClassifiedPostFeed classifiedPostFeed, CursorPaginationService cursorPaginationService, ClassifiedPostApplicationRepository classifiedPostApplicationRepository) {
+    public ClassifiedPostService(ClassifiedPostRepository classifiedPostRepository, ClassifiedPostFeed classifiedPostFeed, CursorPaginationService cursorPaginationService, ClassifiedPostApplicationRepository classifiedPostApplicationRepository, LaunchPadClient launchPadClient) {
         this.classifiedPostRepository = classifiedPostRepository;
         this.classifiedPostFeed = classifiedPostFeed;
         this.cursorPaginationService = cursorPaginationService;
         this.classifiedPostApplicationRepository = classifiedPostApplicationRepository;
+        this.launchPadClient = launchPadClient;
     }
 
 
@@ -45,11 +48,21 @@ public class ClassifiedPostService {
             throw new IllegalArgumentException("Invalid classified post creation request");
         }
 
+        if (request.positionId() != null) {
+            String positionStatus = launchPadClient.getPositionStatus(request.positionId());
+            if (!"OPEN".equalsIgnoreCase(positionStatus)) {
+                throw new IllegalArgumentException(
+                        "Cannot create a classified post for position " + request.positionId()
+                        + ": position status is " + positionStatus);
+            }
+        }
+
         ClassifiedPost post = new ClassifiedPost();
         post.setTitle(request.basePost().title());
         post.setContent(request.basePost().content());
         post.setAuthor(authorId);
         post.setProjectId(request.projectId());
+        post.setPositionId(request.positionId());
         post.setStatus(request.status());
 
         ClassifiedPost savedPost = classifiedPostRepository.save(post);

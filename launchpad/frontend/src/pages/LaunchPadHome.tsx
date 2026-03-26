@@ -305,11 +305,13 @@ export function LaunchPadHome() {
       <CreateSandboxDialog
         open={showCreateSandbox}
         onClose={() => setShowCreateSandbox(false)}
+        studentId={student?.id ?? ""}
       />
       <CreateSideHustleDialog
         open={showCreateSideHustle}
         onClose={() => setShowCreateSideHustle(false)}
         sandboxes={launchpad?.sandboxes ?? []}
+        studentId={student?.id ?? ""}
       />
     </AppLayout>
   )

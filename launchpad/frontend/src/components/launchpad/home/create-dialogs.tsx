@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { useCreateSandbox, useCreateSideHustle } from "@/hooks/use-mutations"
-import { MOCK_STUDENT } from "@/lib/mock-data"
 import type { SandboxSummary } from "@/lib/types"
 import { useState } from "react"
 import { useNavigate } from "react-router"
@@ -25,9 +24,11 @@ import { useNavigate } from "react-router"
 export function CreateSandboxDialog({
   open,
   onClose,
+  studentId,
 }: {
   open: boolean
   onClose: () => void
+  studentId: string
 }) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -38,7 +39,7 @@ export function CreateSandboxDialog({
     e.preventDefault()
     if (!title.trim()) return
     const createdSandbox = await mutateAsync({
-      studentId: MOCK_STUDENT.id,
+      studentId,
       title: title.trim(),
       description: description.trim() || undefined,
     })
@@ -111,10 +112,12 @@ export function CreateSideHustleDialog({
   open,
   onClose,
   sandboxes,
+  studentId,
 }: {
   open: boolean
   onClose: () => void
   sandboxes: SandboxSummary[]
+  studentId: string
 }) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -129,7 +132,7 @@ export function CreateSideHustleDialog({
     if (!title.trim() || !selectedSandboxId) return
     const createdSideHustle = await mutateAsync({
       sandboxId: selectedSandboxId,
-      studentId: MOCK_STUDENT.id,
+      studentId,
       title: title.trim(),
       description: description.trim() || undefined,
       type,

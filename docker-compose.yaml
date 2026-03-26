@@ -82,6 +82,7 @@ services:
       context: ./launchpad/frontend
       args:
         VITE_API_BASE_URL: /api
+        VITE_CONNECTHUB_URL: http://localhost:5173
     ports:
       - "4173:80"
     depends_on:
@@ -138,11 +139,14 @@ services:
       DB_NAME: connecthub_db
       DB_URL: jdbc:postgresql://connecthub-postgres:5432/connecthub_db
       AUTH_SERVICE_URL: http://auth-service:8080
+      LAUNCHPAD_SERVICE_URL: http://launchpad:8080
     depends_on:
       connecthub-postgres:
         condition: service_healthy
       auth-service:
         condition: service_healthy
+      launchpad:
+        condition: service_started
 
   connecthub-frontend:
     build:

@@ -8,9 +8,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import com.hatchloom.connecthub.connecthub_service.config.TestSecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
@@ -25,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(TestSecurityConfig.class)
 class ClassifiedPostServiceTest {
     @Autowired
     ClassifiedPostRepository classifiedPostRepository;
@@ -60,7 +63,7 @@ class ClassifiedPostServiceTest {
     @DisplayName("Test creating a classified post with valid data")
     void testCreateClassifiedPost() throws Exception {
         ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
-                "This is a classified test"), testProject.id, "open");
+                "This is a classified test"), testProject.id, null, "open");
 
         mockMvc.perform(post("/api/classified")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -84,7 +87,7 @@ class ClassifiedPostServiceTest {
     @DisplayName("Test creating a classified post with invalid status")
     void testCreateClassifiedPostInvalidStatus() throws Exception {
         ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
-                "This is a classified test"), testProject.id, "invalid_status");
+                "This is a classified test"), testProject.id, null, "invalid_status");
 
         mockMvc.perform(post("/api/classified")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -99,7 +102,7 @@ class ClassifiedPostServiceTest {
     @Test
     @DisplayName("Test creating a classified post with null fields")
     void testCreateClassifiedPostNullFields() throws Exception {
-        ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("", ""), null, "open");
+        ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("", ""), null, null, "open");
 
         mockMvc.perform(post("/api/classified")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -115,7 +118,7 @@ class ClassifiedPostServiceTest {
     @DisplayName("Test creating a classified post with long title")
     void testCreateClassifiedPostLongTitle() throws Exception {
         ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("A".repeat(300),
-                "This is a classified test"), testProject.id, "open");
+                "This is a classified test"), testProject.id, null, "open");
 
         mockMvc.perform(post("/api/classified")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -131,7 +134,7 @@ class ClassifiedPostServiceTest {
     @DisplayName("Test creating a classified post with long content")
     void testCreateClassifiedPostLongContent() throws Exception {
         ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
-                "A".repeat(3001)), testProject.id, "open");
+                "A".repeat(3001)), testProject.id, null, "open");
 
         mockMvc.perform(post("/api/classified")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -150,7 +153,7 @@ class ClassifiedPostServiceTest {
 
         for (String status : statuses) {
             ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
-                    "This is a classified test"), testProject.id, status);
+                    "This is a classified test"), testProject.id, null, status);
 
             mockMvc.perform(post("/api/classified")
             .contentType(MediaType.APPLICATION_JSON)
@@ -187,7 +190,7 @@ class ClassifiedPostServiceTest {
     @DisplayName("Test update classified post status")
     void testUpdateClassifiedPostStatus() throws Exception {
         ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
-                "This is a classified test"), testProject.id, "open");
+                "This is a classified test"), testProject.id, null, "open");
 
         String response = mockMvc.perform(post("/api/classified")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -216,7 +219,7 @@ class ClassifiedPostServiceTest {
     @DisplayName("Test update classified post status with a post that doesn't exist")
     void testUpdateClassifiedPostStatusInvalidStatus() throws Exception {
         ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
-                "This is a classified test"), testProject.id, "open");
+                "This is a classified test"), testProject.id, null, "open");
 
         mockMvc.perform(post("/api/classified")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -244,7 +247,7 @@ class ClassifiedPostServiceTest {
 
         for (int i = 0; i < upperLimit; i++) {
             ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post" + i,
-                    "This is a classified test"), testProject.id, "open");
+                    "This is a classified test"), testProject.id, null, "open");
 
             mockMvc.perform(post("/api/classified")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -275,7 +278,7 @@ class ClassifiedPostServiceTest {
 
         for (int i = 0; i < upperLimit; i++) {
             ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post" + i,
-                    "This is a classified test"), testProject.id, "open");
+                    "This is a classified test"), testProject.id, null, "open");
 
             mockMvc.perform(post("/api/classified")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -332,7 +335,7 @@ class ClassifiedPostServiceTest {
     @DisplayName("Test applying to a classified post")
     void testApplyClassifiedPost() throws Exception {
         ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
-                "This is a classified test"), testProject.id, "open");
+                "This is a classified test"), testProject.id, null, "open");
 
         String response = mockMvc.perform(post("/api/classified")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -363,7 +366,7 @@ class ClassifiedPostServiceTest {
     @DisplayName("Test applying to a classified post that is not open")
     void testApplyClassifiedPostInvalidStatus() throws Exception {
         ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
-                "This is a classified test"), testProject.id, "filled");
+                "This is a classified test"), testProject.id, null, "filled");
 
         String response = mockMvc.perform(post("/api/classified")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -400,7 +403,7 @@ class ClassifiedPostServiceTest {
     @DisplayName("Test get all applications for a classified post")
     void testGetClassifiedPostApplications() throws Exception {
         ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
-                "This is a classified test"), testProject.id, "open");
+                "This is a classified test"), testProject.id, null, "open");
 
         String response = mockMvc.perform(post("/api/classified")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -430,7 +433,7 @@ class ClassifiedPostServiceTest {
     @DisplayName("Test get applications for a user")
     void testGetUserApplications() throws Exception {
         ClassifiedPostCreationRequest dto = new ClassifiedPostCreationRequest(new BasePostRequest("Classified test post",
-                "This is a classified test"), testProject.id, "open");
+                "This is a classified test"), testProject.id, null, "open");
 
         String response = mockMvc.perform(post("/api/classified")
                         .contentType(MediaType.APPLICATION_JSON)

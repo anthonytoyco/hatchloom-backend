@@ -36,6 +36,7 @@ const SIDEBAR_SECTIONS: SidebarSection[] = [
       {
         name: "Classifieds",
         icon: "📋",
+        link: "/classifieds",
       },
       {
         name: "Organisations",

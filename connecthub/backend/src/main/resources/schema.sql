@@ -23,6 +23,7 @@ CREATE TABLE classified_posts (
     content TEXT NOT NULL,
     author UUID NOT NULL,
     project_id UUID NOT NULL,
+    position_id UUID,
     assigned_to UUID,
     status VARCHAR(20) NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'filled', 'closed')),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
