@@ -6,11 +6,12 @@ User Service microservice for the Hatchloom platform. Provides authentication, r
 
 ## Features
 
-- JWT-based Authentication with 30-minute access tokens
+- JWT-based Authentication with 30-minute access tokens (RS256, RSA-2048)
 - Refresh Token Mechanism (7-day expiry)
 - Role-based Access Control (RBAC)
-- Polymorphic User Profiles (Student, Educator, Admin)
+- Polymorphic User Profiles (Academic and Professional)
 - User Session Management and Validation
+- OIDC Discovery Endpoint (consumed by LaunchPad for JWT validation)
 - PostgreSQL Integration
 - Secure password hashing (bcrypt)
 - Authorization checks on profile access
@@ -52,7 +53,8 @@ spring.datasource.password=secret
 
 **Description:** Create a new user account with specified role.
 
-**Request:
+\*\*Request:
+
 ```json
 {
   "username": "john_doe",
@@ -65,6 +67,7 @@ spring.datasource.password=secret
 ```
 
 Response (201 Created):
+
 ```json
 {
   "userId": "550e8400-e29b-41d4-a716-446655440001",
@@ -75,14 +78,16 @@ Response (201 Created):
 ```
 
 Notes:
+
 - Email uniqueness is enforced
 - Generic error responses prevent information disclosure
 - Password is bcrypt-hashed
-- Role-specific required fields: schoolId (STUDENT/SCHOOL_TEACHER/SCHOOL_ADMIN), age (STUDENT)
+- Role-specific required fields: schoolId (STUDENT/SCHOOL_TEACHER/SCHOOL_ADMIN), age (STUDENT), companyName (HATCHLOOM_TEACHER/HATCHLOOM_ADMIN)
 
 #### POST /auth/login - Authenticate User
 
 Request:
+
 ```json
 {
   "username": "john_doe",
@@ -91,6 +96,7 @@ Request:
 ```
 
 Response (200 OK):
+
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9...",
@@ -102,13 +108,15 @@ Response (200 OK):
 ```
 
 Token Details:
+
 - Access Token: 30 minutes expiry (configurable)
 - Refresh Token: 7 days expiry (configurable)
-- Both tokens are JWT-based with HMAC-SHA512 algorithm
+- Both tokens are JWT-based with RS256 (asymmetric RSA-2048) algorithm
 
 #### POST /auth/refresh - Refresh Access Token
 
 Request:
+
 ```json
 {
   "refreshToken": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9..."
@@ -116,6 +124,7 @@ Request:
 ```
 
 Response (200 OK):
+
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9...",
@@ -129,11 +138,13 @@ Response (200 OK):
 #### GET /auth/validate - Validate Session Token
 
 Headers:
+
 ```
 Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9...
 ```
 
 Response (200 OK):
+
 ```json
 {
   "valid": true,
@@ -144,6 +155,7 @@ Response (200 OK):
 ```
 
 Response (401 Unauthorized):
+
 ```json
 {
   "valid": false,
@@ -154,11 +166,13 @@ Response (401 Unauthorized):
 #### GET /auth/permissions - Get Role Permissions
 
 Headers:
+
 ```
 Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9...
 ```
 
 Response (200 OK):
+
 ```json
 {
   "role": "STUDENT",
@@ -176,19 +190,23 @@ Response (200 OK):
 #### POST /auth/link-parent/{studentId} - Link Parent to Student
 
 Headers:
+
 ```
 Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9...
 ```
 
 Path Parameters:
+
 - studentId: UUID of the student to link
 
 Response (200 OK):
+
 ```
 Parent linked successfully
 ```
 
 Authorization:
+
 - Only users with PARENT role can call this endpoint
 - Links the parent account to the specified student
 
@@ -197,14 +215,17 @@ Authorization:
 #### GET /profile/{userId} - Get User Profile
 
 Headers:
+
 ```
 Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9...
 ```
 
 Path Parameters:
+
 - userId: UUID of the user
 
-Response (200 OK):
+Response (200 OK) - STUDENT example:
+
 ```json
 {
   "userId": "550e8400-e29b-41d4-a716-446655440001",
@@ -227,23 +248,47 @@ Response (200 OK):
 }
 ```
 
+Response (200 OK) - HATCHLOOM_ADMIN / HATCHLOOM_TEACHER example:
+
+```json
+{
+  "userId": "550e8400-e29b-41d4-a716-446655440002",
+  "username": "jane_admin",
+  "email": "jane@hatchloom.com",
+  "role": "HATCHLOOM_ADMIN",
+  "bio": "Platform administrator",
+  "description": null,
+  "profilePictureUrl": null,
+  "companyName": "Hatchloom Inc.",
+  "jobTitle": "Platform Admin",
+  "expertise": "EdTech",
+  "createdAt": "2026-03-04T23:00:00",
+  "updatedAt": "2026-03-04T23:15:00"
+}
+```
+
 Authorization:
+
 - Users can view their own profile
 - Only HATCHLOOM_ADMIN and SCHOOL_ADMIN can view any profile
-- Student-specific fields (`lastActive`, `skillsCertified`, `explorerLevelXp`, `currentStreak`, `activeVentures`, `problemsTackled`) are returned only for `STUDENT` users
+- Student/academic fields (`gradeLevel`, `specialization`, `lastActive`, `skillsCertified`, `explorerLevelXp`, `currentStreak`, `activeVentures`, `problemsTackled`) are returned only for academic role profiles (STUDENT, SCHOOL_TEACHER)
+- Professional fields (`companyName`, `jobTitle`, `expertise`) are returned only for professional role profiles (HATCHLOOM_ADMIN, HATCHLOOM_TEACHER)
 
 #### PUT /profile/{userId} - Update User Profile
 
 Headers:
+
 ```
 Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9...
 Content-Type: application/json
 ```
 
 Path Parameters:
+
 - userId: UUID of the user
 
 Request:
+
 ```json
 {
   "bio": "Updated bio",
@@ -260,6 +305,7 @@ Request:
 ```
 
 Response (200 OK):
+
 ```json
 {
   "userId": "550e8400-e29b-41d4-a716-446655440001",
@@ -283,21 +329,26 @@ Response (200 OK):
 ```
 
 Authorization:
+
 - Users can only update their own profile
 - Read-only fields: `username`, `email`, `role`, `createdAt`, `lastActive` (`lastActive` is updated on successful login)
+- Updatable professional profile fields: `companyName`, `jobTitle`, `expertise` (for HATCHLOOM_ADMIN/HATCHLOOM_TEACHER profiles)
 
 #### GET /profile?page=0&size=20 - List All Profiles (Admin Only)
 
 Headers:
+
 ```
 Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9...
 ```
 
 Query Parameters:
+
 - page: Page number (0-indexed, default: 0)
 - size: Results per page (default: 20)
 
 Response (200 OK):
+
 ```json
 {
   "content": [
@@ -323,36 +374,43 @@ Response (200 OK):
 ```
 
 Authorization:
+
 - Only HATCHLOOM_ADMIN and SCHOOL_ADMIN can list profiles
 
 ## User Roles and Permissions
 
 HATCHLOOM_ADMIN
+
 - Permissions: ManageClients, GlobalAnalytics, ManageUsers, ManageSchools
 - Scope: UNRESTRICTED
 - Description: Full access to all system resources
 
 HATCHLOOM_TEACHER
+
 - Permissions: CreateGlobalCourses, ViewCourses, UpdateOwnCourses
 - Scope: CROSS_SCHOOL_GLOBAL
 - Description: Can create and manage global courses across schools
 
 SCHOOL_ADMIN
+
 - Permissions: CohortAnalytics, ManageCohorts, AddRemoveStudents, ManageTeachers, ViewSchoolData
 - Scope: SINGLE_SCHOOL_LIMIT
 - Description: Manages a single school's operations
 
 SCHOOL_TEACHER
+
 - Permissions: ManageCohorts, RunExperience, GradeStudents, ViewCohortData, UpdateOwnProfile
 - Scope: SINGLE_SCHOOL_LIMIT
 - Description: Teaches at a single school
 
 STUDENT
+
 - Permissions: ViewMyExperiences, SubmitAssignments, ViewMyGrades, UpdateOwnProfile, ViewMyProgress
 - Scope: OWN_DATA_ONLY
 - Description: Can view own experiences and grades
 
 PARENT
+
 - Permissions: ViewChildWork, ViewChildProgress, ViewChildGrades, UpdateOwnProfile, ContactTeacher
 - Scope: LINKED_CHILDREN_ONLY
 - Description: Can view linked child's work and progress
@@ -372,30 +430,37 @@ All error responses follow this format:
 Common Error Scenarios:
 
 Duplicate email registration:
+
 - Status: 400
 - Message: Invalid registration request
 
 Invalid credentials:
+
 - Status: 401
 - Message: Invalid credentials
 
 Expired token:
+
 - Status: 401
 - Message: Invalid or expired token
 
 Missing authorization header:
+
 - Status: 401
 - Message: Unauthorized
 
 Insufficient permissions:
+
 - Status: 403
 - Message: Access forbidden
 
 Resource not found:
+
 - Status: 404
 - Message: Not found
 
 Server error:
+
 - Status: 500
 - Message: An error occurred processing your request
 
@@ -410,6 +475,7 @@ This section provides comprehensive examples for all six user types, showing reg
 #### Step 1: Register as Student
 
 Request:
+
 ```bash
 curl -X POST http://localhost:8080/auth/register \
   -H "Content-Type: application/json" \
@@ -424,6 +490,7 @@ curl -X POST http://localhost:8080/auth/register \
 ```
 
 Response (201 Created):
+
 ```json
 {
   "userId": "a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d",
@@ -436,6 +503,7 @@ Response (201 Created):
 #### Step 2: Login as Student
 
 Request:
+
 ```bash
 curl -X POST http://localhost:8080/auth/login \
   -H "Content-Type: application/json" \
@@ -446,6 +514,7 @@ curl -X POST http://localhost:8080/auth/login \
 ```
 
 Response (200 OK):
+
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlbW1hX3N0dWRlbnQiLCJyb2xlIjoiU1RVRE...",
@@ -457,17 +526,20 @@ Response (200 OK):
 ```
 
 Notes:
+
 - On successful login, the student's `lastActive` field is automatically set to the current timestamp.
 
 #### Step 3: View Own Profile (Student)
 
 Request:
+
 ```bash
 curl -X GET http://localhost:8080/profile/a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlbW1hX3N0dWRlbnQi..."
 ```
 
 Response (200 OK):
+
 ```json
 {
   "userId": "a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d",
@@ -493,6 +565,7 @@ Response (200 OK):
 #### Step 4: Update Own Profile (Student)
 
 Request:
+
 ```bash
 curl -X PUT http://localhost:8080/profile/a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlbW1hX3N0dWRlbnQi..." \
@@ -512,6 +585,7 @@ curl -X PUT http://localhost:8080/profile/a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d \
 ```
 
 Response (200 OK):
+
 ```json
 {
   "userId": "a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d",
@@ -537,12 +611,14 @@ Response (200 OK):
 #### Step 5: Get Student Permissions
 
 Request:
+
 ```bash
 curl -X GET http://localhost:8080/auth/permissions \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlbW1hX3N0dWRlbnQi..."
 ```
 
 Response (200 OK):
+
 ```json
 {
   "role": "STUDENT",
@@ -560,12 +636,14 @@ Response (200 OK):
 #### Step 6: Student Attempts to View Another Profile (Forbidden)
 
 Request:
+
 ```bash
 curl -X GET http://localhost:8080/profile/b2c3d4e5-f6a7-4b5c-8d9e-2f3a4b5c6d7e \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlbW1hX3N0dWRlbnQi..."
 ```
 
 Response (403 Forbidden):
+
 ```json
 {
   "status": 403,
@@ -581,6 +659,7 @@ Response (403 Forbidden):
 #### Step 1: Register as Parent
 
 Request:
+
 ```bash
 curl -X POST http://localhost:8080/auth/register \
   -H "Content-Type: application/json" \
@@ -593,6 +672,7 @@ curl -X POST http://localhost:8080/auth/register \
 ```
 
 Response (201 Created):
+
 ```json
 {
   "userId": "b2c3d4e5-f6a7-4b5c-8d9e-2f3a4b5c6d7e",
@@ -607,6 +687,7 @@ Note: PARENT role does not require schoolId or age fields.
 #### Step 2: Login as Parent
 
 Request:
+
 ```bash
 curl -X POST http://localhost:8080/auth/login \
   -H "Content-Type: application/json" \
@@ -617,6 +698,7 @@ curl -X POST http://localhost:8080/auth/login \
 ```
 
 Response (200 OK):
+
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzYXJhaF9wYXJlbnQiLCJyb2xlIjoiUE...",
@@ -630,12 +712,14 @@ Response (200 OK):
 #### Step 3: Link Parent to Student
 
 Request:
+
 ```bash
 curl -X POST http://localhost:8080/auth/link-parent/a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzYXJhaF9wYXJlbnQi..."
 ```
 
 Response (200 OK):
+
 ```
 Parent linked successfully
 ```
@@ -645,12 +729,14 @@ Note: This links the parent to student emma_student (ID: a1b2c3d4-e5f6-4a5b-8c9d
 #### Step 4: Get Parent Permissions
 
 Request:
+
 ```bash
 curl -X GET http://localhost:8080/auth/permissions \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzYXJhaF9wYXJlbnQi..."
 ```
 
 Response (200 OK):
+
 ```json
 {
   "role": "PARENT",
@@ -668,6 +754,7 @@ Response (200 OK):
 #### Step 5: Update Own Profile (Parent)
 
 Request:
+
 ```bash
 curl -X PUT http://localhost:8080/profile/b2c3d4e5-f6a7-4b5c-8d9e-2f3a4b5c6d7e \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzYXJhaF9wYXJlbnQi..." \
@@ -680,6 +767,7 @@ curl -X PUT http://localhost:8080/profile/b2c3d4e5-f6a7-4b5c-8d9e-2f3a4b5c6d7e \
 ```
 
 Response (200 OK):
+
 ```json
 {
   "userId": "b2c3d4e5-f6a7-4b5c-8d9e-2f3a4b5c6d7e",
@@ -703,6 +791,7 @@ Response (200 OK):
 #### Step 1: Register as School Teacher
 
 Request:
+
 ```bash
 curl -X POST http://localhost:8080/auth/register \
   -H "Content-Type: application/json" \
@@ -716,6 +805,7 @@ curl -X POST http://localhost:8080/auth/register \
 ```
 
 Response (201 Created):
+
 ```json
 {
   "userId": "c3d4e5f6-a7b8-4c5d-9e0f-3a4b5c6d7e8f",
@@ -730,6 +820,7 @@ Note: SCHOOL_TEACHER requires schoolId but not age.
 #### Step 2: Login as School Teacher
 
 Request:
+
 ```bash
 curl -X POST http://localhost:8080/auth/login \
   -H "Content-Type: application/json" \
@@ -740,6 +831,7 @@ curl -X POST http://localhost:8080/auth/login \
 ```
 
 Response (200 OK):
+
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtaWtlX3RlYWNoZXIiLCJyb2xlIjoiU0...",
@@ -753,12 +845,14 @@ Response (200 OK):
 #### Step 3: Get Teacher Permissions
 
 Request:
+
 ```bash
 curl -X GET http://localhost:8080/auth/permissions \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtaWtlX3RlYWNoZXIi..."
 ```
 
 Response (200 OK):
+
 ```json
 {
   "role": "SCHOOL_TEACHER",
@@ -776,6 +870,7 @@ Response (200 OK):
 #### Step 4: Update Own Profile (Teacher)
 
 Request:
+
 ```bash
 curl -X PUT http://localhost:8080/profile/c3d4e5f6-a7b8-4c5d-9e0f-3a4b5c6d7e8f \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtaWtlX3RlYWNoZXIi..." \
@@ -789,6 +884,7 @@ curl -X PUT http://localhost:8080/profile/c3d4e5f6-a7b8-4c5d-9e0f-3a4b5c6d7e8f \
 ```
 
 Response (200 OK):
+
 ```json
 {
   "userId": "c3d4e5f6-a7b8-4c5d-9e0f-3a4b5c6d7e8f",
@@ -812,6 +908,7 @@ Response (200 OK):
 #### Step 1: Register as School Admin
 
 Request:
+
 ```bash
 curl -X POST http://localhost:8080/auth/register \
   -H "Content-Type: application/json" \
@@ -825,6 +922,7 @@ curl -X POST http://localhost:8080/auth/register \
 ```
 
 Response (201 Created):
+
 ```json
 {
   "userId": "d4e5f6a7-b8c9-4d5e-0f1a-4b5c6d7e8f9a",
@@ -837,6 +935,7 @@ Response (201 Created):
 #### Step 2: Login as School Admin
 
 Request:
+
 ```bash
 curl -X POST http://localhost:8080/auth/login \
   -H "Content-Type: application/json" \
@@ -847,6 +946,7 @@ curl -X POST http://localhost:8080/auth/login \
 ```
 
 Response (200 OK):
+
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJsaXNhX2FkbWluIiwicm9sZSI6IlNDSE...",
@@ -860,12 +960,14 @@ Response (200 OK):
 #### Step 3: Get School Admin Permissions
 
 Request:
+
 ```bash
 curl -X GET http://localhost:8080/auth/permissions \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJsaXNhX2FkbWluIi..."
 ```
 
 Response (200 OK):
+
 ```json
 {
   "role": "SCHOOL_ADMIN",
@@ -883,12 +985,14 @@ Response (200 OK):
 #### Step 4: View Student Profile (School Admin)
 
 Request:
+
 ```bash
 curl -X GET http://localhost:8080/profile/a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJsaXNhX2FkbWluIi..."
 ```
 
 Response (200 OK):
+
 ```json
 {
   "userId": "a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d",
@@ -916,12 +1020,14 @@ Note: School Admin can view profiles of users in their school.
 #### Step 5: List All Profiles (School Admin)
 
 Request:
+
 ```bash
 curl -X GET "http://localhost:8080/profile?page=0&size=10" \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJsaXNhX2FkbWluIi..."
 ```
 
 Response (200 OK):
+
 ```json
 {
   "content": [
@@ -964,6 +1070,7 @@ Response (200 OK):
 #### Step 1: Register as Hatchloom Teacher
 
 Request:
+
 ```bash
 curl -X POST http://localhost:8080/auth/register \
   -H "Content-Type: application/json" \
@@ -976,6 +1083,7 @@ curl -X POST http://localhost:8080/auth/register \
 ```
 
 Response (201 Created):
+
 ```json
 {
   "userId": "e5f6a7b8-c9d0-4e5f-1a2b-5c6d7e8f9a0b",
@@ -990,6 +1098,7 @@ Note: HATCHLOOM_TEACHER does not require schoolId (cross-school global access).
 #### Step 2: Login as Hatchloom Teacher
 
 Request:
+
 ```bash
 curl -X POST http://localhost:8080/auth/login \
   -H "Content-Type: application/json" \
@@ -1000,6 +1109,7 @@ curl -X POST http://localhost:8080/auth/login \
 ```
 
 Response (200 OK):
+
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkYXZpZF9oYXRjaGxvb20iLCJyb2xlIj...",
@@ -1013,20 +1123,18 @@ Response (200 OK):
 #### Step 3: Get Hatchloom Teacher Permissions
 
 Request:
+
 ```bash
 curl -X GET http://localhost:8080/auth/permissions \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkYXZpZF9oYXRjaGxvb20i..."
 ```
 
 Response (200 OK):
+
 ```json
 {
   "role": "HATCHLOOM_TEACHER",
-  "permissions": [
-    "CreateGlobalCourses",
-    "ViewCourses",
-    "UpdateOwnCourses"
-  ],
+  "permissions": ["CreateGlobalCourses", "ViewCourses", "UpdateOwnCourses"],
   "scope": "CROSS_SCHOOL_GLOBAL"
 }
 ```
@@ -1034,6 +1142,7 @@ Response (200 OK):
 #### Step 4: Update Profile (Hatchloom Teacher)
 
 Request:
+
 ```bash
 curl -X PUT http://localhost:8080/profile/e5f6a7b8-c9d0-4e5f-1a2b-5c6d7e8f9a0b \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkYXZpZF9oYXRjaGxvb20i..." \
@@ -1047,6 +1156,7 @@ curl -X PUT http://localhost:8080/profile/e5f6a7b8-c9d0-4e5f-1a2b-5c6d7e8f9a0b \
 ```
 
 Response (200 OK):
+
 ```json
 {
   "userId": "e5f6a7b8-c9d0-4e5f-1a2b-5c6d7e8f9a0b",
@@ -1070,6 +1180,7 @@ Response (200 OK):
 #### Step 1: Register as Hatchloom Admin
 
 Request:
+
 ```bash
 curl -X POST http://localhost:8080/auth/register \
   -H "Content-Type: application/json" \
@@ -1082,6 +1193,7 @@ curl -X POST http://localhost:8080/auth/register \
 ```
 
 Response (201 Created):
+
 ```json
 {
   "userId": "f6a7b8c9-d0e1-4f5a-2b3c-6d7e8f9a0b1c",
@@ -1094,6 +1206,7 @@ Response (201 Created):
 #### Step 2: Login as Hatchloom Admin
 
 Request:
+
 ```bash
 curl -X POST http://localhost:8080/auth/login \
   -H "Content-Type: application/json" \
@@ -1104,6 +1217,7 @@ curl -X POST http://localhost:8080/auth/login \
 ```
 
 Response (200 OK):
+
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbl9zdXBlciIsInJvbGUiOiJIQV...",
@@ -1117,12 +1231,14 @@ Response (200 OK):
 #### Step 3: Get Hatchloom Admin Permissions
 
 Request:
+
 ```bash
 curl -X GET http://localhost:8080/auth/permissions \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbl9zdXBlciI..."
 ```
 
 Response (200 OK):
+
 ```json
 {
   "role": "HATCHLOOM_ADMIN",
@@ -1139,12 +1255,14 @@ Response (200 OK):
 #### Step 4: View Any User Profile (Hatchloom Admin)
 
 Request:
+
 ```bash
 curl -X GET http://localhost:8080/profile/a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbl9zdXBlciI..."
 ```
 
 Response (200 OK):
+
 ```json
 {
   "userId": "a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d",
@@ -1172,12 +1290,14 @@ Note: Hatchloom Admin can view any user profile across all schools.
 #### Step 5: List All Profiles (Hatchloom Admin)
 
 Request:
+
 ```bash
 curl -X GET "http://localhost:8080/profile?page=0&size=20" \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbl9zdXBlciI..."
 ```
 
 Response (200 OK):
+
 ```json
 {
   "content": [
@@ -1251,12 +1371,14 @@ Note: Hatchloom Admin can list all users across all schools and roles.
 #### Step 6: Validate Token (Any Role)
 
 Request:
+
 ```bash
 curl -X GET http://localhost:8080/auth/validate \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbl9zdXBlciI..."
 ```
 
 Response (200 OK):
+
 ```json
 {
   "valid": true,
@@ -1273,6 +1395,7 @@ Response (200 OK):
 #### Refresh Expired Access Token
 
 Request:
+
 ```bash
 curl -X POST http://localhost:8080/auth/refresh \
   -H "Content-Type: application/json" \
@@ -1282,6 +1405,7 @@ curl -X POST http://localhost:8080/auth/refresh \
 ```
 
 Response (200 OK):
+
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlbW1hX3N0dWRlbnQiLCJyb2xlIjoi...",
@@ -1301,6 +1425,7 @@ Note: Both access and refresh tokens are renewed. Refresh tokens expire after 7 
 #### Duplicate Email Registration
 
 Request:
+
 ```bash
 curl -X POST http://localhost:8080/auth/register \
   -H "Content-Type: application/json" \
@@ -1315,6 +1440,7 @@ curl -X POST http://localhost:8080/auth/register \
 ```
 
 Response (400 Bad Request):
+
 ```json
 {
   "status": 400,
@@ -1328,6 +1454,7 @@ Note: Generic error prevents email enumeration attacks.
 #### Invalid Credentials
 
 Request:
+
 ```bash
 curl -X POST http://localhost:8080/auth/login \
   -H "Content-Type: application/json" \
@@ -1338,6 +1465,7 @@ curl -X POST http://localhost:8080/auth/login \
 ```
 
 Response (401 Unauthorized):
+
 ```json
 {
   "status": 401,
@@ -1349,12 +1477,14 @@ Response (401 Unauthorized):
 #### Expired Token
 
 Request:
+
 ```bash
 curl -X GET http://localhost:8080/auth/validate \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.EXPIRED_TOKEN..."
 ```
 
 Response (401 Unauthorized):
+
 ```json
 {
   "valid": false,
@@ -1365,11 +1495,13 @@ Response (401 Unauthorized):
 #### Missing Authorization Header
 
 Request:
+
 ```bash
 curl -X GET http://localhost:8080/profile/a1b2c3d4-e5f6-4a5b-8c9d-1e2f3a4b5c6d
 ```
 
 Response (401 Unauthorized):
+
 ```json
 {
   "status": 401,
@@ -1381,12 +1513,14 @@ Response (401 Unauthorized):
 #### Insufficient Permissions
 
 Request (Student trying to list all profiles):
+
 ```bash
 curl -X GET "http://localhost:8080/profile?page=0&size=20" \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlbW1hX3N0dWRlbnQi..."
 ```
 
 Response (403 Forbidden):
+
 ```json
 {
   "status": 403,
@@ -1398,12 +1532,14 @@ Response (403 Forbidden):
 #### User Not Found
 
 Request:
+
 ```bash
 curl -X GET http://localhost:8080/profile/00000000-0000-0000-0000-000000000000 \
   -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbl9zdXBlciI..."
 ```
 
 Response (404 Not Found):
+
 ```json
 {
   "status": 404,
@@ -1416,20 +1552,21 @@ Response (404 Not Found):
 
 ## Summary of User Type Requirements
 
-| User Type | Required Fields | schoolId | age | Access Scope |
-|-----------|----------------|----------|-----|--------------|
-| STUDENT | username, email, password, role, schoolId, age | ✓ | ✓ | Own data only |
-| PARENT | username, email, password, role | ✗ | ✗ | Linked children only |
-| SCHOOL_TEACHER | username, email, password, role, schoolId | ✓ | ✗ | Single school |
-| SCHOOL_ADMIN | username, email, password, role, schoolId | ✓ | ✗ | Single school |
-| HATCHLOOM_TEACHER | username, email, password, role | ✗ | ✗ | Cross-school global |
-| HATCHLOOM_ADMIN | username, email, password, role | ✗ | ✗ | Unrestricted |
+| User Type         | Required Fields                                | schoolId | age | Access Scope         |
+| ----------------- | ---------------------------------------------- | -------- | --- | -------------------- |
+| STUDENT           | username, email, password, role, schoolId, age | ✓        | ✓   | Own data only        |
+| PARENT            | username, email, password, role                | ✗        | ✗   | Linked children only |
+| SCHOOL_TEACHER    | username, email, password, role, schoolId      | ✓        | ✗   | Single school        |
+| SCHOOL_ADMIN      | username, email, password, role, schoolId      | ✓        | ✗   | Single school        |
+| HATCHLOOM_TEACHER | username, email, password, role                | ✗        | ✗   | Cross-school global  |
+| HATCHLOOM_ADMIN   | username, email, password, role                | ✗        | ✗   | Unrestricted         |
 
 ---
 
 ## Quick Testing Guide
 
 Basic workflow for testing:
+
 ```bash
 # 1. Register user
 curl -X POST http://localhost:8080/auth/register \
@@ -1480,16 +1617,19 @@ Docker and Docker Compose
 ## Running the Application
 
 Docker Compose:
+
 ```bash
 docker-compose up -d
 ```
 
 Start the Application:
+
 ```bash
 mvn spring-boot:run
 ```
 
 Or with Maven wrapper:
+
 ```bash
 ./mvnw spring-boot:run
 ```
@@ -1509,6 +1649,54 @@ Source code located at: src/main/java/com/hatchloom/user/user_service/
 - security: JWT and session management
 - service: Business logic
 - strategy: Authorization strategies
+
+## OIDC / Token Discovery Endpoints
+
+The User Service exposes standard OpenID Connect discovery endpoints. These are consumed by the LaunchPad service (and any other JWT resource server) to validate tokens.
+
+### GET `/.well-known/openid-configuration`
+
+Returns the OIDC discovery metadata, including the JWKS URI.
+
+No authentication required.
+
+Response (200 OK):
+
+```json
+{
+  "issuer": "http://localhost:8081",
+  "jwks_uri": "http://localhost:8081/.well-known/jwks.json",
+  "id_token_signing_alg_values_supported": ["RS256"],
+  "subject_types_supported": ["public"]
+}
+```
+
+---
+
+### GET `/.well-known/jwks.json`
+
+Returns the RSA public key in JWK Set format for token signature verification.
+
+No authentication required.
+
+Response (200 OK):
+
+```json
+{
+  "keys": [
+    {
+      "kty": "RSA",
+      "use": "sig",
+      "alg": "RS256",
+      "kid": "user-service-rs256",
+      "n": "<base64url encoded modulus>",
+      "e": "<base64url encoded exponent>"
+    }
+  ]
+}
+```
+
+---
 
 ## References
 

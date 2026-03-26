@@ -284,7 +284,10 @@ com.hatchloom.launchpad/
 │       └── SideHustleSummary.java
 │
 ├── config/
-│   └── SecurityConfig.java          # OAuth2 resource server + public endpoint list
+│   ├── SecurityConfig.java          # OAuth2 resource server + public endpoint list
+│   ├── JwtDecoderConfig.java        # JWT decoder pointing to Auth service OIDC discovery
+│   ├── DevSecurityConfig.java       # Dev profile: disables JWT validation (SPRING_PROFILES_ACTIVE=dev)
+│   └── DevAuthFilter.java           # Dev profile: injects synthetic user principal for local testing
 │
 ├── controller/                      # HTTP layer - one controller per resource
 │   ├── LaunchPadHomeController.java
@@ -388,7 +391,7 @@ All endpoints require a valid `Authorization: Bearer <JWT>` header unless marked
 
 | Method | Path                                                        | Auth       | Body                          | Response                           | Notes                        |
 | ------ | ----------------------------------------------------------- | ---------- | ----------------------------- | ---------------------------------- | ---------------------------- |
-| `POST` | `/launchpad/sidehustles/{id}/positions`                     | JWT        | `CreatePositionRequest`       | `201 PositionResponse`             | Sets `hasOpenPositions=true` |
+| `POST` | `/launchpad/sidehustles/{id}/positions`                     | JWT        | `CreatePositionRequest`       | `200 PositionResponse`             | Sets `hasOpenPositions=true` |
 | `GET`  | `/launchpad/sidehustles/{id}/positions`                     | JWT        | -                             | `List<PositionResponse>`           |                              |
 | `PUT`  | `/launchpad/sidehustles/{id}/positions/{positionId}/status` | JWT        | `UpdatePositionStatusRequest` | `PositionResponse`                 | State machine enforced       |
 | `GET`  | `/launchpad/positions/{positionId}/status`                  | **Public** | -                             | `"OPEN"` / `"FILLED"` / `"CLOSED"` | Position Status Interface    |
