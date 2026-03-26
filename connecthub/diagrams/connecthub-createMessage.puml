@@ -1,0 +1,68 @@
+@startuml
+actor User
+participant Client
+participant Browser
+
+participant MessageController
+participant MessageService
+participant ConversationRepository
+participant MessageRepository
+
+database Database
+
+User -> Client : Clicks "Create Message" button
+Client -> Browser : POST /api/message/{recipientId}/send\nContent-Type: application/json\nBody: SendMessageRequest request
+
+Browser -> MessageController : POST /api/message/{recipientId}/send
+activate MessageController
+
+MessageController -> MessageController : parse JSON -> SendMessageRequest request
+MessageController -> MessageService : sendMessage(recipientId, request)
+activate MessageService
+
+MessageService -> MessageService : validate senderID, recipient ID, message content
+alt Validation fails
+    MessageService --> MessageController : throw IllegalArgumentException
+    deactivate MessageService
+    MessageController -> MessageController : catch IllegalArgumentException
+    MessageController --> Browser : HTTP 400 Bad Request
+    deactivate MessageController
+    Browser --> Client : 400 BAD REQUEST
+    Client -> User : Show validation error
+end
+
+MessageService -> MessageService : getOrCreateConversation(senderId, recipientId)
+MessageService -> ConversationRepository : findByUser1IdAndUser2Id(lesserId, greaterId)
+
+activate ConversationRepository
+ConversationRepository -> Database : Query for conversation between sender and recipient
+Database --> ConversationRepository : Return conversation data or null
+ConversationRepository --> MessageService : Return conversation or null
+deactivate ConversationRepository
+
+alt Conversation does not exist
+    MessageService -> ConversationRepository : create new conversation
+    activate ConversationRepository
+    ConversationRepository -> Database : Insert new conversation record
+    Database --> ConversationRepository : Return created conversation
+    ConversationRepository --> MessageService : Return created conversation
+    deactivate ConversationRepository
+end
+
+MessageService -> MessageRepository : save new message
+MessageService -> MessageService : notify recipient for new message
+activate MessageRepository
+MessageRepository -> Database : Insert new message and link it to the conversation
+
+Database --> MessageRepository : Return saved message
+MessageRepository --> MessageService : Return saved message
+deactivate MessageRepository
+
+MessageService -> MessageController : Return new SendMessageResponse
+deactivate MessageService
+MessageController --> Browser : HTTP 201 Created + SendMessageResponse
+deactivate MessageController
+
+Browser --> Client : 201 Created + SendMessageResponse
+Client -> User : Show message sent confirmation
+@enduml

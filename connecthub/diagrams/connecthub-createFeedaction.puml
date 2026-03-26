@@ -1,0 +1,60 @@
+@startuml
+actor User
+participant Client
+participant Browser
+
+participant FeedActionController
+participant FeedActionService
+participant FeedPostRepository
+participant FeedActionRepository
+
+database Database
+
+
+User -> Client : Clicks Like button on a feed post
+Client -> Browser : POST /api/feed/actions/like\nContent-Type: application/json\nBody: LikeRequest request
+
+Browser -> FeedActionController : POST /api/feed/actions/like
+activate FeedActionController
+
+FeedActionController -> FeedActionController : parse JSON -> LikeRequest request
+FeedActionController -> FeedActionService : likePost(request)
+
+activate FeedActionService
+FeedActionService -> FeedActionService : validate post ID, existing like
+
+alt Validation fails
+    FeedActionService --> FeedActionController : throw IllegalArgumentException
+    deactivate FeedActionService
+    FeedActionController -> FeedActionController : catch IllegalArgumentException
+    FeedActionController --> Browser : HTTP 400 Bad Request
+    deactivate FeedActionController
+    Browser --> Client : 400 BAD REQUEST
+    Client -> User : Show validation error
+end
+
+FeedActionService -> FeedPostRepository : getPostById(postId)
+activate FeedPostRepository
+
+FeedPostRepository -> Database : Query for post by ID
+Database --> FeedPostRepository : Return post data
+
+FeedPostRepository --> FeedActionService : Return post data
+deactivate FeedPostRepository
+
+FeedActionService -> FeedActionRepository : save like action
+activate FeedActionRepository
+
+FeedActionRepository -> Database : Insert into feed action table
+Database --> FeedActionRepository : Like action saved
+FeedActionRepository --> FeedActionService : Return saved like action
+deactivate FeedActionRepository
+
+FeedActionService -> FeedActionController : Return success response
+deactivate FeedActionService
+FeedActionController --> Browser : HTTP 201 Created "Post liked successfully"
+deactivate FeedActionController
+Browser --> Client : 201 Created + success message
+Client -> User : Show like action success message
+
+@enduml

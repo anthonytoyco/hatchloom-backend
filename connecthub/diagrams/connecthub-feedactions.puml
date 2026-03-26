@@ -1,0 +1,22 @@
+@startuml
+abstract class Post {
+- id: Integer
+- title: String
+- content: String
+- author: UUID
+- createdAt: LocalDateTime
+}
+
+class FeedAction {
+- id: Integer
+- Post post
+- postId: Integer
+- userId: UUID
+- actionType: String
+- commentText: String
+- parentActionId: Integer
+- createdAt: LocalDateTime
+}
+
+FeedAction -right-> Post : acts on
+@enduml

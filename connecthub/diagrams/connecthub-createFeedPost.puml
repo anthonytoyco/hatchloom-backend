@@ -1,0 +1,57 @@
+@startuml
+
+actor User
+participant Client
+participant Browser
+
+participant FeedPostController
+participant FeedPostService
+participant FeedPostRepository
+
+database Database
+
+User -> Client : Click "Create Post"
+Client -> User : Show post creation form
+
+User -> Client : Fill out form and submit
+Client -> Browser : POST /api/feed/\nContent-Type: application/json\nBody: PostCreationRequest
+
+Browser -> FeedPostController : POST /api/feed
+
+activate FeedPostController
+FeedPostController -> FeedPostController : parse JSON -> PostCreationRequest
+FeedPostController -> FeedPostService : createFeedPost(request)
+activate FeedPostService
+
+FeedPostService -> FeedPostService : validate title, content, authorId, postType
+
+alt Validation fails
+    FeedPostService --> FeedPostController : throw IllegalArgumentException
+    deactivate FeedPostService
+    FeedPostController -> FeedPostController : catch IllegalArgumentException
+    FeedPostController --> Browser : HTTP 400 Bad Request
+    deactivate FeedPostController
+    Browser --> Client : 400 BAD REQUEST
+    Client -> User : Show validation error
+end
+
+FeedPostService -> FeedPostService : switch(request.postType)\ncase "share" -> new SharePost(...)\ncase "announcement" -> new AnnouncementPost(...)\ncase "achievement" -> new AchievementPost(...)
+FeedPostService -> FeedPostRepository : save(post)
+activate FeedPostRepository
+
+FeedPostRepository -> Database : INSERT INTO posts
+Database --> FeedPostRepository : Post is saved
+
+FeedPostRepository --> FeedPostService : return saved Post
+deactivate FeedPostRepository
+
+FeedPostService --> FeedPostController : return saved Post
+deactivate FeedPostService
+
+FeedPostController --> Browser : HTTP 201 Created\nBody: saved Post
+deactivate FeedPostController
+
+Browser --> Client : 201 Created + Post JSON
+Client -> User : Update feed with new post
+
+@enduml

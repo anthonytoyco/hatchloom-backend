@@ -96,6 +96,9 @@ note right of AuthCtrl
   POST /auth/refresh
   GET /auth/validate
   GET /auth/permissions
+  POST /auth/link-parent/{studentId}
+  GET /.well-known/openid-configuration
+  GET /.well-known/jwks.json
 end note
 
 note right of ProfileCtrl

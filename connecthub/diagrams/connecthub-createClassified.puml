@@ -1,0 +1,54 @@
+@startuml
+actor User
+participant Client
+participant Browser
+
+participant ClassifiedPostController
+participant ClassifiedPostService
+participant ClassifiedPostRepository
+
+database Database
+
+User -> Client : Click "Create Classified Post"
+Client -> User : Show classified post creation form
+
+User -> Client : Fill out form and submit
+Client -> Browser : POST /api/classified\nContent-Type: application/json\nBody: ClassifiedPostCreationRequest
+
+Browser -> ClassifiedPostController : POST /api/classified
+activate ClassifiedPostController
+ClassifiedPostController -> ClassifiedPostController : parse JSON -> ClassifiedPostCreationRequest
+ClassifiedPostController -> ClassifiedPostService : createClassifiedPost(request)
+
+activate ClassifiedPostService
+ClassifiedPostService -> ClassifiedPostService : validate title, content, projectId, authorId, status
+
+alt Validation fails
+    ClassifiedPostService --> ClassifiedPostController : throw IllegalArgumentException
+    deactivate ClassifiedPostService
+    ClassifiedPostController -> ClassifiedPostController : catch IllegalArgumentException
+    ClassifiedPostController --> Browser : HTTP 400 Bad Request
+    deactivate ClassifiedPostController
+    Browser --> Client : 400 BAD REQUEST
+    Client -> User : Show validation error
+end
+
+ClassifiedPostService -> ClassifiedPostRepository : save(classifiedPost)
+ClassifiedPostService -> ClassifiedPostService : notify subscribers about new post
+activate ClassifiedPostRepository
+ClassifiedPostRepository -> Database : INSERT INTO classified_posts
+
+Database --> ClassifiedPostRepository : Classified post is saved
+ClassifiedPostRepository --> ClassifiedPostService : return saved ClassifiedPost
+deactivate ClassifiedPostRepository
+
+ClassifiedPostService --> ClassifiedPostController : return saved ClassifiedPost
+deactivate ClassifiedPostService
+
+ClassifiedPostController --> Browser : HTTP 201 Created\nBody: saved ClassifiedPost
+deactivate ClassifiedPostController
+
+Browser --> Client : 201 Created + ClassifiedPost JSON
+Client -> User : Update classified posts feed with new post
+
+@enduml

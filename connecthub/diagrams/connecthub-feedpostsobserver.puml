@@ -1,0 +1,70 @@
+@startuml
+class ClassifiedPost {
+- id: Integer
+- title: String
+- content: String
+- author: UUID
+- projectId: UUID
+- positionId: UUID
+- assignedTo: UUID
+- status: String
+- createdAt: LocalDateTime
+- updatedAt: LocalDateTime
+}
+
+class NotificationService <<service>> {
++ createNotification(NotificationBuilder builder): void
+
+}
+
+enum ClassifiedStatus {
+OPEN,
+CLOSED,
+PENDING
+}
+
+class ClassifiedSubscription {
+- id: Integer
+- userId: UUID
+- createdAt: LocalDateTime
+}
+
+interface ClassifiedObserver {
++ update(ClassifiedPost post, UUID receiverUserId): void
+}
+
+interface ClassifiedSubject {
++ subscribe(UUID userId): void
++ unsubscribe(UUID userId): void
++ notifyObservers(ClassifiedPost post, UUID receiverUserId): void
+}
+
+class ClassifiedNotificationObserver implements ClassifiedObserver {
++ update(ClassifiedPost post, UUID receiverUserId): void
+}
+
+class ClassifiedPostFeed implements ClassifiedSubject {
++ subscribe(UUID userId): void
++ unsubscribe(UUID userId): void
++ notifyObservers(ClassifiedPost post, UUID receiverUserId): void
+}
+
+class ClassifiedPostService <<service>> {
++ createClassifiedPost(ClassifiedPostRequest request): ClassifiedPost
+}
+
+class ClassifiedSubscriptionService <<service>> {
++ subscribe(UUID userId): void
++ unsubscribe(UUID userId): void
+}
+
+ClassifiedPost --> ClassifiedStatus : has
+ClassifiedPostFeed "1" o-- "*" ClassifiedObserver : observes
+ClassifiedPostFeed --> ClassifiedSubscriptionService : uses
+ClassifiedSubscriptionService --> ClassifiedSubscription : manages
+
+ClassifiedPostService ..> ClassifiedPost : creates
+ClassifiedNotificationObserver ..> NotificationService : uses
+
+
+@enduml

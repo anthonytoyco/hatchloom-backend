@@ -1,0 +1,44 @@
+
+@startuml
+
+abstract class PostFactory {
+ + createPost(String title, String content, UUID authorId): Post
+}
+
+class ShareFactory {
+    + createPost(String title, String content, UUID authorId): Post
+}
+
+class AchievementFactory {
+    + createPost(String title, String content, UUID authorId): Post
+}
+
+class AnnouncementFactory {
+    + createPost(String title, String content, UUID authorId): Post
+}
+
+abstract class Post {
+- id: Integer
+- title: String
+- content: String
+- author: UUID
+- createdAt: LocalDateTime
+}
+
+class SharePost extends Post {
+- postType: String
+}
+
+class AchievementPost extends Post {
+- postType: String
+}
+
+class AnnouncementPost extends Post {
+- postType: String
+}
+
+PostFactory .right.> Post : creates
+ShareFactory -up-|> PostFactory
+AchievementFactory -up-|> PostFactory
+AnnouncementFactory -down-|> PostFactory
+@enduml

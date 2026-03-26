@@ -1,0 +1,45 @@
+@startuml
+actor User
+participant Client
+participant Browser
+
+participant FeedPostController
+participant FeedPostService
+participant CursorPaginationService
+participant FeedPostRepository
+
+database Database
+
+User -> Client : Visit Feed Page
+Client -> Browser : GET /api/feed/
+
+Browser -> FeedPostController : GET /api/feed
+activate FeedPostController
+
+FeedPostController -> FeedPostService : getAllFeedPosts(after, limit)
+activate FeedPostService
+
+FeedPostService -> CursorPaginationService : paginate(after, limit, ...)
+activate CursorPaginationService
+
+CursorPaginationService -> FeedPostRepository : findAllWithCursor(createdAt, cursorId, pageable)
+activate FeedPostRepository
+
+FeedPostRepository -> Database : Query for posts
+Database --> FeedPostRepository : Return list of posts
+FeedPostRepository --> CursorPaginationService : Return list of posts
+deactivate FeedPostRepository
+
+CursorPaginationService --> FeedPostService : Return paginated posts
+deactivate CursorPaginationService
+
+FeedPostService --> FeedPostController : Return paginated posts
+deactivate FeedPostService
+
+FeedPostController --> Browser : HTTP 200 OK with paginated posts json
+deactivate FeedPostController
+
+Browser --> Client : 200 OK with paginated posts json
+Client -> User : Display first page of posts with pagination
+
+@enduml

@@ -1,0 +1,96 @@
+@startuml
+enum NotificationType {
+MESSAGE,
+CLASSIFIED_CREATED
+}
+
+class Conversation {
+- id: UUID
+- user1Id: UUID
+- user2Id: UUID
+- createdAt: LocalDateTime
+}
+
+class Messages {
+- id: UUID
+- conversation_id: Conversation
+- senderId: UUID
+- content: String
+- createdAt: LocalDateTime
+}
+
+class Notification {
+- id: Integer
+- recipientUserId: UUID
+- senderUserId: UUID
+- type: NotificationType
+- message: String
+- classifiedPostId: Integer
+- conversationId: UUID
+- messageId: UUID
+- isRead: boolean
+- createdAt: LocalDateTime
+- readAt: LocalDateTime
+}
+
+Messages "*" --> "1" Conversation : belongs to
+Notification --> Conversation : related to
+Notification --> Messages : related to
+Notification --> NotificationType : uses
+
+interface MessageObserver {
++ update(Messages message, UUID receiverUserId): void
+}
+
+class MessageService <<service>> {
++ sendMessage(UUID conversationId, UUID senderId, UUID recipientId, String content): SendMessageResponse
++ getOrCreateConversation(UUID senderId, UUID recipientId): Conversation
++ getConversationMessages(UUID conversationId, UUID userId): List<MessageResponse>
++ getUserConversations(UUID userId): List<ConversationResponse>
+}
+
+class MessageNotificationObserver implements MessageObserver {
++ update(Messages message, UUID receiverUserId): void
+}
+
+MessageService -down-> MessageNotificationObserver : notifies
+
+interface Builder {
++ setRecipientUserId(UUID recipientUserId): Builder
++ setSenderUserId(UUID senderUserId): Builder
++ setType(NotificationType type): Builder
++ setMessage(String message): Builder
++ setClassifiedPostId(Integer classifiedPostId): Builder
++ setConversationId(UUID conversationId): Builder
++ setMessageId(UUID messageId): Builder
++ build(): Notification
+}
+
+class NotificationBuilder implements Builder {
+- recipientUserId: UUID
+- senderUserId: UUID
+- type: NotificationType
+- message: String
+- classifiedPostId: Integer
+- conversationId: UUID
+- messageId: UUID
+
++ setRecipientUserId(UUID recipientUserId): NotificationBuilder
++ setSenderUserId(UUID senderUserId): NotificationBuilder
++ setType(NotificationType type): NotificationBuilder
++ setMessage(String message): NotificationBuilder
++ setClassifiedPostId(Integer classifiedPostId): NotificationBuilder
++ setConversationId(UUID conversationId): NotificationBuilder
++ setMessageId(UUID messageId): NotificationBuilder
++ build(): Notification
+}
+
+class NotificationService <<service>> {
++ createNotification(NotificationBuilder builder): void
+}
+
+NotificationBuilder .right.> Notification : builds
+MessageNotificationObserver .down.> NotificationService : uses
+NotificationService .right.> NotificationBuilder : uses
+
+@enduml

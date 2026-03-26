@@ -1,0 +1,27 @@
+@startuml
+class SideHustle {
+}
+
+enum ClassifiedStatus {
+OPEN,
+CLOSED,
+PENDING
+}
+
+class ClassifiedPost {
+- id: Integer
+- title: String
+- content: String
+- author: UUID
+- projectId: UUID
+- positionId: UUID
+- assignedTo: UUID
+- status: String
+- createdAt: LocalDateTime
+- updatedAt: LocalDateTime
+}
+
+SideHustle "1" -- "0..*" ClassifiedPost : creates
+ClassifiedPost "1" -right- "1" ClassifiedStatus : has
+
+@enduml
