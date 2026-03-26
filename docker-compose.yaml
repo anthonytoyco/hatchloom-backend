@@ -83,6 +83,7 @@ services:
       args:
         VITE_API_BASE_URL: /api
         VITE_CONNECTHUB_URL: http://localhost:5173
+        VITE_CONNECTHUB_API_URL: http://localhost:8083
     ports:
       - "4173:80"
     depends_on:

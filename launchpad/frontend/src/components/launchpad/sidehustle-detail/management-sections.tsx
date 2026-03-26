@@ -23,8 +23,9 @@ import type {
   TeamMember,
 } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { getAuthToken } from "@/lib/api-client"
 import { Plus } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -373,6 +374,15 @@ const CONNECTHUB_URL: string =
   (import.meta.env.VITE_CONNECTHUB_URL as string | undefined) ??
   "http://localhost:5173"
 
+const CONNECTHUB_API_URL: string =
+  (import.meta.env.VITE_CONNECTHUB_API_URL as string | undefined) ??
+  "http://localhost:8080"
+
+interface ClassifiedInfo {
+  id: number
+  status: string
+}
+
 function buildClassifiedsUrl(positionId: string, sideHustleId: string): string {
   return `${CONNECTHUB_URL}/classifieds?positionId=${positionId}&projectId=${sideHustleId}`
 }
@@ -389,6 +399,75 @@ export function PositionsSection({
   const [newDesc, setNewDesc] = useState("")
   const createPosition = useCreatePosition(sideHustleId)
   const updateStatus = useUpdatePositionStatus()
+
+  // Map positionId → classified post info (null = no classified exists yet)
+  const [classifiedMap, setClassifiedMap] = useState<
+    Record<string, ClassifiedInfo | null>
+  >({})
+
+  const loadClassifieds = useCallback(async () => {
+    const openPositions = positions.filter((p) => p.status === "OPEN")
+    if (openPositions.length === 0) return
+    const token = getAuthToken()
+    const results = await Promise.allSettled(
+      openPositions.map(async (p) => {
+        const res = await fetch(
+          `${CONNECTHUB_API_URL}/api/classified/by-position/${p.id}`,
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          }
+        )
+        const classified = res.ok
+          ? ((await res.json()) as ClassifiedInfo)
+          : null
+        return { positionId: p.id, classified }
+      })
+    )
+    const map: Record<string, ClassifiedInfo | null> = {}
+    for (const r of results) {
+      if (r.status === "fulfilled") map[r.value.positionId] = r.value.classified
+    }
+    setClassifiedMap((prev) => ({ ...prev, ...map }))
+  }, [positions])
+
+  useEffect(() => {
+    void loadClassifieds()
+    // Re-check when the user returns from another tab (e.g. after posting a classified in ConnectHub)
+    const onFocus = () => void loadClassifieds()
+    window.addEventListener("focus", onFocus)
+    return () => window.removeEventListener("focus", onFocus)
+  }, [loadClassifieds])
+
+  // Best-effort sync: when a position transitions, update the linked classified post status too.
+  // Always does a fresh GET to avoid stale classifiedMap (e.g. classified was created in another tab).
+  async function syncClassifiedStatus(positionId: string, newStatus: string) {
+    const token = getAuthToken()
+    try {
+      const checkRes = await fetch(
+        `${CONNECTHUB_API_URL}/api/classified/by-position/${positionId}`,
+        { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+      )
+      if (!checkRes.ok) return
+      const existing = (await checkRes.json()) as ClassifiedInfo
+      await fetch(
+        `${CONNECTHUB_API_URL}/api/classified/${existing.id}/status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ newStatus }),
+        }
+      )
+      setClassifiedMap((prev) => ({
+        ...prev,
+        [positionId]: { ...existing, status: newStatus },
+      }))
+    } catch {
+      // Best-effort: ConnectHub sync failure should not block LaunchPad transitions
+    }
+  }
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
@@ -486,25 +565,38 @@ export function PositionsSection({
                 )}
               </div>
               <div className="flex shrink-0 items-center gap-1.5">
-                {p.status === "OPEN" && (
-                  <a
-                    href={buildClassifiedsUrl(p.id, sideHustleId)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 font-heading text-[0.6rem] font-bold text-blue-700 transition-all hover:opacity-80"
-                  >
-                    Post to Classifieds ↗
-                  </a>
-                )}
+                {p.status === "OPEN" &&
+                  (classifiedMap[p.id] ? (
+                    <a
+                      href={`${CONNECTHUB_URL}/classifieds`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-full border border-teal-200 bg-teal-50 px-2 py-0.5 font-heading text-[0.6rem] font-bold text-teal-700 transition-all hover:opacity-80"
+                    >
+                      View on ConnectHub ↗
+                    </a>
+                  ) : (
+                    <a
+                      href={buildClassifiedsUrl(p.id, sideHustleId)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 font-heading text-[0.6rem] font-bold text-blue-700 transition-all hover:opacity-80"
+                    >
+                      Post to Classifieds ↗
+                    </a>
+                  ))}
                 <button
                   onClick={() => {
                     const nextStatus = NEXT_STATUS[p.status]
                     if (!nextStatus) return
-                    void updateStatus.mutateAsync({
-                      positionId: p.id,
-                      status: nextStatus,
-                      sideHustleId,
-                    })
+                    void (async () => {
+                      await updateStatus.mutateAsync({
+                        positionId: p.id,
+                        status: nextStatus,
+                        sideHustleId,
+                      })
+                      await syncClassifiedStatus(p.id, nextStatus.toLowerCase())
+                    })()
                   }}
                   disabled={!NEXT_STATUS[p.status] || updateStatus.isPending}
                   className={cn(

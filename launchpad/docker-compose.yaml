@@ -35,6 +35,8 @@ services:
         # VITE_* vars are baked into the static bundle at build time.
         # Browser hits frontend nginx at /api, which proxies to backend.
         VITE_API_BASE_URL: "/api"
+        # ConnectHub API URL - browser-accessible address for cross-service calls
+        VITE_CONNECTHUB_API_URL: "http://localhost:8080"
     ports:
       - "4173:80"
     depends_on:

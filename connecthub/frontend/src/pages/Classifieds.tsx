@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
+import axios from "axios";
 import apiClient from "../api/client";
 import type { ClassifiedPost, ClassifiedStatus } from "../types/classified";
 import type { CursorResponse } from "../types/post";
@@ -28,11 +29,11 @@ function ClassifiedCard({
   return (
     <div className="border-border bg-card w-full rounded-2xl border-[1.5px] p-5 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
       <div className="mb-2 flex items-start justify-between gap-3">
-        <h3 className="font-display text-charcoal text-[0.9rem] font-extrabold leading-snug">
+        <h3 className="font-display text-charcoal text-[0.9rem] leading-snug font-extrabold">
           {post.title}
         </h3>
         <span
-          className={`shrink-0 rounded-full border px-2.5 py-0.5 font-display text-[0.65rem] font-extrabold uppercase ${
+          className={`font-display shrink-0 rounded-full border px-2.5 py-0.5 text-[0.65rem] font-extrabold uppercase ${
             STATUS_STYLE[post.status] ?? STATUS_STYLE.open
           }`}
         >
@@ -66,7 +67,7 @@ function ClassifiedCard({
 }
 
 function Classifieds() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const prefilledPositionId = searchParams.get("positionId") ?? "";
   const prefilledProjectId = searchParams.get("projectId") ?? "";
 
@@ -95,6 +96,24 @@ function Classifieds() {
   const [applyError, setApplyError] = useState<string | null>(null);
   const [applySuccess, setApplySuccess] = useState<string | null>(null);
 
+  // Check whether a classified post already exists for the pre-filled position (prevents duplicates)
+  const [existingClassified, setExistingClassified] =
+    useState<ClassifiedPost | null>(null);
+  const [positionCheckDone, setPositionCheckDone] =
+    useState(!prefilledPositionId);
+
+  useEffect(() => {
+    if (!prefilledPositionId) {
+      setPositionCheckDone(true);
+      return;
+    }
+    apiClient
+      .get<ClassifiedPost>(`/api/classified/by-position/${prefilledPositionId}`)
+      .then((res) => setExistingClassified(res.data))
+      .catch(() => setExistingClassified(null))
+      .finally(() => setPositionCheckDone(true));
+  }, [prefilledPositionId]);
+
   const fetchPosts = useCallback(
     async (cursor: string | null = null, status: ClassifiedStatus = "open") => {
       if (isLoadingRef.current) return;
@@ -105,7 +124,11 @@ function Classifieds() {
         const response = await apiClient.get<CursorResponse<ClassifiedPost>>(
           "/api/classified",
           {
-            params: { limit: POSTS_PER_PAGE, after: cursor, statusType: status },
+            params: {
+              limit: POSTS_PER_PAGE,
+              after: cursor,
+              statusType: status,
+            },
           },
         );
 
@@ -190,10 +213,17 @@ function Classifieds() {
         status: "open",
       });
       setIsCreateOpen(false);
+      // Clear URL query params so a refresh doesn't re-open the prefilled form
+      if (prefilledPositionId || prefilledProjectId) {
+        setSearchParams({}, { replace: true });
+      }
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : "Could not create classified post.";
-      setCreateError(msg);
+      if (axios.isAxiosError(err)) {
+        const data = err.response?.data;
+        setCreateError(typeof data === "string" && data ? data : err.message);
+      } else {
+        setCreateError("Could not create classified post.");
+      }
     } finally {
       setIsCreating(false);
     }
@@ -206,9 +236,16 @@ function Classifieds() {
       await apiClient.post(`/api/classified/${postId}/apply`);
       setApplySuccess("Application submitted successfully.");
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : "Could not apply. Try again.";
-      setApplyError(msg);
+      if (axios.isAxiosError(err)) {
+        const data = err.response?.data;
+        setApplyError(
+          typeof data === "string" && data
+            ? data
+            : "Could not apply. Try again.",
+        );
+      } else {
+        setApplyError("Could not apply. Try again.");
+      }
     }
   };
 
@@ -295,7 +332,26 @@ function Classifieds() {
               </button>
             </div>
 
-            <form onSubmit={(e) => void onSubmitCreate(e)} className="space-y-4">
+            <form
+              onSubmit={(e) => void onSubmitCreate(e)}
+              className="space-y-4"
+            >
+              {/* Already-posted warning - shown when the position already has a classified */}
+              {prefilledPositionId &&
+                positionCheckDone &&
+                existingClassified && (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm font-semibold text-amber-700">
+                    A classified post already exists for this position. You
+                    cannot post the same position twice.{" "}
+                    <button
+                      type="button"
+                      onClick={closeCreate}
+                      className="underline hover:no-underline"
+                    >
+                      Close
+                    </button>
+                  </div>
+                )}
               <div>
                 <label className="font-display text-text-soft mb-1 block text-xs font-extrabold uppercase">
                   Title <span className="text-red-500">*</span>
@@ -363,13 +419,15 @@ function Classifieds() {
                   placeholder="e.g. 123e4567-e89b-12d3-a456-426614174000"
                   readOnly={!!prefilledPositionId}
                   className={`border-border text-charcoal w-full rounded-lg border px-3 py-2 text-sm outline-none ${
-                    prefilledPositionId ? "bg-gray-50 text-gray-500" : "bg-white"
+                    prefilledPositionId
+                      ? "bg-gray-50 text-gray-500"
+                      : "bg-white"
                   }`}
                 />
                 {prefilledPositionId && (
                   <p className="mt-1 text-[0.68rem] font-semibold text-green-600">
-                    Position pre-filled from LaunchPad. Only OPEN positions can be
-                    posted.
+                    Position pre-filled from LaunchPad. Only OPEN positions can
+                    be posted.
                   </p>
                 )}
               </div>
@@ -411,7 +469,12 @@ function Classifieds() {
                 </button>
                 <button
                   type="submit"
-                  disabled={isCreating}
+                  disabled={
+                    isCreating ||
+                    (!!prefilledPositionId &&
+                      positionCheckDone &&
+                      !!existingClassified)
+                  }
                   className="font-display cursor-pointer rounded-lg bg-black px-4 py-2 text-sm font-extrabold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
                 >
                   {isCreating ? "Posting..." : "Post Classified"}
