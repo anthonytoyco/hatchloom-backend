@@ -19,7 +19,7 @@ public class TestSecurityConfig {
 
     @Bean
     @Primary
-    public JwtDecoder jwtDecoder() {
+    public JwtDecoder testJwtDecoder() {
         SecretKeySpec key = new SecretKeySpec(
                 jwtSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
         return NimbusJwtDecoder.withSecretKey(key)
