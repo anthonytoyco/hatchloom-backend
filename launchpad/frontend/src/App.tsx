@@ -1,24 +1,27 @@
-import { getAuthToken } from "@/lib/api-client"
+import { getAuthToken, redirectToLogin } from "@/lib/api-client"
+import { AuthCallback } from "@/pages/AuthCallback"
 import { LaunchPadHome } from "@/pages/LaunchPadHome"
-import { LoginPage } from "@/pages/LoginPage"
 import { NotFoundPage } from "@/pages/NotFoundPage"
 import { PlaceholderPage } from "@/pages/PlaceholderPage"
 import { SandboxDetail } from "@/pages/SandboxDetail"
 import { SideHustleDetail } from "@/pages/SideHustleDetail"
-import { StudentHome } from "@/pages/StudentHome"
 import { ToolPage } from "@/pages/ToolPage"
 import { BrowserRouter, Navigate, Route, Routes } from "react-router"
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
-  return getAuthToken() ? <>{children}</> : <Navigate to="/login" replace />
+  if (!getAuthToken()) {
+    redirectToLogin()
+    return null
+  }
+  return <>{children}</>
 }
 
 export function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={<RequireAuth><StudentHome /></RequireAuth>} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/" element={<Navigate to="/launchpad" replace />} />
         <Route path="/launchpad" element={<RequireAuth><LaunchPadHome /></RequireAuth>} />
         <Route
           path="/launchpad/sandboxes/:sandboxId"

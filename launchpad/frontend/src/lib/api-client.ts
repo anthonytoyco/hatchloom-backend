@@ -29,7 +29,13 @@ export function storeSession(accessToken: string, user: { userId: string; userna
 
 export function clearSession() {
   localStorage.removeItem("access_token")
+  localStorage.removeItem("refresh_token")
   localStorage.removeItem("user")
+}
+
+export function redirectToLogin() {
+  const callbackUrl = encodeURIComponent(`${window.location.origin}/auth/callback`)
+  window.location.href = `http://localhost:3000/login?redirect_uri=${callbackUrl}`
 }
 
 export async function apiFetch<T>(
