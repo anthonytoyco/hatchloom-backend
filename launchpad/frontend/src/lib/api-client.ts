@@ -26,16 +26,25 @@ export function isTokenValid(): boolean {
   }
 }
 
-export function getStoredUser(): { userId: string; username: string; role: string } | null {
+export function getStoredUser(): {
+  userId: string
+  username: string
+  role: string
+} | null {
   const raw = localStorage.getItem("user") ?? getCookie("user")
   try {
-    return raw ? (JSON.parse(raw) as { userId: string; username: string; role: string }) : null
+    return raw
+      ? (JSON.parse(raw) as { userId: string; username: string; role: string })
+      : null
   } catch {
     return null
   }
 }
 
-export function storeSession(accessToken: string, user: { userId: string; username: string; role: string }) {
+export function storeSession(
+  accessToken: string,
+  user: { userId: string; username: string; role: string }
+) {
   localStorage.setItem("access_token", accessToken)
   localStorage.setItem("user", JSON.stringify(user))
 }
@@ -47,7 +56,9 @@ export function clearSession() {
 }
 
 export function redirectToLogin() {
-  const callbackUrl = encodeURIComponent(`${window.location.origin}/auth/callback`)
+  const callbackUrl = encodeURIComponent(
+    `${window.location.origin}/auth/callback`
+  )
   window.location.href = `http://localhost:3000/login?redirect_uri=${callbackUrl}`
 }
 

@@ -31,18 +31,37 @@ export function App() {
       <Routes>
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/" element={<Navigate to="/launchpad" replace />} />
-        <Route path="/launchpad" element={<RequireAuth><LaunchPadHome /></RequireAuth>} />
+        <Route
+          path="/launchpad"
+          element={
+            <RequireAuth>
+              <LaunchPadHome />
+            </RequireAuth>
+          }
+        />
         <Route
           path="/launchpad/sandboxes/:sandboxId"
-          element={<RequireAuth><SandboxDetail /></RequireAuth>}
+          element={
+            <RequireAuth>
+              <SandboxDetail />
+            </RequireAuth>
+          }
         />
         <Route
           path="/launchpad/sidehustles/:sideHustleId"
-          element={<RequireAuth><SideHustleDetail /></RequireAuth>}
+          element={
+            <RequireAuth>
+              <SideHustleDetail />
+            </RequireAuth>
+          }
         />
         <Route
           path="/launchpad/sandboxes/:sandboxId/tools/:toolType"
-          element={<RequireAuth><ToolPage /></RequireAuth>}
+          element={
+            <RequireAuth>
+              <ToolPage />
+            </RequireAuth>
+          }
         />
         <Route
           path="/launchpad/sandboxes"

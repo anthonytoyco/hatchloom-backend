@@ -10,7 +10,10 @@ export function useStudent() {
     queryKey: ["student"],
     queryFn: () => {
       const user = getStoredUser()
-      return Promise.resolve({ ...MOCK_STUDENT, id: user?.userId ?? MOCK_STUDENT.id })
+      return Promise.resolve({
+        ...MOCK_STUDENT,
+        id: user?.userId ?? MOCK_STUDENT.id,
+      })
     },
     staleTime: Infinity,
   })
