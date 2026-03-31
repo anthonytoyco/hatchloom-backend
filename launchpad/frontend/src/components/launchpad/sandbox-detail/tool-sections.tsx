@@ -45,6 +45,14 @@ function ToolIcon({ name, className }: { name: string; className?: string }) {
   return <Icon className={className} />
 }
 
+function getToolLabel(toolType: ToolType) {
+  return TOOL_META.find((tool) => tool.type === toolType)?.label ?? toolType
+}
+
+function getDuplicateToolMessage(toolType: ToolType) {
+  return `You can only have one ${getToolLabel(toolType)} in your sandbox`
+}
+
 export function ActiveToolsCard({
   tools,
   sandboxId,
@@ -119,66 +127,105 @@ export function ActiveToolsCard({
 export function AddToolDialog({
   open,
   sandboxId,
+  tools,
   onClose,
 }: {
   open: boolean
   sandboxId: string
+  tools: SandboxTool[]
   onClose: () => void
 }) {
   const [selected, setSelected] = useState<ToolType | null>(null)
   const { mutateAsync, isPending } = useAddTool(sandboxId)
+  const existingToolTypes = new Set(tools.map((tool) => tool.toolType))
+
+  function handleClose() {
+    setSelected(null)
+    onClose()
+  }
 
   async function handleAdd() {
     if (!selected) return
-    await mutateAsync({ toolType: selected })
-    onClose()
-    setSelected(null)
+    if (existingToolTypes.has(selected)) {
+      toast.error(getDuplicateToolMessage(selected))
+      return
+    }
+
+    try {
+      await mutateAsync({ toolType: selected })
+      handleClose()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to add tool")
+    }
   }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+    <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-heading text-lg font-black text-hatch-charcoal">
             Add a Tool 🛠
           </DialogTitle>
         </DialogHeader>
+        <p className="text-sm text-muted-foreground">
+          Each sandbox can only have one of each tool type.
+        </p>
         <div className="grid max-h-[380px] grid-cols-2 gap-2 overflow-y-auto py-2">
-          {TOOL_META.map((m) => (
-            <button
-              key={m.type}
-              onClick={() => {
-                if (!IMPLEMENTED_TOOL_TYPES.includes(m.type)) {
-                  toast.info(
-                    `${m.label} is a placeholder tool and editor support is coming soon.`
-                  )
-                  return
-                }
-                setSelected(m.type)
-              }}
-              className={cn(
-                "flex items-start gap-2.5 rounded-xl border p-3 text-left transition-all",
-                selected === m.type
-                  ? "border-sandbox-green bg-green-50"
-                  : "border-border hover:border-muted-foreground/30 hover:bg-hatch-bg"
-              )}
-            >
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-orange-50">
-                <ToolIcon name={m.icon} className="size-4 text-hatch-orange" />
-              </div>
-              <div>
-                <p className="font-heading text-[0.78rem] font-bold text-hatch-charcoal">
-                  {m.label}
-                </p>
-                <p className="text-[0.67rem] leading-snug text-muted-foreground">
-                  {m.description}
-                </p>
-              </div>
-            </button>
-          ))}
+          {TOOL_META.map((m) => {
+            const isAlreadyAdded = existingToolTypes.has(m.type)
+
+            return (
+              <button
+                key={m.type}
+                onClick={() => {
+                  if (!IMPLEMENTED_TOOL_TYPES.includes(m.type)) {
+                    toast.info(
+                      `${m.label} is a placeholder tool and editor support is coming soon.`
+                    )
+                    return
+                  }
+                  if (isAlreadyAdded) {
+                    toast.error(getDuplicateToolMessage(m.type))
+                    return
+                  }
+                  setSelected(m.type)
+                }}
+                className={cn(
+                  "flex items-start gap-2.5 rounded-xl border p-3 text-left transition-all",
+                  isAlreadyAdded
+                    ? "border-dashed border-amber-300 bg-amber-50/70"
+                    : selected === m.type
+                      ? "border-sandbox-green bg-green-50"
+                      : "border-border hover:border-muted-foreground/30 hover:bg-hatch-bg"
+                )}
+              >
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-orange-50">
+                  <ToolIcon
+                    name={m.icon}
+                    className="size-4 text-hatch-orange"
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-heading text-[0.78rem] font-bold text-hatch-charcoal">
+                      {m.label}
+                    </p>
+                    {isAlreadyAdded ? (
+                      <span className="shrink-0 rounded-full bg-white px-2 py-0.5 font-heading text-[0.58rem] font-extrabold tracking-[0.08em] text-amber-700 uppercase">
+                        Added
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="text-[0.67rem] leading-snug text-muted-foreground">
+                    {m.description}
+                  </p>
+                </div>
+              </button>
+            )
+          })}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
           <Button

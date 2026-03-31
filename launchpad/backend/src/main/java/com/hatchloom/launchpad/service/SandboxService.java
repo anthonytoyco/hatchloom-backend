@@ -15,7 +15,6 @@ import com.hatchloom.launchpad.dto.request.UpdateSandboxRequest;
 import com.hatchloom.launchpad.dto.response.SandboxResponse;
 import com.hatchloom.launchpad.model.Sandbox;
 import com.hatchloom.launchpad.repository.SandboxRepository;
-import com.hatchloom.launchpad.repository.SideHustleRepository;
 
 /**
  * Service for Sandbox CRUD operations.
@@ -26,12 +25,9 @@ public class SandboxService {
     private static final Logger log = LoggerFactory.getLogger(SandboxService.class);
 
     private final SandboxRepository sandboxRepository;
-    private final SideHustleRepository sideHustleRepository;
 
-    public SandboxService(SandboxRepository sandboxRepository,
-            SideHustleRepository sideHustleRepository) {
+    public SandboxService(SandboxRepository sandboxRepository) {
         this.sandboxRepository = sandboxRepository;
-        this.sideHustleRepository = sideHustleRepository;
     }
 
     /**

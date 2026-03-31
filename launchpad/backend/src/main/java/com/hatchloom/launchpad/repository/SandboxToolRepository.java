@@ -19,4 +19,13 @@ public interface SandboxToolRepository extends JpaRepository<SandboxTool, UUID> 
      * @return list of tools, empty if none found
      */
     List<SandboxTool> findAllBySandbox_Id(UUID sandboxId);
+
+    /**
+     * Returns whether a sandbox already has a tool of the given type.
+     *
+     * @param sandboxId the sandbox UUID
+     * @param toolType  the tool type identifier
+     * @return true when a tool of the same type already exists
+     */
+    boolean existsBySandbox_IdAndToolType(UUID sandboxId, String toolType);
 }

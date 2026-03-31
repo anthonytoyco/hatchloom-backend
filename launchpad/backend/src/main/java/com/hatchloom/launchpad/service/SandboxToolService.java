@@ -1,6 +1,7 @@
 package com.hatchloom.launchpad.service;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -40,9 +41,17 @@ public class SandboxToolService {
     @Transactional
     public SandboxToolResponse addTool(UUID sandboxId, CreateSandboxToolRequest request) {
         Sandbox sandbox = sandboxService.findOrThrow(sandboxId);
+        String toolType = request.getToolType().trim().toUpperCase(Locale.ROOT);
+
+        if (sandboxToolRepository.existsBySandbox_IdAndToolType(sandboxId, toolType)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "You can only have one " + formatToolTypeLabel(toolType) + " in your sandbox");
+        }
+
         SandboxTool tool = new SandboxTool();
         tool.setSandbox(sandbox);
-        tool.setToolType(request.getToolType());
+        tool.setToolType(toolType);
         tool.setData(request.getData());
         return SandboxToolResponse.from(sandboxToolRepository.save(tool));
     }
@@ -99,5 +108,26 @@ public class SandboxToolService {
                     HttpStatus.NOT_FOUND, "Tool " + toolId + " does not belong to sandbox " + sandboxId);
         }
         return tool;
+    }
+
+    private String formatToolTypeLabel(String toolType) {
+        return switch (toolType) {
+            case "POSTIT" -> "Post-it Note";
+            case "GUIDED_QA" -> "Guided Q&A";
+            case "CANVAS_BOARD" -> "Canvas Board";
+            case "CHECKLIST" -> "Checklist";
+            case "CALCULATOR" -> "Calculator";
+            case "DECK" -> "Slide Deck";
+            case "TEMPLATE_FORM" -> "Template Form";
+            case "DOWNLOAD" -> "Downloads";
+            case "IMAGE_PDF" -> "Image / PDF Maker";
+            case "VIDEO_AUDIO" -> "Video & Audio";
+            case "SOCIAL_POST" -> "Social Post";
+            case "LOGO_BRAND" -> "Logo & Brand Kit";
+            case "SURVEY" -> "Survey";
+            case "INVOICE" -> "Invoice";
+            case "QR_CODE" -> "QR Code";
+            default -> toolType.replace('_', ' ');
+        };
     }
 }

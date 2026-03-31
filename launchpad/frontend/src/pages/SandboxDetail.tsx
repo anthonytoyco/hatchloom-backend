@@ -172,6 +172,7 @@ export function SandboxDetail() {
       <AddToolDialog
         open={showAddTool}
         sandboxId={sandboxId}
+        tools={tools}
         onClose={() => setShowAddTool(false)}
       />
       {sandbox && (
