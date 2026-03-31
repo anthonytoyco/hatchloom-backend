@@ -76,6 +76,12 @@ export async function apiFetch<T>(
     },
   })
 
+  if (res.status === 401) {
+    clearSession()
+    redirectToLogin()
+    throw new Error("Unauthorized")
+  }
+
   if (!res.ok) {
     const contentType = res.headers.get("content-type") ?? ""
     let message = `${res.status} ${res.statusText}`
