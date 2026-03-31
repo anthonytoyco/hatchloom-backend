@@ -1,4 +1,4 @@
-import { getAuthToken, redirectToLogin } from "@/lib/api-client"
+import { isTokenValid, redirectToLogin } from "@/lib/api-client"
 import { AuthCallback } from "@/pages/AuthCallback"
 import { LaunchPadHome } from "@/pages/LaunchPadHome"
 import { NotFoundPage } from "@/pages/NotFoundPage"
@@ -18,7 +18,7 @@ function ClassifiedsRedirect() {
 }
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
-  if (!getAuthToken()) {
+  if (!isTokenValid()) {
     redirectToLogin()
     return null
   }

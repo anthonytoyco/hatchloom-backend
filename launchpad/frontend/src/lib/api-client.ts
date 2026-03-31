@@ -13,6 +13,19 @@ export function getAuthToken(): string | null {
   return localStorage.getItem("access_token") ?? getCookie("access_token")
 }
 
+export function isTokenValid(): boolean {
+  const token = getAuthToken()
+  if (!token) return false
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]))
+    const exp: number = payload.exp
+    if (!exp) return false
+    return Date.now() < exp * 1000
+  } catch {
+    return false
+  }
+}
+
 export function getStoredUser(): { userId: string; username: string; role: string } | null {
   const raw = localStorage.getItem("user") ?? getCookie("user")
   try {
