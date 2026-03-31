@@ -1,9 +1,7 @@
-import { redirectToLogin } from "../api/auth";
+import { isTokenValid, redirectToLogin } from "../api/auth";
 
 function Protected({ children }: { children: React.ReactNode }) {
-  const token = localStorage.getItem("access_token");
-
-  if (!token) {
+  if (!isTokenValid()) {
     redirectToLogin();
     return null;
   }
