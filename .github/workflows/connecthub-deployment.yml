@@ -2,7 +2,7 @@ name: connecthub-deployment
 
 on:
   workflow_run:
-    workflows: ["connecthub-test"]
+    workflows: ["connecthub-backend"]
     types: [completed]
     branches: [main]
   workflow_dispatch:

@@ -1,0 +1,26 @@
+name: connecthub-backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - connecthub/backend/**
+      - .github/workflows/connecthub-backend.yml
+      - .github/workflows/_reusable-java-ci.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - connecthub/backend/**
+      - .github/workflows/connecthub-backend.yml
+      - .github/workflows/_reusable-java-ci.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    uses: ./.github/workflows/_reusable-java-ci.yml
+    with:
+      service-path: connecthub/backend
+      image-name: connecthub

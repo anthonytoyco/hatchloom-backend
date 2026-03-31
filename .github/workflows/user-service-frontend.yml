@@ -1,0 +1,26 @@
+name: user-service-frontend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - user-service/frontend/**
+      - .github/workflows/user-service-frontend.yml
+      - .github/workflows/_reusable-node-ci.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - user-service/frontend/**
+      - .github/workflows/user-service-frontend.yml
+      - .github/workflows/_reusable-node-ci.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    uses: ./.github/workflows/_reusable-node-ci.yml
+    with:
+      service-path: user-service/frontend
+      image-name: user-service-frontend

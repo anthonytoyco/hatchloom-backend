@@ -1,0 +1,26 @@
+name: connecthub-frontend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - connecthub/frontend/**
+      - .github/workflows/connecthub-frontend.yml
+      - .github/workflows/_reusable-node-ci.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - connecthub/frontend/**
+      - .github/workflows/connecthub-frontend.yml
+      - .github/workflows/_reusable-node-ci.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    uses: ./.github/workflows/_reusable-node-ci.yml
+    with:
+      service-path: connecthub/frontend
+      image-name: connecthub-frontend

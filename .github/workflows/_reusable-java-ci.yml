@@ -1,0 +1,184 @@
+name: Reusable Java CI
+
+on:
+  workflow_call:
+    inputs:
+      service-path:
+        description: "Relative path to the service directory (e.g. launchpad/backend)"
+        required: true
+        type: string
+      image-name:
+        description: "Image name to publish to GHCR (e.g. hatchloom-launchpad)"
+        required: true
+        type: string
+      java-version:
+        description: "Java version"
+        required: false
+        type: string
+        default: "25"
+      use-postgres:
+        description: "Spin up a Postgres 16 service container and inject datasource env vars"
+        required: false
+        type: boolean
+        default: false
+      jwt-secret:
+        description: "Value for JWT_SECRET env var (used by services with symmetric JWT signing)"
+        required: false
+        type: string
+        default: ""
+      oauth2-issuer-uri:
+        description: "Value for SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI"
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  # Runs when the service uses an in-memory / embedded database
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    if: ${{ !inputs.use-postgres }}
+
+    env:
+      SPRING_PROFILES_ACTIVE: test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java ${{ inputs.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java-version }}
+          cache: maven
+
+      - name: Export JWT secret
+        if: ${{ inputs.jwt-secret != '' }}
+        run: echo "JWT_SECRET=${{ inputs.jwt-secret }}" >> $GITHUB_ENV
+
+      - name: Export OAuth2 issuer URI
+        if: ${{ inputs.oauth2-issuer-uri != '' }}
+        run: echo "SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=${{ inputs.oauth2-issuer-uri }}" >> $GITHUB_ENV
+
+      - name: Run tests
+        working-directory: ${{ inputs.service-path }}
+        run: |
+          chmod +x mvnw
+          ./mvnw clean verify
+
+      - name: Upload surefire reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-${{ inputs.image-name }}-${{ github.run_id }}
+          path: ${{ inputs.service-path }}/target/surefire-reports/
+          retention-days: 30
+
+  # Runs when the service requires a real Postgres instance
+  test-with-postgres:
+    name: Test (Postgres)
+    runs-on: ubuntu-latest
+    if: ${{ inputs.use-postgres }}
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: testdb
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U testuser -d testdb"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      SPRING_PROFILES_ACTIVE: test
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/testdb
+      SPRING_DATASOURCE_USERNAME: testuser
+      SPRING_DATASOURCE_PASSWORD: testpass
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java ${{ inputs.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java-version }}
+          cache: maven
+
+      - name: Export JWT secret
+        if: ${{ inputs.jwt-secret != '' }}
+        run: echo "JWT_SECRET=${{ inputs.jwt-secret }}" >> $GITHUB_ENV
+
+      - name: Export OAuth2 issuer URI
+        if: ${{ inputs.oauth2-issuer-uri != '' }}
+        run: echo "SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=${{ inputs.oauth2-issuer-uri }}" >> $GITHUB_ENV
+
+      - name: Run tests
+        working-directory: ${{ inputs.service-path }}
+        run: |
+          chmod +x mvnw
+          ./mvnw clean verify
+
+      - name: Upload surefire reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-${{ inputs.image-name }}-${{ github.run_id }}
+          path: ${{ inputs.service-path }}/target/surefire-reports/
+          retention-days: 30
+
+  build-docker:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: [test, test-with-postgres]
+    # Run only on main pushes, after whichever test job ran succeeds (the other is skipped)
+    if: |
+      always() &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled') &&
+      contains(needs.*.result, 'success')
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Convert owner to lowercase
+        run: echo "OWNER_LC=${OWNER,,}" >> $GITHUB_ENV
+        env:
+          OWNER: ${{ github.repository_owner }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./${{ inputs.service-path }}
+          file: ./${{ inputs.service-path }}/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ env.OWNER_LC }}/${{ inputs.image-name }}:latest
+            ghcr.io/${{ env.OWNER_LC }}/${{ inputs.image-name }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
