@@ -42,7 +42,7 @@ export function Sidebar({ sections, ctaLabel, ctaHref }: SidebarProps) {
     if (el) {
       el.scrollIntoView({ behavior: "smooth" })
     } else {
-      navigate("/launchpad")
+      void navigate("/launchpad")
       setTimeout(() => {
         document
           .getElementById(item.scrollToId!)
