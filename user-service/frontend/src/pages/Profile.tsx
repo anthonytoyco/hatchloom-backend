@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import authService, { UserProfile } from '../services/authService';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useNavigate, useParams } from "react-router-dom";
+import authService, { UserProfile } from "../services/authService";
 
 const Profile: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -12,7 +13,7 @@ const Profile: React.FC = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       if (!userId) {
-        setError('User ID is missing');
+        setError("User ID is missing");
         setLoading(false);
         return;
       }
@@ -23,34 +24,52 @@ const Profile: React.FC = () => {
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
-        } else if (typeof err === 'object' && err !== null && 'response' in err) {
-          const axiosError = err as any;
-          if (axiosError.response?.status === 403) {
-            setError('You do not have permission to view this profile');
+        } else if (axios.isAxiosError(err)) {
+          if (err.response?.status === 403) {
+            setError("You do not have permission to view this profile");
           } else {
-            setError(axiosError.response?.data?.message || 'Failed to load profile');
+            setError(
+              (err.response?.data as { message?: string } | undefined)
+                ?.message ?? "Failed to load profile",
+            );
           }
         } else {
-          setError('Failed to load profile');
+          setError("Failed to load profile");
         }
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProfile();
+    void fetchProfile();
   }, [userId]);
 
   const handleLogout = () => {
     authService.logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white p-4">
-        <div className="mx-auto max-w-3xl rounded-2xl bg-white p-8 shadow-xl">
-          <div className="text-center text-sm text-slate-600">Loading profile...</div>
+      <div className="min-h-screen bg-slate-50 p-4">
+        <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl bg-white shadow-xl">
+          <div className="flex flex-col gap-4 bg-gradient-to-br from-indigo-400/40 to-purple-400/40 p-6 sm:flex-row sm:items-center">
+            <div className="h-20 w-20 animate-pulse rounded-xl bg-white/40" />
+            <div className="flex-1 space-y-2">
+              <div className="h-6 w-40 animate-pulse rounded bg-white/40" />
+              <div className="h-4 w-20 animate-pulse rounded bg-white/40" />
+              <div className="h-3 w-32 animate-pulse rounded bg-white/40" />
+            </div>
+          </div>
+          <div className="space-y-3 p-6">
+            {Array.from({ length: 4 }, (_, i) => (
+              <div
+                key={i}
+                className="h-4 animate-pulse rounded bg-slate-200"
+                style={{ width: `${75 - i * 8}%` }}
+              />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -58,13 +77,17 @@ const Profile: React.FC = () => {
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen bg-white p-4">
+      <div className="min-h-screen bg-slate-50 p-4">
         <div className="mx-auto max-w-3xl rounded-2xl bg-white p-8 shadow-xl">
-          <div className="mb-6 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
-            {error || 'Profile not found'}
+          <div
+            className="mb-6 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-medium text-red-600"
+            role="alert"
+          >
+            {error || "Profile not found"}
           </div>
           <button
-            className="w-full rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200"
+            type="button"
+            className="w-full cursor-pointer rounded-lg border border-slate-300 bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200"
             onClick={handleLogout}
           >
             Back to Login
@@ -80,9 +103,16 @@ const Profile: React.FC = () => {
         <div className="flex flex-col gap-4 bg-gradient-to-br from-indigo-500 to-purple-600 p-6 text-white sm:flex-row sm:items-center">
           <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 border-white/80 bg-white/20">
             {profile.profilePictureUrl ? (
-              <img src={profile.profilePictureUrl} alt={profile.username} className="h-full w-full object-cover" />
+              <img
+                src={profile.profilePictureUrl}
+                alt={profile.username}
+                className="h-full w-full object-cover"
+              />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-2xl font-bold">
+              <div
+                className="flex h-full w-full items-center justify-center text-2xl font-bold"
+                aria-label={profile.username}
+              >
                 {profile.username.charAt(0).toUpperCase()}
               </div>
             )}
@@ -107,38 +137,68 @@ const Profile: React.FC = () => {
 
           {profile.description && (
             <section>
-              <h3 className="mb-1 text-sm font-semibold text-slate-800">Description</h3>
+              <h3 className="mb-1 text-sm font-semibold text-slate-800">
+                Description
+              </h3>
               <p className="text-sm text-slate-600">{profile.description}</p>
             </section>
           )}
 
-          {profile.role === 'STUDENT' && (
+          {profile.role === "STUDENT" && (
             <section className="rounded-xl bg-slate-50 p-4">
-              <h3 className="mb-3 text-sm font-semibold text-slate-800">Academic Profile</h3>
+              <h3 className="mb-3 text-sm font-semibold text-slate-800">
+                Academic Profile
+              </h3>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                 {profile.gradeLevel && (
                   <MetricCard label="Grade Level" value={profile.gradeLevel} />
                 )}
                 {profile.specialization && (
-                  <MetricCard label="Specialization" value={profile.specialization} />
+                  <MetricCard
+                    label="Specialization"
+                    value={profile.specialization}
+                  />
                 )}
-                {profile.skillsCertified !== null && profile.skillsCertified !== undefined && (
-                  <MetricCard label="Skills Certified" value={profile.skillsCertified} />
-                )}
-                {profile.explorerLevelXp !== null && profile.explorerLevelXp !== undefined && (
-                  <MetricCard label="Explorer XP" value={profile.explorerLevelXp} />
-                )}
-                {profile.currentStreak !== null && profile.currentStreak !== undefined && (
-                  <MetricCard label="Current Streak" value={profile.currentStreak} />
-                )}
-                {profile.activeVentures !== null && profile.activeVentures !== undefined && (
-                  <MetricCard label="Active Ventures" value={profile.activeVentures} />
-                )}
-                {profile.problemsTackled !== null && profile.problemsTackled !== undefined && (
-                  <MetricCard label="Problems Tackled" value={profile.problemsTackled} />
-                )}
+                {profile.skillsCertified !== null &&
+                  profile.skillsCertified !== undefined && (
+                    <MetricCard
+                      label="Skills Certified"
+                      value={profile.skillsCertified}
+                    />
+                  )}
+                {profile.explorerLevelXp !== null &&
+                  profile.explorerLevelXp !== undefined && (
+                    <MetricCard
+                      label="Explorer XP"
+                      value={profile.explorerLevelXp}
+                    />
+                  )}
+                {profile.currentStreak !== null &&
+                  profile.currentStreak !== undefined && (
+                    <MetricCard
+                      label="Current Streak"
+                      value={profile.currentStreak}
+                    />
+                  )}
+                {profile.activeVentures !== null &&
+                  profile.activeVentures !== undefined && (
+                    <MetricCard
+                      label="Active Ventures"
+                      value={profile.activeVentures}
+                    />
+                  )}
+                {profile.problemsTackled !== null &&
+                  profile.problemsTackled !== undefined && (
+                    <MetricCard
+                      label="Problems Tackled"
+                      value={profile.problemsTackled}
+                    />
+                  )}
                 {profile.lastActive && (
-                  <MetricCard label="Last Active" value={new Date(profile.lastActive).toLocaleDateString()} />
+                  <MetricCard
+                    label="Last Active"
+                    value={new Date(profile.lastActive).toLocaleDateString()}
+                  />
                 )}
               </div>
             </section>
@@ -146,17 +206,22 @@ const Profile: React.FC = () => {
 
           <section className="space-y-1 border-t border-slate-200 pt-4 text-sm text-slate-600">
             <p>
-              <span className="font-semibold text-slate-800">Account Created:</span>{' '}
+              <span className="font-semibold text-slate-800">
+                Account Created:
+              </span>{" "}
               {new Date(profile.createdAt).toLocaleDateString()}
             </p>
             <p>
-              <span className="font-semibold text-slate-800">Last Updated:</span>{' '}
+              <span className="font-semibold text-slate-800">
+                Last Updated:
+              </span>{" "}
               {new Date(profile.updatedAt).toLocaleDateString()}
             </p>
           </section>
 
           <button
-            className="w-full rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200"
+            type="button"
+            className="w-full cursor-pointer rounded-lg border border-slate-300 bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200"
             onClick={handleLogout}
           >
             Log Out
@@ -167,12 +232,16 @@ const Profile: React.FC = () => {
   );
 };
 
-const MetricCard: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
+const MetricCard: React.FC<{ label: string; value: string | number }> = ({
+  label,
+  value,
+}) => (
   <div className="rounded-lg border border-slate-200 bg-white p-3 text-center">
-    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+      {label}
+    </p>
     <p className="mt-1 text-lg font-bold text-pink-600">{value}</p>
   </div>
 );
 
 export default Profile;
-

@@ -1,6 +1,6 @@
-import apiClient from './apiClient';
+import apiClient from "./apiClient";
 
-export type SupportedSignupRole = 'STUDENT' | 'SCHOOL_TEACHER' | 'PARENT';
+export type SupportedSignupRole = "STUDENT" | "SCHOOL_TEACHER" | "PARENT";
 
 export interface SignUpRequest {
   username: string;
@@ -60,40 +60,53 @@ export interface UserProfile {
 
 const authService = {
   signup: async (data: SignUpRequest): Promise<RegisterResponse> => {
-    const response = await apiClient.post('/auth/register', data);
+    const response = await apiClient.post<RegisterResponse>(
+      "/auth/register",
+      data,
+    );
     return response.data;
   },
 
   login: async (data: LoginRequest): Promise<LoginResponse> => {
-    const response = await apiClient.post('/auth/login', data);
+    const response = await apiClient.post<LoginResponse>("/auth/login", data);
     return response.data;
   },
 
   validateSession: async (): Promise<SessionValidationResponse> => {
-    const response = await apiClient.get('/auth/validate');
+    const response =
+      await apiClient.get<SessionValidationResponse>("/auth/validate");
     return response.data;
   },
 
   getProfile: async (userId: string): Promise<UserProfile> => {
-    const response = await apiClient.get(`/profile/${userId}`);
+    const response = await apiClient.get<UserProfile>(`/profile/${userId}`);
     return response.data;
   },
 
   logout: (): void => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user');
-    document.cookie = 'access_token=; path=/; max-age=0; samesite=lax';
-    document.cookie = 'user=; path=/; max-age=0; samesite=lax';
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("user");
+    document.cookie = "access_token=; path=/; max-age=0; samesite=lax";
+    document.cookie = "user=; path=/; max-age=0; samesite=lax";
   },
 
   isAuthenticated: (): boolean => {
-    return !!localStorage.getItem('access_token');
+    return !!localStorage.getItem("access_token");
   },
 
-  getStoredUser: (): { userId: string; username: string; role: string } | null => {
-    const user = localStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
+  getStoredUser: (): {
+    userId: string;
+    username: string;
+    role: string;
+  } | null => {
+    const user = localStorage.getItem("user");
+    if (!user) return null;
+    return JSON.parse(user) as {
+      userId: string;
+      username: string;
+      role: string;
+    };
   },
 };
 
