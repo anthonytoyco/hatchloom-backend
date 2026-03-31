@@ -5,12 +5,10 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.List;
@@ -39,7 +37,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
             catch (Exception e) {
                 System.out.println("JWT parse error: " + e.getClass().getName() + " - " + e.getMessage());
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\":\"Invalid token\"}");
+                return;
             }
         }
 
