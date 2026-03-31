@@ -60,13 +60,6 @@ const DEMO: FormData = {
   ],
 }
 
-const PRODUCTS = [
-  "Garlic Herb Butter",
-  "Honey Cinnamon Butter",
-  "Classic Salted Butter",
-  "Chili Lime Butter",
-]
-
 const CHANNELS = [
   "In person (at school/market)",
   "Through a friend",
@@ -166,9 +159,9 @@ export function TemplateFormContent({
 
   return (
     <div className="flex-1 overflow-auto px-6 py-5">
-      <div className="mx-auto max-w-[720px]">
+      <div className="mx-auto max-w-180">
         {/* Summary bar */}
-        <div className="mb-5 flex items-center gap-4 rounded-xl border border-border bg-hatch-bg px-4 py-3">
+        <div className="mb-5 grid grid-cols-4 overflow-hidden rounded-xl border border-border bg-hatch-bg">
           {[
             {
               label: "Responses",
@@ -193,9 +186,11 @@ export function TemplateFormContent({
           ].map((s, i) => (
             <div
               key={s.label}
-              className="flex flex-1 flex-col items-center gap-0.5"
+              className={cn(
+                "flex min-w-0 flex-col items-center gap-0.5 px-4 py-3",
+                i < 3 && "border-r border-border"
+              )}
             >
-              {i > 0 && <div className="absolute h-8 w-px bg-border" />}
               <span
                 className={cn("font-heading text-[1.25rem] font-black", s.cls)}
               >
@@ -264,7 +259,7 @@ export function TemplateFormContent({
                 What did they say?
               </label>
               <textarea
-                className="min-h-[70px] w-full resize-y rounded-[9px] border border-border bg-card px-3 py-2 text-[0.82rem] leading-relaxed text-foreground transition-colors outline-none placeholder:text-muted-foreground/50 focus:border-amber-400"
+                className="min-h-17.5 w-full resize-y rounded-[9px] border border-border bg-card px-3 py-2 text-[0.82rem] leading-relaxed text-foreground transition-colors outline-none placeholder:text-muted-foreground/50 focus:border-amber-400"
                 placeholder="Write down what the customer told you — exact words are best"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
@@ -276,16 +271,12 @@ export function TemplateFormContent({
                 <label className="mb-1 block font-heading text-[0.74rem] font-bold text-hatch-charcoal">
                   Which product?
                 </label>
-                <select
-                  className="w-full cursor-pointer rounded-[9px] border border-border bg-card px-3 py-2 text-[0.82rem] text-foreground outline-none focus:border-amber-400"
+                <input
+                  className="w-full rounded-[9px] border border-border bg-card px-3 py-2 text-[0.82rem] text-foreground outline-none placeholder:text-muted-foreground/50 focus:border-amber-400"
                   value={product}
                   onChange={(e) => setProduct(e.target.value)}
-                >
-                  <option value="">Select a product…</option>
-                  {PRODUCTS.map((p) => (
-                    <option key={p}>{p}</option>
-                  ))}
-                </select>
+                  placeholder="Type the product name"
+                />
               </div>
 
               <div>
@@ -310,7 +301,7 @@ export function TemplateFormContent({
                 Your action plan
               </label>
               <textarea
-                className="min-h-[50px] w-full resize-none rounded-[9px] border border-border bg-card px-3 py-2 text-[0.82rem] leading-relaxed text-foreground transition-colors outline-none placeholder:text-muted-foreground/50 focus:border-amber-400"
+                className="min-h-12.5 w-full resize-none rounded-[9px] border border-border bg-card px-3 py-2 text-[0.82rem] leading-relaxed text-foreground transition-colors outline-none placeholder:text-muted-foreground/50 focus:border-amber-400"
                 placeholder="e.g. Adjust recipe, follow up with customer, change packaging…"
                 value={actionPlan}
                 onChange={(e) => setActionPlan(e.target.value)}

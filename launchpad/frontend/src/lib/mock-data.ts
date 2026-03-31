@@ -364,8 +364,8 @@ export const TOOL_META: ToolMeta[] = [
   },
   {
     type: "CHECKLIST",
-    label: "Checklist",
-    description: "Task tracker with progress",
+    label: "Inventory Tracker",
+    description: "Track stock levels and reorder points",
     icon: "CheckSquare",
   },
   {

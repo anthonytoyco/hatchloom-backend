@@ -89,7 +89,7 @@ export function SocialPostContent({
   return (
     <div className="flex flex-1 overflow-hidden">
       {/* Settings panel */}
-      <div className="flex w-[280px] shrink-0 flex-col gap-4 overflow-y-auto border-r border-border bg-hatch-bg p-4">
+      <div className="flex w-70 shrink-0 flex-col gap-4 overflow-y-auto border-r border-border bg-hatch-bg p-4">
         {/* Format */}
         <div>
           <p className="mb-2 font-heading text-[0.62rem] font-extrabold tracking-[0.04em] text-muted-foreground/60 uppercase">
@@ -212,7 +212,7 @@ export function SocialPostContent({
             </span>
           </label>
           <textarea
-            className="min-h-[50px] w-full resize-none rounded-[9px] border border-border bg-card px-2.5 py-2 text-[0.8rem] leading-relaxed text-foreground transition-colors outline-none placeholder:text-muted-foreground/40 focus:border-amber-400"
+            className="min-h-12.5 w-full resize-none rounded-[9px] border border-border bg-card px-2.5 py-2 text-[0.8rem] leading-relaxed text-foreground transition-colors outline-none placeholder:text-muted-foreground/40 focus:border-amber-400"
             placeholder="Your main message"
             value={data.headline}
             onChange={(e) => update({ headline: e.target.value })}
@@ -230,7 +230,7 @@ export function SocialPostContent({
             </span>
           </label>
           <textarea
-            className="min-h-[40px] w-full resize-none rounded-[9px] border border-border bg-card px-2.5 py-2 text-[0.8rem] leading-relaxed text-foreground transition-colors outline-none placeholder:text-muted-foreground/40 focus:border-amber-400"
+            className="min-h-10 w-full resize-none rounded-[9px] border border-border bg-card px-2.5 py-2 text-[0.8rem] leading-relaxed text-foreground transition-colors outline-none placeholder:text-muted-foreground/40 focus:border-amber-400"
             placeholder="Supporting info"
             value={data.subline}
             onChange={(e) => update({ subline: e.target.value })}
@@ -266,7 +266,7 @@ export function SocialPostContent({
             Caption & Hashtags
           </p>
           <textarea
-            className="min-h-[80px] w-full resize-y rounded-[9px] border border-border bg-card px-2.5 py-2 text-[0.76rem] leading-relaxed text-foreground transition-colors outline-none placeholder:text-muted-foreground/40 focus:border-amber-400"
+            className="min-h-20 w-full resize-y rounded-[9px] border border-border bg-card px-2.5 py-2 text-[0.76rem] leading-relaxed text-foreground transition-colors outline-none placeholder:text-muted-foreground/40 focus:border-amber-400"
             placeholder="Write your caption and add #hashtags at the end..."
             value={data.caption}
             onChange={(e) => update({ caption: e.target.value })}
@@ -278,13 +278,13 @@ export function SocialPostContent({
       <div className="flex flex-1 items-center justify-center overflow-auto bg-[#E5E7EB] p-6">
         <div className="flex flex-col items-center gap-3">
           {/* Phone mockup */}
-          <div className="rounded-[32px] bg-[#1E1E2E] p-[8px] shadow-[0_12px_48px_rgba(0,0,0,0.2)]">
+          <div className="w-[320px] rounded-[32px] bg-[#1E1E2E] p-2 shadow-[0_12px_48px_rgba(0,0,0,0.2)]">
             <div className="overflow-hidden rounded-[26px] bg-black">
               {/* Notch */}
-              <div className="mx-auto h-[22px] w-[100px] rounded-b-[14px] bg-[#1E1E2E]" />
+              <div className="mx-auto h-5.5 w-25 rounded-b-[14px] bg-[#1E1E2E]" />
 
               {/* Post image */}
-              <div className={cn("relative w-[280px]", postAspect)}>
+              <div className={cn("relative w-76 overflow-hidden", postAspect)}>
                 <div
                   className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center"
                   style={{ background: bg.gradient, color: bg.textColor }}
@@ -324,10 +324,10 @@ export function SocialPostContent({
                   <span className="text-lg text-white">💬</span>
                   <span className="text-lg text-white">➤</span>
                 </div>
-                <div className="flex flex-1 justify-center gap-[3px]">
-                  <div className="size-[5px] rounded-full bg-white" />
-                  <div className="size-[5px] rounded-full bg-white/30" />
-                  <div className="size-[5px] rounded-full bg-white/30" />
+                <div className="flex flex-1 justify-center gap-0.75">
+                  <div className="size-1.25 rounded-full bg-white" />
+                  <div className="size-1.25 rounded-full bg-white/30" />
+                  <div className="size-1.25 rounded-full bg-white/30" />
                 </div>
                 <div className="flex-1 text-right text-lg text-white/80">
                   🔖

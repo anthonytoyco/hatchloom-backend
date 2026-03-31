@@ -1,6 +1,7 @@
 import type { SandboxTool } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
+import { useNavigate, useParams } from "react-router"
 
 interface QAStep {
   label: string
@@ -8,11 +9,13 @@ interface QAStep {
   hint: string
   placeholder: string
   example: string
+  railLabel: string
 }
 
 const QA_STEPS: QAStep[] = [
   {
     label: "STEP 1 OF 4",
+    railLabel: "Who has the problem?",
     question: "Who has this problem?",
     hint: 'Think about the specific person or group who experiences this pain. Not "everyone" - be specific. A real name or role is great.',
     placeholder:
@@ -22,6 +25,7 @@ const QA_STEPS: QAStep[] = [
   },
   {
     label: "STEP 2 OF 4",
+    railLabel: "What is the problem?",
     question: "What is the problem they face?",
     hint: "Describe the pain in plain language. What happens? How often? What have they tried that doesn't work?",
     placeholder:
@@ -31,6 +35,7 @@ const QA_STEPS: QAStep[] = [
   },
   {
     label: "STEP 3 OF 4",
+    railLabel: "Why does it matter?",
     question: "Why does this matter?",
     hint: "What's the impact if nothing changes? Think about the emotional, safety, or financial cost.",
     placeholder:
@@ -40,6 +45,7 @@ const QA_STEPS: QAStep[] = [
   },
   {
     label: "FINAL STEP",
+    railLabel: "One-sentence statement",
     question: "Your Problem Statement",
     hint: "We've combined your answers into one clear sentence. Edit it until it feels right - this becomes the north star for your project.",
     placeholder: "",
@@ -54,34 +60,81 @@ export function GuidedQAContent({
   tool: SandboxTool
   onUnsaved: (data: string) => void
 }) {
+  const navigate = useNavigate()
+  const { sandboxId = tool.sandboxId } = useParams<{ sandboxId: string }>()
   const parsed = (() => {
     try {
-      return JSON.parse(tool.data ?? '{"currentStep":0,"answers":{}}') as {
+      return JSON.parse(
+        tool.data ?? '{"currentStep":0,"answers":{},"statement":""}'
+      ) as {
         currentStep: number
         answers: Record<string, string>
+        statement?: string
       }
     } catch {
-      return { currentStep: 0, answers: {} as Record<string, string> }
+      return {
+        currentStep: 0,
+        answers: {} as Record<string, string>,
+        statement: "",
+      }
     }
   })()
   const [currentStep, setCurrentStep] = useState(parsed.currentStep)
   const [answers, setAnswers] = useState<Record<string, string>>(parsed.answers)
 
-  const generated =
-    answers["0"] && answers["1"] && answers["2"]
-      ? `${answers["0"]} struggle with ${answers["1"]}. This matters because ${answers["2"]}.`
+  function buildStatement(nextAnswers: Record<string, string>) {
+    return nextAnswers["0"] && nextAnswers["1"] && nextAnswers["2"]
+      ? `${nextAnswers["0"]} face a problem: ${nextAnswers["1"]} This matters because ${nextAnswers["2"]}`
       : ""
+  }
+
+  const [statement, setStatement] = useState(
+    parsed.statement || buildStatement(parsed.answers)
+  )
+
+  function persist(
+    nextCurrentStep: number,
+    nextAnswers: Record<string, string>,
+    nextStatement: string
+  ) {
+    onUnsaved(
+      JSON.stringify({
+        currentStep: nextCurrentStep,
+        answers: nextAnswers,
+        statement: nextStatement,
+      })
+    )
+  }
 
   function goStep(i: number) {
     setCurrentStep(i)
+    persist(i, answers, statement)
   }
 
   function setAnswer(val: string) {
-    setAnswers((prev) => {
-      const next = { ...prev, [currentStep]: val }
-      onUnsaved(JSON.stringify({ currentStep, answers: next }))
-      return next
-    })
+    const nextAnswers = { ...answers, [currentStep]: val }
+    const nextStatement = buildStatement(nextAnswers)
+    setAnswers(nextAnswers)
+    setStatement((prev) => (currentStep === 2 || !prev ? nextStatement : prev))
+    persist(
+      currentStep,
+      nextAnswers,
+      currentStep === 2 || !statement ? nextStatement : statement
+    )
+  }
+
+  function handleStatementChange(val: string) {
+    setStatement(val)
+    persist(currentStep, answers, val)
+  }
+
+  function handleStepChange(nextStep: number) {
+    setCurrentStep(nextStep)
+    persist(nextStep, answers, statement)
+  }
+
+  function handleComplete() {
+    void navigate(`/launchpad/sandboxes/${sandboxId}`)
   }
 
   const step = QA_STEPS[currentStep]
@@ -90,9 +143,10 @@ export function GuidedQAContent({
 
   return (
     <div className="flex flex-1 overflow-hidden">
-      <div className="flex w-[240px] shrink-0 flex-col gap-0 overflow-y-auto border-r border-border bg-hatch-bg px-3 py-5">
+      <div className="flex w-60 shrink-0 flex-col gap-0 overflow-y-auto border-r border-border bg-hatch-bg px-3 py-5">
         {QA_STEPS.map((s, i) => {
-          const isDone = i < currentStep || !!answers[i]
+          const isDone =
+            i < currentStep || !!answers[i] || (i === 3 && !!statement)
           const isActive = i === currentStep
           return (
             <div key={i}>
@@ -105,7 +159,7 @@ export function GuidedQAContent({
               >
                 <div
                   className={cn(
-                    "flex size-[26px] shrink-0 items-center justify-center rounded-full border-2 font-heading text-[0.7rem] font-extrabold transition-all",
+                    "flex size-6.5 shrink-0 items-center justify-center rounded-full border-2 font-heading text-[0.7rem] font-extrabold transition-all",
                     isDone &&
                       "border-sandbox-green bg-sandbox-green text-white",
                     isActive &&
@@ -120,7 +174,7 @@ export function GuidedQAContent({
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-heading text-[0.76rem] font-bold text-hatch-charcoal">
-                    {s.question}
+                    {s.railLabel}
                   </p>
                   <p className="text-[0.64rem] text-muted-foreground/60">
                     {isDone
@@ -130,16 +184,11 @@ export function GuidedQAContent({
                         : "Not yet"}
                   </p>
                 </div>
-                {isDone && !isActive && (
-                  <span className="shrink-0 text-[0.75rem] text-sandbox-green">
-                    ✓
-                  </span>
-                )}
               </div>
               {i < QA_STEPS.length - 1 && (
                 <div
                   className={cn(
-                    "ml-[1.55rem] h-3 w-[2px]",
+                    "ml-[1.55rem] h-3 w-0.5",
                     isDone ? "bg-sandbox-green" : "bg-border"
                   )}
                 />
@@ -151,7 +200,7 @@ export function GuidedQAContent({
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto p-8">
-          <div className="mx-auto w-full max-w-[640px]">
+          <div className="mx-auto w-full max-w-160">
             {!isSummary ? (
               <>
                 <p className="mb-1.5 font-heading text-[0.68rem] font-extrabold tracking-[0.06em] text-hatch-orange uppercase">
@@ -164,7 +213,7 @@ export function GuidedQAContent({
                   {step.hint}
                 </p>
                 <textarea
-                  className="font-body min-h-[120px] w-full resize-none rounded-xl border border-border px-4 py-3 text-[0.9rem] leading-relaxed text-foreground transition-colors outline-none focus:border-sandbox-green"
+                  className="font-body min-h-30 w-full resize-none rounded-xl border border-border px-4 py-3 text-[0.9rem] leading-relaxed text-foreground transition-colors outline-none focus:border-sandbox-green"
                   placeholder={step.placeholder}
                   value={answers[currentStep] ?? ""}
                   onChange={(e) => setAnswer(e.target.value)}
@@ -172,7 +221,7 @@ export function GuidedQAContent({
                 {step.example && (
                   <div className="mt-3 rounded-[10px] border border-border bg-hatch-bg px-4 py-3">
                     <p className="mb-1 font-heading text-[0.65rem] font-extrabold tracking-[0.04em] text-muted-foreground/60 uppercase">
-                      Example
+                      💡 Example
                     </p>
                     <p className="text-[0.78rem] leading-relaxed whitespace-pre-line text-muted-foreground">
                       {step.example}
@@ -183,24 +232,23 @@ export function GuidedQAContent({
             ) : (
               <>
                 <p className="mb-1.5 font-heading text-[0.68rem] font-extrabold tracking-[0.06em] text-hatch-orange uppercase">
-                  FINAL STEP
+                  {step.label}
                 </p>
                 <h2 className="mb-1 font-heading text-[1.35rem] leading-snug font-black text-hatch-charcoal">
-                  Your Problem Statement
+                  {step.question}
                 </h2>
                 <p className="mb-5 text-[0.82rem] leading-relaxed text-muted-foreground">
                   {step.hint}
                 </p>
                 <div className="rounded-[14px] border-2 border-green-200 bg-green-50 p-5">
                   <p className="mb-3 font-heading text-[0.75rem] font-extrabold tracking-[0.04em] text-sandbox-green uppercase">
-                    Your Statement
+                    ✨ Your Problem Statement
                   </p>
-                  <div className="rounded-[10px] border-[1.5px] border-green-200 bg-white px-4 py-3">
-                    <p className="font-heading text-[1.1rem] leading-relaxed font-bold text-hatch-charcoal">
-                      {generated ||
-                        "Answer the previous steps to generate your problem statement."}
-                    </p>
-                  </div>
+                  <textarea
+                    className="min-h-40 w-full resize-none rounded-[10px] border-[1.5px] border-green-200 bg-white px-4 py-3 font-heading text-[1.05rem] leading-relaxed font-bold text-hatch-charcoal outline-none focus:border-sandbox-green"
+                    value={statement || buildStatement(answers)}
+                    onChange={(e) => handleStatementChange(e.target.value)}
+                  />
                 </div>
               </>
             )}
@@ -212,7 +260,7 @@ export function GuidedQAContent({
             <span>
               Step {currentStep + 1} of {QA_STEPS.length}
             </span>
-            <div className="h-[6px] w-[120px] overflow-hidden rounded-full bg-border">
+            <div className="h-1.5 w-30 overflow-hidden rounded-full bg-border">
               <div
                 className="h-full rounded-full bg-sandbox-green transition-all duration-300"
                 style={{ width: `${progressPct}%` }}
@@ -221,21 +269,31 @@ export function GuidedQAContent({
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setCurrentStep((v) => Math.max(0, v - 1))}
+              onClick={() => handleStepChange(Math.max(0, currentStep - 1))}
               disabled={currentStep === 0}
               className="rounded-lg border border-border bg-card px-4 py-[0.45rem] font-heading text-[0.78rem] font-bold text-foreground transition-all hover:bg-hatch-bg disabled:opacity-40"
             >
               ← Back
             </button>
-            <button
-              onClick={() =>
-                setCurrentStep((v) => Math.min(QA_STEPS.length - 1, v + 1))
-              }
-              disabled={currentStep === QA_STEPS.length - 1}
-              className="rounded-lg bg-sandbox-green px-5 py-[0.45rem] font-heading text-[0.78rem] font-bold text-white transition-all hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-border disabled:text-muted-foreground"
-            >
-              Next →
-            </button>
+            {isSummary ? (
+              <button
+                onClick={handleComplete}
+                className="rounded-lg bg-sandbox-green px-5 py-[0.45rem] font-heading text-[0.78rem] font-bold text-white transition-all hover:bg-emerald-700"
+              >
+                ✓ Complete
+              </button>
+            ) : (
+              <button
+                onClick={() =>
+                  handleStepChange(
+                    Math.min(QA_STEPS.length - 1, currentStep + 1)
+                  )
+                }
+                className="rounded-lg bg-sandbox-green px-5 py-[0.45rem] font-heading text-[0.78rem] font-bold text-white transition-all hover:bg-emerald-700"
+              >
+                Next →
+              </button>
+            )}
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import type { SandboxTool } from "@/lib/types"
 import { cn } from "@/lib/utils"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 
 type ElementType = "heading" | "body" | "image" | "shape" | "divider" | "icon"
@@ -13,9 +13,18 @@ interface CanvasElement {
   content: string
   x: number
   y: number
+  width?: number
+  height?: number
   color?: string
   fontSize?: number
   bold?: boolean
+}
+
+interface MakerData {
+  elements: CanvasElement[]
+  selectedId: string | null
+  template: Template
+  pageSize: PageSize
 }
 
 const TOOLBAR_ELEMENTS: { type: ElementType; icon: string; label: string }[] = [
@@ -43,6 +52,7 @@ const DEFAULT_ELEMENTS: CanvasElement[] = [
     content: "🧈 Flavour Butter Co.",
     x: 40,
     y: 35,
+    width: 280,
     color: "#D97706",
     fontSize: 28,
     bold: true,
@@ -53,6 +63,7 @@ const DEFAULT_ELEMENTS: CanvasElement[] = [
     content: "Handmade artisan flavoured butters — made fresh by students",
     x: 40,
     y: 82,
+    width: 420,
     color: "#6B7280",
     fontSize: 13,
   },
@@ -63,6 +74,8 @@ const DEFAULT_ELEMENTS: CanvasElement[] = [
       "OUR FLAVOURS\n🧄 Garlic Herb  🍯 Honey Cinnamon\n🧂 Classic Salted  🌶️ Chili Lime",
     x: 40,
     y: 120,
+    width: 320,
+    height: 120,
     color: "#D97706",
     fontSize: 13,
   },
@@ -72,6 +85,8 @@ const DEFAULT_ELEMENTS: CanvasElement[] = [
     content: "📷",
     x: 40,
     y: 295,
+    width: 180,
+    height: 130,
     color: "#9CA3AF",
     fontSize: 36,
   },
@@ -81,6 +96,8 @@ const DEFAULT_ELEMENTS: CanvasElement[] = [
     content: "📷",
     x: 280,
     y: 295,
+    width: 180,
+    height: 130,
     color: "#9CA3AF",
     fontSize: 36,
   },
@@ -91,59 +108,226 @@ const DEFAULT_ELEMENTS: CanvasElement[] = [
       "$9 per jar\n3 for $24 · Available at school cafeteria every Wednesday",
     x: 40,
     y: 480,
+    width: 340,
+    height: 90,
     color: "#FFFFFF",
     fontSize: 13,
   },
 ]
 
+const PAGE_DIMENSIONS: Record<PageSize, { width: number; height: number }> = {
+  Letter: { width: 480, height: 620 },
+  A4: { width: 460, height: 650 },
+  Square: { width: 520, height: 520 },
+  Story: { width: 360, height: 640 },
+}
+
+function defaultSizeFor(type: ElementType) {
+  switch (type) {
+    case "image":
+      return { width: 180, height: 130 }
+    case "shape":
+      return { width: 220, height: 90 }
+    case "divider":
+      return { width: 220, height: 2 }
+    case "icon":
+      return { width: 48, height: 48 }
+    case "heading":
+      return { width: 240, height: 48 }
+    case "body":
+      return { width: 220, height: 80 }
+  }
+}
+
+function hydrateMakerData(tool: SandboxTool): MakerData {
+  const fallback: MakerData = {
+    elements: DEFAULT_ELEMENTS,
+    selectedId: "e1",
+    template: "Product Flyer",
+    pageSize: "Letter",
+  }
+
+  if (!tool.data) return fallback
+
+  try {
+    const parsed = JSON.parse(tool.data) as MakerData | CanvasElement[]
+    if (Array.isArray(parsed)) {
+      return {
+        ...fallback,
+        elements: parsed.map((element) => ({
+          ...element,
+          ...defaultSizeFor(element.type),
+          width: element.width ?? defaultSizeFor(element.type).width,
+          height: element.height ?? defaultSizeFor(element.type).height,
+        })),
+      }
+    }
+
+    return {
+      elements:
+        parsed.elements?.map((element) => ({
+          ...element,
+          width: element.width ?? defaultSizeFor(element.type).width,
+          height: element.height ?? defaultSizeFor(element.type).height,
+        })) ?? fallback.elements,
+      selectedId: parsed.selectedId ?? fallback.selectedId,
+      template: parsed.template ?? fallback.template,
+      pageSize: parsed.pageSize ?? fallback.pageSize,
+    }
+  } catch {
+    return fallback
+  }
+}
+
 export function ImagePdfContent({
+  tool,
   onUnsaved,
 }: {
   tool: SandboxTool
   onUnsaved: (data: string) => void
 }) {
-  const [elements, setElements] = useState<CanvasElement[]>(DEFAULT_ELEMENTS)
-  const [selectedId, setSelectedId] = useState<string | null>("e1")
-  const [template, setTemplate] = useState<Template>("Product Flyer")
-  const [pageSize, setPageSize] = useState<PageSize>("Letter")
+  const initial = hydrateMakerData(tool)
+  const [elements, setElements] = useState<CanvasElement[]>(initial.elements)
+  const [selectedId, setSelectedId] = useState<string | null>(
+    initial.selectedId
+  )
+  const [template, setTemplate] = useState<Template>(initial.template)
+  const [pageSize, setPageSize] = useState<PageSize>(initial.pageSize)
+  const canvasRef = useRef<HTMLDivElement | null>(null)
+  const elementsRef = useRef(elements)
+  const nextIdRef = useRef(elements.length + 1)
+  const dragRef = useRef<{
+    id: string
+    offsetX: number
+    offsetY: number
+  } | null>(null)
 
   const selected = elements.find((e) => e.id === selectedId)
 
-  const addElement = useCallback(
-    (type: ElementType) => {
-      const defaults: Record<ElementType, Partial<CanvasElement>> = {
-        heading: {
-          content: "New Heading",
-          color: "#1E1E2E",
-          fontSize: 24,
-          bold: true,
-        },
-        body: { content: "Add your text here", color: "#2D2D2D", fontSize: 13 },
-        image: { content: "📷", color: "#9CA3AF", fontSize: 48 },
-        shape: { content: "Shape", color: "#D97706", fontSize: 13 },
-        divider: { content: "—", color: "#EDEEF2", fontSize: 13 },
-        icon: { content: "⭐", color: "#D97706", fontSize: 32 },
-      }
-      const id = `el-${Date.now()}`
-      const x = 40 + Math.random() * 100
-      const y = 60 + Math.random() * 120
-      const el: CanvasElement = {
-        id,
-        type,
-        x,
-        y,
-        ...defaults[type],
-      } as CanvasElement
-      setElements((prev) => {
-        const next = [...prev, el]
-        onUnsaved(JSON.stringify(next))
-        return next
-      })
-      setSelectedId(el.id)
-      toast.info("Element added — click to edit")
+  useEffect(() => {
+    elementsRef.current = elements
+  }, [elements])
+
+  const persist = useCallback(
+    (
+      nextElements: CanvasElement[],
+      nextSelectedId = selectedId,
+      nextTemplate = template,
+      nextPageSize = pageSize
+    ) => {
+      onUnsaved(
+        JSON.stringify({
+          elements: nextElements,
+          selectedId: nextSelectedId,
+          template: nextTemplate,
+          pageSize: nextPageSize,
+        })
+      )
     },
-    [onUnsaved]
+    [onUnsaved, pageSize, selectedId, template]
   )
+
+  useEffect(() => {
+    function handleMouseMove(event: MouseEvent) {
+      if (!dragRef.current || !canvasRef.current) return
+      const dragged = elementsRef.current.find(
+        (element) => element.id === dragRef.current?.id
+      )
+      if (!dragged) return
+
+      const rect = canvasRef.current.getBoundingClientRect()
+      const width = dragged.width ?? defaultSizeFor(dragged.type).width
+      const height = dragged.height ?? defaultSizeFor(dragged.type).height
+      const nextX = Math.max(
+        0,
+        Math.min(
+          rect.width - width,
+          event.clientX - rect.left - dragRef.current.offsetX
+        )
+      )
+      const nextY = Math.max(
+        0,
+        Math.min(
+          rect.height - height,
+          event.clientY - rect.top - dragRef.current.offsetY
+        )
+      )
+
+      setElements((prev) =>
+        prev.map((element) =>
+          element.id === dragRef.current?.id
+            ? { ...element, x: nextX, y: nextY }
+            : element
+        )
+      )
+    }
+
+    function handleMouseUp() {
+      if (!dragRef.current) return
+      dragRef.current = null
+      persist(elementsRef.current)
+    }
+
+    window.addEventListener("mousemove", handleMouseMove)
+    window.addEventListener("mouseup", handleMouseUp)
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove)
+      window.removeEventListener("mouseup", handleMouseUp)
+    }
+  }, [persist])
+
+  function addElement(type: ElementType) {
+    const size = defaultSizeFor(type)
+    const defaults: Record<ElementType, Partial<CanvasElement>> = {
+      heading: {
+        content: "New Heading",
+        color: "#1E1E2E",
+        fontSize: 24,
+        bold: true,
+      },
+      body: { content: "Add your text here", color: "#2D2D2D", fontSize: 13 },
+      image: { content: "📷", color: "#9CA3AF", fontSize: 48 },
+      shape: { content: "Shape", color: "#D97706", fontSize: 13 },
+      divider: { content: "—", color: "#E5E7EB", fontSize: 13 },
+      icon: { content: "⭐", color: "#D97706", fontSize: 32 },
+    }
+
+    const nextId = `el-${nextIdRef.current}`
+    nextIdRef.current += 1
+    const offset = elementsRef.current.length * 24
+
+    const element: CanvasElement = {
+      id: nextId,
+      type,
+      x: 40 + (offset % 120),
+      y: 60 + (offset % 180),
+      width: size.width,
+      height: size.height,
+      ...defaults[type],
+    } as CanvasElement
+
+    setElements((prev) => {
+      const next = [...prev, element]
+      persist(next, element.id)
+      return next
+    })
+    setSelectedId(element.id)
+    toast.info("Element added — drag it into place")
+  }
+
+  function startDrag(event: React.MouseEvent<HTMLDivElement>, id: string) {
+    if (!canvasRef.current) return
+    const element = elements.find((item) => item.id === id)
+    if (!element) return
+
+    const rect = canvasRef.current.getBoundingClientRect()
+    dragRef.current = {
+      id,
+      offsetX: event.clientX - rect.left - element.x,
+      offsetY: event.clientY - rect.top - element.y,
+    }
+    setSelectedId(id)
+  }
 
   function updateSelected(patch: Partial<CanvasElement>) {
     if (!selectedId) return
@@ -151,7 +335,7 @@ export function ImagePdfContent({
       const next = prev.map((e) =>
         e.id === selectedId ? { ...e, ...patch } : e
       )
-      onUnsaved(JSON.stringify(next))
+      persist(next)
       return next
     })
   }
@@ -160,7 +344,7 @@ export function ImagePdfContent({
     if (!selectedId) return
     setElements((prev) => {
       const next = prev.filter((e) => e.id !== selectedId)
-      onUnsaved(JSON.stringify(next))
+      persist(next, null)
       return next
     })
     setSelectedId(null)
@@ -169,6 +353,7 @@ export function ImagePdfContent({
   const templateBg =
     TEMPLATES.find((t) => t.name === template)?.bg ??
     "from-amber-50 to-yellow-100"
+  const frameSize = PAGE_DIMENSIONS[pageSize]
 
   return (
     <div className="flex flex-1 overflow-hidden">
@@ -204,6 +389,7 @@ export function ImagePdfContent({
                 key={t.name}
                 onClick={() => {
                   setTemplate(t.name)
+                  persist(elements, selectedId, t.name, pageSize)
                   toast.success(`Template applied: ${t.name}`)
                 }}
                 className={cn(
@@ -228,7 +414,10 @@ export function ImagePdfContent({
             {PAGE_SIZES.map((s) => (
               <button
                 key={s}
-                onClick={() => setPageSize(s)}
+                onClick={() => {
+                  setPageSize(s)
+                  persist(elements, selectedId, template, s)
+                }}
                 className={cn(
                   "rounded-[7px] border py-1.5 font-heading text-[0.68rem] font-bold transition-all",
                   pageSize === s
@@ -246,35 +435,41 @@ export function ImagePdfContent({
       {/* Canvas area */}
       <div className="flex flex-1 items-start justify-center overflow-auto bg-[#E5E7EB] p-6">
         <div
+          ref={canvasRef}
           className={cn(
             "relative overflow-hidden rounded-sm bg-linear-to-b shadow-[0_8px_40px_rgba(0,0,0,0.12)]",
             templateBg
           )}
-          style={{ width: 480, height: 620 }}
+          style={{ width: frameSize.width, height: frameSize.height }}
         >
           {elements.map((el) => (
             <div
               key={el.id}
               onClick={() => setSelectedId(el.id)}
+              onMouseDown={(event) => startDrag(event, el.id)}
               style={{
                 left: el.x,
                 top: el.y,
                 color: el.color,
                 fontSize: el.fontSize,
+                width: el.width,
+                minHeight: el.height,
               }}
               className={cn(
-                "absolute cursor-pointer rounded px-2 py-1 transition-all select-none",
+                "absolute cursor-grab rounded px-2 py-1 transition-all select-none active:cursor-grabbing",
                 selectedId === el.id
                   ? "ring-2 ring-amber-400"
                   : "hover:ring-2 hover:ring-amber-200",
                 el.type === "shape" &&
-                  "min-w-50 rounded-[10px] border border-amber-200 bg-amber-50/80 px-3 py-2",
-                el.type === "divider" &&
-                  "h-px w-100 border-t border-current py-0"
+                  "rounded-[10px] border border-amber-200 bg-amber-50/80 px-3 py-2",
+                el.type === "divider" && "h-px border-t border-current py-0"
               )}
             >
               {el.type === "image" ? (
-                <div className="flex h-30 w-40 items-center justify-center rounded-[8px] border-2 border-dashed border-gray-300 bg-gray-50 text-4xl">
+                <div
+                  className="flex items-center justify-center rounded-[8px] border-2 border-dashed border-gray-300 bg-gray-50 text-4xl"
+                  style={{ width: el.width, height: el.height }}
+                >
                   {el.content}
                 </div>
               ) : el.type === "shape" ? (
@@ -366,20 +561,46 @@ export function ImagePdfContent({
 
             <div>
               <p className="mb-1 font-heading text-[0.6rem] font-extrabold tracking-[0.04em] text-muted-foreground/60 uppercase">
+                Position
+              </p>
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="number"
+                  className="w-14 rounded-[7px] border border-border bg-card px-2 py-1 text-[0.74rem] outline-none focus:border-amber-400"
+                  value={Math.round(selected.x)}
+                  onChange={(e) =>
+                    updateSelected({ x: Number(e.target.value) || 0 })
+                  }
+                />
+                <input
+                  type="number"
+                  className="w-14 rounded-[7px] border border-border bg-card px-2 py-1 text-[0.74rem] outline-none focus:border-amber-400"
+                  value={Math.round(selected.y)}
+                  onChange={(e) =>
+                    updateSelected({ y: Number(e.target.value) || 0 })
+                  }
+                />
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-1 font-heading text-[0.6rem] font-extrabold tracking-[0.04em] text-muted-foreground/60 uppercase">
                 Actions
               </p>
               <div className="flex gap-1.5">
                 <button
                   onClick={() => {
+                    const duplicateId = `el-${nextIdRef.current}`
+                    nextIdRef.current += 1
                     const copy = {
                       ...selected,
-                      id: `el-${Date.now()}`,
+                      id: duplicateId,
                       x: selected.x + 10,
                       y: selected.y + 10,
                     }
                     setElements((prev) => {
                       const next = [...prev, copy]
-                      onUnsaved(JSON.stringify(next))
+                      persist(next, copy.id)
                       return next
                     })
                     setSelectedId(copy.id)
