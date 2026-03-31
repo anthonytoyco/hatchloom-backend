@@ -21,11 +21,11 @@ export const MOCK_STUDENT: StudentProfile = {
   id: "00000000-0000-0000-0000-000000000001",
   name: "Alex Rivera",
   emoji: "🦊",
-  school: "Westview Academy",
+  school: "Ridgewood Academy",
   rank: "CHALLENGER",
   xp: 3420,
   xpToNextRank: 5000,
-  streakDays: 14,
+  streakDays: 18,
   swimlane: "EI",
 }
 
@@ -282,6 +282,7 @@ export const MOCK_HOME_VIEW: LaunchPadHomeView = {
   sideHustles: MOCK_SIDE_HUSTLES.map<SideHustleSummary>((sh) => ({
     id: sh.id,
     title: sh.title,
+    description: sh.description,
     status: sh.status,
     hasOpenPositions: sh.hasOpenPositions,
     teamSize: MOCK_TEAM.filter(

@@ -1,5 +1,6 @@
 package com.hatchloom.launchpad.aggregator.dto;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.hatchloom.launchpad.dto.response.SandboxResponse;
@@ -12,6 +13,8 @@ public class SandboxSummary {
 
     private UUID id;
     private String title;
+    private String description;
+    private LocalDateTime createdAt;
 
     /**
      * Maps a {@link SandboxResponse} to a {@link SandboxSummary}.
@@ -23,6 +26,8 @@ public class SandboxSummary {
         SandboxSummary s = new SandboxSummary();
         s.id = sandbox.getId();
         s.title = sandbox.getTitle();
+        s.description = sandbox.getDescription();
+        s.createdAt = sandbox.getCreatedAt();
         return s;
     }
 
@@ -32,5 +37,13 @@ public class SandboxSummary {
 
     public String getTitle() {
         return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }

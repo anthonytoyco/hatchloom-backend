@@ -17,6 +17,13 @@ const SIDEHUSTLE_GRADIENTS = [
 ]
 const SIDEHUSTLE_EMOJIS = ["🧈", "🚗"]
 
+function formatShortDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return "unknown"
+  const d = new Date(dateStr)
+  if (isNaN(d.getTime())) return "unknown"
+  return d.toLocaleDateString("en-CA", { month: "short", day: "numeric" })
+}
+
 const STATUS_MESSAGES = [
   {
     text: "ms.rivera@school.ca · Feedback on packaging mockup",
@@ -149,10 +156,7 @@ export function SandboxTile({
 }) {
   const gradient = SANDBOX_GRADIENTS[index % SANDBOX_GRADIENTS.length]
   const emoji = SANDBOX_EMOJIS[index % SANDBOX_EMOJIS.length]
-  const date = new Date(sandbox.createdAt).toLocaleDateString("en-CA", {
-    month: "short",
-    day: "numeric",
-  })
+  const date = formatShortDate(sandbox.createdAt)
 
   return (
     <Link
@@ -207,10 +211,7 @@ export function SideHustleTile({
   const gradient = SIDEHUSTLE_GRADIENTS[index % SIDEHUSTLE_GRADIENTS.length]
   const emoji = SIDEHUSTLE_EMOJIS[index % SIDEHUSTLE_EMOJIS.length]
   const isLive = sh.status === "LIVE_VENTURE"
-  const date = new Date(sh.createdAt).toLocaleDateString("en-CA", {
-    month: "short",
-    day: "numeric",
-  })
+  const date = formatShortDate(sh.createdAt)
 
   return (
     <Link
@@ -238,6 +239,9 @@ export function SideHustleTile({
         <p className="font-heading text-[0.9rem] leading-tight font-black tracking-tight text-hatch-charcoal">
           {sh.title}
         </p>
+        <p className="line-clamp-2 text-[0.74rem] leading-snug text-muted-foreground">
+          {sh.description ?? "No description yet."}
+        </p>
         {sh.hasOpenPositions && (
           <Badge
             variant="outline"
@@ -250,9 +254,11 @@ export function SideHustleTile({
           <span className="text-[0.68rem] font-medium text-muted-foreground/60">
             Launched {date}
           </span>
-          <span className="font-heading text-[0.65rem] font-bold text-muted-foreground">
-            {sh.teamSize} member{sh.teamSize !== 1 ? "s" : ""}
-          </span>
+          {sh.teamSize != null && sh.teamSize > 0 && (
+            <span className="font-heading text-[0.65rem] font-bold text-muted-foreground">
+              {sh.teamSize} member{sh.teamSize !== 1 ? "s" : ""}
+            </span>
+          )}
         </div>
       </div>
     </Link>

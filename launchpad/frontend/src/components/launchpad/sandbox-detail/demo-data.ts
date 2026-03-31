@@ -11,8 +11,10 @@ export interface PhaseStep {
 
 export interface Gate {
   id: string
+  afterPhaseIdx: number // which segment (between phase[afterPhaseIdx] and [afterPhaseIdx+1])
   question: string
-  dueDate: string
+  dueDate: string // display label e.g. "Feb 10"
+  isoDate: string // YYYY-MM-DD for sorting / editing
   answered: boolean
   answer?: string
 }
@@ -110,34 +112,44 @@ export const PHASES: PhaseStep[] = [
 export const GATES: Gate[] = [
   {
     id: "g1",
+    afterPhaseIdx: 0,
     question: "What's the #1 pain point I discovered?",
     dueDate: "Feb 10",
+    isoDate: "2026-02-10",
     answered: true,
     answer:
       "Cafeteria staff throw out 200+ wrappers daily and feel guilty about it.",
   },
   {
     id: "g2",
+    afterPhaseIdx: 1,
     question: "What problem am I solving, and for who?",
     dueDate: "Feb 25",
+    isoDate: "2026-02-25",
     answered: false,
   },
   {
     id: "g3",
+    afterPhaseIdx: 2,
     question: "Which idea am I going with, and why?",
     dueDate: "Mar 8",
+    isoDate: "2026-03-08",
     answered: false,
   },
   {
     id: "g4",
+    afterPhaseIdx: 3,
     question: "What exactly am I putting in front of people?",
     dueDate: "Mar 18",
+    isoDate: "2026-03-18",
     answered: false,
   },
   {
     id: "g5",
+    afterPhaseIdx: 4,
     question: "What did I change based on feedback?",
     dueDate: "Mar 28",
+    isoDate: "2026-03-28",
     answered: false,
   },
 ]

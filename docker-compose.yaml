@@ -61,7 +61,7 @@ services:
         aliases:
           - user-service
 
-  launchpad:
+  launchpad-service:
     build:
       context: ./launchpad/backend
     ports:
@@ -87,7 +87,7 @@ services:
     ports:
       - "4173:80"
     depends_on:
-      - launchpad
+      - launchpad-service
 
   auth-frontend:
     build:
@@ -140,13 +140,13 @@ services:
       DB_NAME: connecthub_db
       DB_URL: jdbc:postgresql://connecthub-postgres:5432/connecthub_db
       AUTH_SERVICE_URL: http://auth-service:8080
-      LAUNCHPAD_SERVICE_URL: http://launchpad:8080
+      LAUNCHPAD_SERVICE_URL: http://launchpad-service:8080
     depends_on:
       connecthub-postgres:
         condition: service_healthy
       auth-service:
         condition: service_healthy
-      launchpad:
+      launchpad-service:
         condition: service_started
 
   connecthub-frontend:

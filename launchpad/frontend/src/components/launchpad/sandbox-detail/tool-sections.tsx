@@ -21,6 +21,17 @@ const IMPLEMENTED_TOOL_TYPES: ToolType[] = [
   "CHECKLIST",
   "GUIDED_QA",
   "DECK",
+  "CANVAS_BOARD",
+  "CALCULATOR",
+  "TEMPLATE_FORM",
+  "DOWNLOAD",
+  "IMAGE_PDF",
+  "VIDEO_AUDIO",
+  "SOCIAL_POST",
+  "LOGO_BRAND",
+  "SURVEY",
+  "INVOICE",
+  "QR_CODE",
 ]
 
 function ToolIcon({ name, className }: { name: string; className?: string }) {

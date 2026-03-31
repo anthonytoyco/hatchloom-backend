@@ -15,16 +15,9 @@ import { Badge } from "@/components/ui/badge"
 import { useLaunchPadHome } from "@/hooks/use-launchpad-home"
 import { useStudent } from "@/hooks/use-student"
 import { cn } from "@/lib/utils"
-import {
-  ArrowRight,
-  Briefcase,
-  ChevronRight,
-  FlaskConical,
-  X,
-} from "lucide-react"
+import { ArrowRight, X } from "lucide-react"
 import { useState } from "react"
 import { Link } from "react-router"
-import { toast } from "sonner"
 
 const FEATURED_TOOLS = [
   {
@@ -89,10 +82,10 @@ export function LaunchPadHome() {
 
         <StatusBar />
 
-        <div className="mb-8">
-          <div className="mb-3.5 flex items-center justify-between px-8">
+        <div id="sandboxes-section" className="mb-8">
+          <div className="mb-3.5 flex items-center px-8">
             <div className="flex items-center gap-2">
-              <FlaskConical className="size-4 text-hatch-charcoal" />
+              <span className="text-[1rem]">🧪</span>
               <span className="font-heading text-[1rem] font-extrabold text-hatch-charcoal">
                 My Sandboxes
               </span>
@@ -103,16 +96,6 @@ export function LaunchPadHome() {
                 {launchpad ? `${launchpad.sandboxes.length} projects` : "…"}
               </span>
             </div>
-            <button
-              onClick={() =>
-                toast.info(
-                  "My Sandboxes listing is not wired yet. Placeholder: this will open the full sandboxes index."
-                )
-              }
-              className="font-heading text-[0.75rem] font-bold text-hatch-pink transition-opacity hover:opacity-70"
-            >
-              See all <ChevronRight className="inline size-3.5" />
-            </button>
           </div>
 
           <div className="flex [scroll-snap-type:x_mandatory] gap-4 overflow-x-auto px-8 pt-1 pb-4 [scrollbar-width:thin]">
@@ -132,10 +115,10 @@ export function LaunchPadHome() {
           </div>
         </div>
 
-        <div className="mb-8">
-          <div className="mb-3.5 flex items-center justify-between px-8">
+        <div id="sidehustles-section" className="mb-8">
+          <div className="mb-3.5 flex items-center px-8">
             <div className="flex items-center gap-2">
-              <Briefcase className="size-4 text-hatch-charcoal" />
+              <span className="text-[1rem]">💼</span>
               <span className="font-heading text-[1rem] font-extrabold text-hatch-charcoal">
                 My SideHustles
               </span>
@@ -146,16 +129,6 @@ export function LaunchPadHome() {
                 {launchpad ? `${launchpad.sideHustles.length} active` : "…"}
               </span>
             </div>
-            <button
-              onClick={() =>
-                toast.info(
-                  "My SideHustles listing is not wired yet. Placeholder: this will open the full side hustles index."
-                )
-              }
-              className="font-heading text-[0.75rem] font-bold text-hatch-pink transition-opacity hover:opacity-70"
-            >
-              See all <ChevronRight className="inline size-3.5" />
-            </button>
           </div>
 
           <div className="flex [scroll-snap-type:x_mandatory] gap-4 overflow-x-auto px-8 pt-1 pb-4 [scrollbar-width:thin]">

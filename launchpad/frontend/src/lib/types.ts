@@ -108,15 +108,16 @@ export interface SandboxSummary {
   title: string
   description: string | null
   createdAt: string
-  toolCount: number
+  toolCount?: number
 }
 
 export interface SideHustleSummary {
   id: string
   title: string
+  description: string | null
   status: SideHustleStatus
   hasOpenPositions: boolean
-  teamSize: number
+  teamSize?: number
   createdAt: string
 }
 
@@ -166,9 +167,10 @@ export interface ToolMeta {
 export interface NavItem {
   id: string
   label: string
-  icon: string // Lucide icon name
+  icon: string // Lucide icon name or emoji
   href: string
   badge?: number | "NEW"
+  scrollToId?: string // if set, clicking scrolls to this element ID
 }
 
 // ─────────────────────────────────────────────

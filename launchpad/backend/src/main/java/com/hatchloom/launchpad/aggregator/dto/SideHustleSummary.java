@@ -1,5 +1,6 @@
 package com.hatchloom.launchpad.aggregator.dto;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.hatchloom.launchpad.dto.response.SideHustleResponse;
@@ -14,8 +15,10 @@ public class SideHustleSummary {
 
     private UUID id;
     private String title;
+    private String description;
     private SideHustleStatus status;
     private boolean hasOpenPositions;
+    private LocalDateTime createdAt;
 
     /**
      * Maps a {@link SideHustleResponse} to a {@link SideHustleSummary}.
@@ -27,8 +30,10 @@ public class SideHustleSummary {
         SideHustleSummary s = new SideHustleSummary();
         s.id = sh.getId();
         s.title = sh.getTitle();
+        s.description = sh.getDescription();
         s.status = sh.getStatus();
         s.hasOpenPositions = sh.isHasOpenPositions();
+        s.createdAt = sh.getCreatedAt();
         return s;
     }
 
@@ -40,11 +45,19 @@ public class SideHustleSummary {
         return title;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
     public SideHustleStatus getStatus() {
         return status;
     }
 
     public boolean isHasOpenPositions() {
         return hasOpenPositions;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }
