@@ -14,7 +14,6 @@ import com.hatchloom.launchpad.dto.request.CreateSandboxRequest;
 import com.hatchloom.launchpad.dto.request.UpdateSandboxRequest;
 import com.hatchloom.launchpad.dto.response.SandboxResponse;
 import com.hatchloom.launchpad.model.Sandbox;
-import com.hatchloom.launchpad.model.SideHustle;
 import com.hatchloom.launchpad.repository.SandboxRepository;
 import com.hatchloom.launchpad.repository.SideHustleRepository;
 
@@ -79,12 +78,12 @@ public class SandboxService {
     }
 
     /**
-     * Deletes a Sandbox and all SideHustles linked to it.
+     * Deletes a Sandbox. Any SideHustles linked to it will retain their data
+     * with sandbox_id set to NULL, allowing them to remain independent.
      *
      * <p>
-     * Deleting linked SideHustles first ensures their own cascade rules are
-     * applied (BMC, Team, TeamMembers, Positions) before removing the parent
-     * Sandbox.
+     * Only the Sandbox and its direct children (SandboxTools) are deleted
+     * due to cascade rules.
      * </p>
      *
      * @param sandboxId the sandbox UUID
@@ -92,15 +91,8 @@ public class SandboxService {
     @Transactional
     public void deleteSandbox(UUID sandboxId) {
         Sandbox sandbox = findOrThrow(sandboxId);
-
-        List<SideHustle> linkedSideHustles = sideHustleRepository.findAllBySandbox_Id(sandboxId);
-        if (!linkedSideHustles.isEmpty()) {
-            sideHustleRepository.deleteAll(linkedSideHustles);
-            log.debug("Deleted {} side hustles linked to sandbox {}", linkedSideHustles.size(), sandboxId);
-        }
-
         sandboxRepository.delete(sandbox);
-        log.debug("Deleted sandbox {}", sandboxId);
+        log.debug("Deleted sandbox {}. Any linked side hustles remain with null sandbox_id", sandboxId);
     }
 
     /**

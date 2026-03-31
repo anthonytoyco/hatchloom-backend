@@ -23,7 +23,8 @@ import {
 import { AppLayout } from "@/components/layout/AppLayout"
 import { useDeleteSideHustle, useRemoveTeamMember } from "@/hooks/use-mutations"
 import { useSideHustle } from "@/hooks/use-side-hustle"
-import { ArrowRight, ChevronRight } from "lucide-react"
+import { getSideHustleEmoji, getSideHustleGradient } from "@/lib/sandbox-colors"
+import { ChevronRight } from "lucide-react"
 import { useState } from "react"
 import { Link, useNavigate, useParams } from "react-router"
 import { toast } from "sonner"
@@ -87,7 +88,10 @@ export function SideHustleDetail() {
             My SideHustles
           </Link>
           <ChevronRight className="size-3 text-border" />
-          <span>🧈 {sideHustle?.title ?? "…"}</span>
+          <span>
+            {sideHustle ? getSideHustleEmoji(sideHustle.id) : "…"}{" "}
+            {sideHustle?.title ?? "…"}
+          </span>
         </nav>
 
         {isLoading ? (
@@ -108,6 +112,10 @@ export function SideHustleDetail() {
               title={sideHustle.title}
               description={sideHustle.description}
               status={sideHustle.status}
+              gradient={getSideHustleGradient(sideHustle.id)}
+              emoji={getSideHustleEmoji(sideHustle.id)}
+              createdAt={sideHustle.createdAt}
+              updatedAt={sideHustle.updatedAt}
               team={team}
               fallbackTeam={TEAM_MEMBERS}
               onEdit={() => setShowEdit(true)}
@@ -134,28 +142,6 @@ export function SideHustleDetail() {
               <TodoCard />
               <CommsCard />
             </div>
-
-            {/* Nudge */}
-            <button
-              onClick={() =>
-                toast.info(
-                  "Placeholder: Post to Classifieds handoff is not wired yet."
-                )
-              }
-              className="mb-5 flex w-full animate-[fadeUp_0.35s_ease_0.2s_both] cursor-pointer items-center gap-2.5 rounded-[9px] border-[1.5px] border-amber-200 bg-amber-50 px-3 py-2.5 text-left transition-all hover:border-amber-400 hover:shadow-[0_2px_6px_rgba(217,119,6,0.12)]"
-              type="button"
-            >
-              <span className="text-base">👋</span>
-              <div>
-                <p className="font-heading text-[0.7rem] font-bold text-hatch-charcoal">
-                  Need help at your next market?
-                </p>
-                <p className="text-[0.58rem] text-muted-foreground">
-                  Post to Classifieds and find a teammate
-                </p>
-              </div>
-              <ArrowRight className="ml-auto size-4 text-amber-500" />
-            </button>
 
             {/* Shelves */}
             <ShelfRow title="📌 Tagged Resources" action="See all →">

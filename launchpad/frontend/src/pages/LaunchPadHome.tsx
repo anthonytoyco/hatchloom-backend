@@ -103,8 +103,8 @@ export function LaunchPadHome() {
               ? Array.from({ length: 3 }).map((_, i) => (
                   <SkeletonTile key={i} />
                 ))
-              : launchpad?.sandboxes.map((sandbox, i) => (
-                  <SandboxTile key={sandbox.id} sandbox={sandbox} index={i} />
+              : launchpad?.sandboxes.map((sandbox) => (
+                  <SandboxTile key={sandbox.id} sandbox={sandbox} />
                 ))}
             <NewTile
               label="New Sandbox"
@@ -136,12 +136,8 @@ export function LaunchPadHome() {
               ? Array.from({ length: 2 }).map((_, i) => (
                   <SkeletonTile key={i} />
                 ))
-              : launchpad?.sideHustles.map((sideHustle, i) => (
-                  <SideHustleTile
-                    key={sideHustle.id}
-                    sh={sideHustle}
-                    index={i}
-                  />
+              : launchpad?.sideHustles.map((sideHustle) => (
+                  <SideHustleTile key={sideHustle.id} sh={sideHustle} />
                 ))}
             <NewTile
               label="New SideHustle"

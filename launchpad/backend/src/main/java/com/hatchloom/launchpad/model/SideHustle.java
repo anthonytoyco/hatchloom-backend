@@ -47,7 +47,7 @@ public class SideHustle {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "sandbox_id")
+    @JoinColumn(name = "sandbox_id", nullable = true)
     private Sandbox sandbox;
 
     @Column(name = "student_id", nullable = false)

@@ -3,10 +3,35 @@ import { cn } from "@/lib/utils"
 import { Plus, Trash2 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
+function formatDate(isoStr: string): string {
+  const date = new Date(isoStr)
+  if (isNaN(date.getTime())) return "unknown"
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })
+}
+
+function formatUpdated(isoStr: string): string {
+  const date = new Date(isoStr)
+  if (isNaN(date.getTime())) return "unknown"
+  const diffH = Math.floor((Date.now() - date.getTime()) / 3_600_000)
+  if (diffH < 1) return "just now"
+  if (diffH < 24) return `${diffH}h ago`
+  const diffD = Math.floor(diffH / 24)
+  if (diffD < 7) return `${diffD}d ago`
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+}
+
 export function HeroCard({
   title,
   description,
   status,
+  gradient,
+  emoji,
+  createdAt,
+  updatedAt,
   team,
   fallbackTeam,
   onEdit,
@@ -17,6 +42,10 @@ export function HeroCard({
   title: string
   description: string | null
   status: string
+  gradient: string
+  emoji: string
+  createdAt: string
+  updatedAt: string
   team: TeamMember[]
   fallbackTeam: Array<{
     id: string
@@ -53,9 +82,14 @@ export function HeroCard({
         teamOpen ? "z-40" : "z-0"
       )}
     >
-      <div className="relative flex h-[60px] items-center rounded-t-2xl bg-gradient-to-r from-amber-200 to-amber-500 px-5">
+      <div
+        className={cn(
+          "relative flex h-[60px] items-center rounded-t-2xl bg-gradient-to-r px-5",
+          gradient
+        )}
+      >
         <div className="flex size-[42px] shrink-0 items-center justify-center rounded-[10px] bg-white/90 text-[1.3rem] shadow-[0_2px_8px_rgba(0,0,0,0.1)] backdrop-blur-sm">
-          🧈
+          {emoji}
         </div>
         <div className="ml-3 flex flex-col gap-0.5">
           <span className="w-fit rounded-full bg-white/25 px-1.5 py-px font-heading text-[0.55rem] font-extrabold tracking-[0.06em] text-white uppercase">
@@ -76,9 +110,9 @@ export function HeroCard({
 
         <div className="ml-auto flex items-center gap-3">
           <div className="text-right font-heading text-[0.55rem] leading-relaxed font-semibold text-white/70">
-            Launched Jan 15, 2026
+            Launched {formatDate(createdAt)}
             <br />
-            Updated 1 hour ago
+            Updated {formatUpdated(updatedAt)}
           </div>
 
           <div className="relative z-10" ref={teamRef}>

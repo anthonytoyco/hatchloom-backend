@@ -3,20 +3,74 @@ import {
   PHASES,
   TEAM_MEMBERS,
 } from "@/components/launchpad/sandbox-detail/demo-data"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useCreateSideHustle } from "@/hooks/use-mutations"
+import { getSandboxEmoji, getSandboxGradient } from "@/lib/sandbox-colors"
+import type { SideHustleStatus } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { Check, Trash2 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
+import { useNavigate } from "react-router"
 import { toast } from "sonner"
 
-function PhaseTracker() {
+function formatDate(isoStr: string): string {
+  const date = new Date(isoStr)
+  if (isNaN(date.getTime())) return "unknown"
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })
+}
+
+function formatUpdated(isoStr: string): string {
+  const date = new Date(isoStr)
+  if (isNaN(date.getTime())) return "unknown"
+  const diffH = Math.floor((Date.now() - date.getTime()) / 3_600_000)
+  if (diffH < 1) return "just now"
+  if (diffH < 24) return `${diffH}h ago`
+  const diffD = Math.floor(diffH / 24)
+  if (diffD < 7) return `${diffD}d ago`
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+}
+
+interface PhaseTrackerProps {
+  sandboxId: string
+  studentId: string
+}
+
+function PhaseTracker({ sandboxId, studentId }: PhaseTrackerProps) {
   const [openGate, setOpenGate] = useState<string | null>(null)
   const [gateAnswers, setGateAnswers] = useState<Record<string, string>>({})
+  const [showLaunchDialog, setShowLaunchDialog] = useState(false)
+  const [launchTitle, setLaunchTitle] = useState("")
+  const [launchDescription, setLaunchDescription] = useState("")
+  const [launchType, setLaunchType] = useState<SideHustleStatus>("IN_THE_LAB")
+  const { mutateAsync: createSideHustle } = useCreateSideHustle()
+  const navigate = useNavigate()
   const trackerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -35,6 +89,27 @@ function PhaseTracker() {
 
   const doneCount = PHASES.filter((p) => p.status === "done").length
   const progressPct = Math.round((doneCount / (PHASES.length - 1)) * 100)
+
+  async function handleLaunchSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!launchTitle.trim()) return
+    try {
+      const created = await createSideHustle({
+        sandboxId,
+        studentId,
+        title: launchTitle.trim(),
+        description: launchDescription.trim() || undefined,
+        type: launchType,
+      })
+      setShowLaunchDialog(false)
+      setLaunchTitle("")
+      setLaunchDescription("")
+      setLaunchType("IN_THE_LAB")
+      void navigate(`/launchpad/sidehustles/${created.id}`)
+    } catch {
+      toast.error("Failed to create sidehustle")
+    }
+  }
 
   return (
     <div className="border-t border-border px-6 pt-3.5 pb-4" ref={trackerRef}>
@@ -197,15 +272,97 @@ function PhaseTracker() {
           Skip ahead anytime
         </span>
         <button
-          onClick={() =>
-            toast.info(
-              "Placeholder: promote Sandbox to SideHustle flow is not wired yet."
-            )
-          }
+          onClick={() => setShowLaunchDialog(true)}
           className="flex items-center gap-1.5 rounded-[10px] bg-gradient-to-r from-hatch-pink to-[#E6004E] px-4 py-[0.45rem] font-heading text-[0.75rem] font-extrabold text-white shadow-[0_2px_8px_rgba(255,31,90,0.2)] transition-opacity hover:opacity-90"
         >
           🚀 Ready to Launch as SideHustle?
         </button>
+
+        {/* Launch SideHustle Dialog */}
+        <Dialog open={showLaunchDialog} onOpenChange={setShowLaunchDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-heading text-lg font-black text-hatch-charcoal">
+                Launch as SideHustle 🚀
+              </DialogTitle>
+            </DialogHeader>
+            <form
+              onSubmit={(e) => void handleLaunchSubmit(e)}
+              className="space-y-4 pt-2"
+            >
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="launch-title"
+                  className="font-heading text-xs font-bold"
+                >
+                  Title <span className="text-hatch-pink">*</span>
+                </Label>
+                <Input
+                  id="launch-title"
+                  placeholder="e.g. Flavour Butter Co."
+                  value={launchTitle}
+                  onChange={(e) => setLaunchTitle(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="launch-type"
+                  className="font-heading text-xs font-bold"
+                >
+                  Type
+                </Label>
+                <Select
+                  value={launchType}
+                  onValueChange={(v) => setLaunchType(v as SideHustleStatus)}
+                >
+                  <SelectTrigger id="launch-type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="IN_THE_LAB">
+                      In the Lab (exploring)
+                    </SelectItem>
+                    <SelectItem value="LIVE_VENTURE">
+                      Live Venture (active)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="launch-desc"
+                  className="font-heading text-xs font-bold"
+                >
+                  Description
+                </Label>
+                <Textarea
+                  id="launch-desc"
+                  placeholder="What does your venture do?"
+                  rows={3}
+                  value={launchDescription}
+                  onChange={(e) => setLaunchDescription(e.target.value)}
+                />
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowLaunchDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={!launchTitle.trim()}
+                  className="bg-hatch-pink text-white hover:bg-hatch-pink/90"
+                >
+                  Launch as SideHustle
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
@@ -214,16 +371,26 @@ function PhaseTracker() {
 export function HeroCard({
   title,
   description,
+  sandboxId,
+  studentId,
+  createdAt,
+  updatedAt,
   onEdit,
   onDelete,
 }: {
   title: string
   description: string | null
+  sandboxId: string
+  studentId: string
+  createdAt: string
+  updatedAt: string
   onEdit: () => void
   onDelete: () => void
 }) {
   const [teamOpen, setTeamOpen] = useState(false)
   const teamRef = useRef<HTMLDivElement>(null)
+  const gradient = getSandboxGradient(sandboxId)
+  const emoji = getSandboxEmoji(sandboxId)
 
   useEffect(() => {
     if (!teamOpen) return
@@ -237,10 +404,20 @@ export function HeroCard({
   }, [teamOpen])
 
   return (
-    <div className="mb-4 animate-[fadeUp_0.4s_ease_both] overflow-visible rounded-[18px] border border-border bg-card shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
-      <div className="relative flex h-[72px] items-center rounded-t-[18px] bg-gradient-to-r from-emerald-400 to-emerald-600 px-6">
+    <div
+      className={cn(
+        "relative mb-4 animate-[fadeUp_0.4s_ease_both] overflow-visible rounded-[18px] border border-border bg-card shadow-[0_2px_12px_rgba(0,0,0,0.04)]",
+        teamOpen ? "z-40" : "z-0"
+      )}
+    >
+      <div
+        className={cn(
+          "relative flex h-[72px] items-center rounded-t-[18px] bg-gradient-to-r px-6",
+          gradient
+        )}
+      >
         <div className="flex size-[52px] shrink-0 items-center justify-center rounded-[14px] bg-white/90 text-[1.6rem] shadow-[0_2px_12px_rgba(0,0,0,0.1)] backdrop-blur-sm">
-          ♻️
+          {emoji}
         </div>
         <div className="ml-4 flex flex-col gap-0.5">
           <span className="w-fit rounded-full bg-white/25 px-2 py-0.5 font-heading text-[0.6rem] font-extrabold tracking-[0.06em] text-white uppercase">
@@ -256,12 +433,12 @@ export function HeroCard({
 
         <div className="ml-auto flex items-center gap-4">
           <div className="text-right font-heading text-[0.6rem] leading-relaxed font-semibold text-white/70">
-            Created Jan 28, 2026
+            Created {formatDate(createdAt)}
             <br />
-            Updated 2 hours ago
+            Updated {formatUpdated(updatedAt)}
           </div>
 
-          <div className="relative" ref={teamRef}>
+          <div className="relative z-10" ref={teamRef}>
             <button
               onClick={() => setTeamOpen((v) => !v)}
               className="flex items-center transition-opacity hover:opacity-85"
@@ -381,7 +558,7 @@ export function HeroCard({
         </div>
       </div>
 
-      <PhaseTracker />
+      <PhaseTracker sandboxId={sandboxId} studentId={studentId} />
     </div>
   )
 }

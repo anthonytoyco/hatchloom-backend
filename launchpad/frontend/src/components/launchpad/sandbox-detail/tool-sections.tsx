@@ -65,24 +65,12 @@ export function ActiveToolsCard({
             {tools.length}
           </span>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onAddTool}
-            className="flex items-center gap-1 font-heading text-[0.7rem] font-bold text-sandbox-green hover:opacity-80"
-          >
-            <Plus className="size-3" /> Add tool
-          </button>
-          <button
-            onClick={() =>
-              toast.info(
-                "Placeholder: full Active Tools index view is not wired yet."
-              )
-            }
-            className="font-heading text-[0.7rem] font-bold text-hatch-pink hover:opacity-80"
-          >
-            See all →
-          </button>
-        </div>
+        <button
+          onClick={onAddTool}
+          className="flex items-center gap-1 font-heading text-[0.7rem] font-bold text-sandbox-green hover:opacity-80"
+        >
+          <Plus className="size-3" /> Add tool
+        </button>
       </div>
 
       <div className="grid grid-cols-2 gap-2">

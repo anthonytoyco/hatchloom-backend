@@ -1,21 +1,13 @@
 import { Badge } from "@/components/ui/badge"
+import {
+  getSandboxEmoji,
+  getSandboxGradient,
+  getSideHustleEmoji,
+  getSideHustleGradient,
+} from "@/lib/sandbox-colors"
 import type { SandboxSummary, SideHustleSummary } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { Link } from "react-router"
-
-const SANDBOX_GRADIENTS = [
-  "from-emerald-400 to-emerald-600",
-  "from-pink-400 to-pink-600",
-  "from-orange-300 to-orange-500",
-  "from-violet-400 to-violet-600",
-  "from-sky-400 to-sky-600",
-]
-const SANDBOX_EMOJIS = ["♻️", "🎨", "🐕", "💡", "🌿"]
-const SIDEHUSTLE_GRADIENTS = [
-  "from-amber-300 to-amber-600",
-  "from-green-400 to-green-600",
-]
-const SIDEHUSTLE_EMOJIS = ["🧈", "🚗"]
 
 function formatShortDate(dateStr: string | null | undefined): string {
   if (!dateStr) return "unknown"
@@ -147,15 +139,9 @@ export function StatusBar() {
   )
 }
 
-export function SandboxTile({
-  sandbox,
-  index,
-}: {
-  sandbox: SandboxSummary
-  index: number
-}) {
-  const gradient = SANDBOX_GRADIENTS[index % SANDBOX_GRADIENTS.length]
-  const emoji = SANDBOX_EMOJIS[index % SANDBOX_EMOJIS.length]
+export function SandboxTile({ sandbox }: { sandbox: SandboxSummary }) {
+  const gradient = getSandboxGradient(sandbox.id)
+  const emoji = getSandboxEmoji(sandbox.id)
   const date = formatShortDate(sandbox.createdAt)
 
   return (
@@ -201,15 +187,9 @@ export function SandboxTile({
   )
 }
 
-export function SideHustleTile({
-  sh,
-  index,
-}: {
-  sh: SideHustleSummary
-  index: number
-}) {
-  const gradient = SIDEHUSTLE_GRADIENTS[index % SIDEHUSTLE_GRADIENTS.length]
-  const emoji = SIDEHUSTLE_EMOJIS[index % SIDEHUSTLE_EMOJIS.length]
+export function SideHustleTile({ sh }: { sh: SideHustleSummary }) {
+  const gradient = getSideHustleGradient(sh.id)
+  const emoji = getSideHustleEmoji(sh.id)
   const isLive = sh.status === "LIVE_VENTURE"
   const date = formatShortDate(sh.createdAt)
 

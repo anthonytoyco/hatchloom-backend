@@ -20,6 +20,7 @@ import {
 import { AppLayout } from "@/components/layout/AppLayout"
 import { useDeleteSandbox } from "@/hooks/use-mutations"
 import { useSandbox } from "@/hooks/use-sandbox"
+import { getSandboxEmoji } from "@/lib/sandbox-colors"
 import { cn } from "@/lib/utils"
 import { ChevronRight } from "lucide-react"
 import { useState } from "react"
@@ -74,32 +75,16 @@ export function SandboxDetail() {
             My Sandboxes
           </Link>
           <ChevronRight className="size-3 text-border" />
-          <span>♻️ {sandbox?.title ?? "…"}</span>
+          <span>
+            {sandbox ? getSandboxEmoji(sandbox.id) : "…"}{" "}
+            {sandbox?.title ?? "…"}
+          </span>
         </nav>
 
         {isLoading ? (
           <>
             {/* Zone 1 - Hero */}
             <SkeletonCard className="mb-4 h-[340px]" />
-
-            {/* Quick Actions bar */}
-            <div className="mb-6 flex animate-[fadeUp_0.4s_ease_0.08s_both] gap-2 rounded-xl border border-border bg-card px-4 py-2.5 shadow-[0_1px_4px_rgba(0,0,0,0.03)]">
-              {[
-                "📝 Add Note",
-                "✅ Add Todo",
-                "📅 Set Milestone",
-                "🔗 Add Resource",
-                "📤 Share",
-              ].map((label) => (
-                <button
-                  key={label}
-                  disabled
-                  className="flex items-center gap-1.5 rounded-lg border border-border bg-hatch-bg px-3 py-[0.4rem] font-heading text-[0.75rem] font-bold text-muted-foreground transition-all hover:border-sandbox-green hover:bg-green-50 hover:text-sandbox-green"
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
 
             {/* Zone 2 - Working Wall */}
             {/* Active Tools */}
@@ -117,46 +102,13 @@ export function SandboxDetail() {
             <HeroCard
               title={sandbox.title}
               description={sandbox.description}
+              sandboxId={sandbox.id}
+              studentId={sandbox.studentId}
+              createdAt={sandbox.createdAt}
+              updatedAt={sandbox.updatedAt}
               onEdit={() => setShowEditSandbox(true)}
               onDelete={() => void handleDelete()}
             />
-
-            {/* Quick Actions bar */}
-            <div className="mb-6 flex animate-[fadeUp_0.4s_ease_0.08s_both] gap-2 rounded-xl border border-border bg-card px-4 py-2.5 shadow-[0_1px_4px_rgba(0,0,0,0.03)]">
-              {[
-                "📝 Add Note",
-                "✅ Add Todo",
-                "📅 Set Milestone",
-                "🔗 Add Resource",
-                "📤 Share",
-              ].map((label) => (
-                <button
-                  key={label}
-                  onClick={() => {
-                    const placeholderMessages: Record<string, string> = {
-                      "📝 Add Note":
-                        "Placeholder: Add Note will open a note composer when implemented.",
-                      "✅ Add Todo":
-                        "Placeholder: Add Todo will open a task creator when implemented.",
-                      "📅 Set Milestone":
-                        "Placeholder: Set Milestone will open milestone scheduling when implemented.",
-                      "🔗 Add Resource":
-                        "Placeholder: Add Resource will open resource/link tagging when implemented.",
-                      "📤 Share":
-                        "Placeholder: Share will open sharing options when implemented.",
-                    }
-
-                    toast.info(
-                      placeholderMessages[label] ??
-                        "Placeholder action is not wired yet."
-                    )
-                  }}
-                  className="flex items-center gap-1.5 rounded-lg border border-border bg-hatch-bg px-3 py-[0.4rem] font-heading text-[0.75rem] font-bold text-muted-foreground transition-all hover:border-sandbox-green hover:bg-green-50 hover:text-sandbox-green"
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
 
             {/* Zone 2 - Working Wall */}
 
