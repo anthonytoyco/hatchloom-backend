@@ -59,7 +59,10 @@ export function redirectToLogin() {
   const callbackUrl = encodeURIComponent(
     `${window.location.origin}/auth/callback`
   )
-  window.location.href = `http://localhost:3000/login?redirect_uri=${callbackUrl}`
+  const authUrl =
+    (import.meta.env.VITE_AUTH_URL as string | undefined) ??
+    "http://localhost:3000"
+  window.location.href = `${authUrl}/login?redirect_uri=${callbackUrl}`
 }
 
 export async function apiFetch<T>(

@@ -3,18 +3,8 @@ name: launchpad-backend
 on:
   push:
     branches: [main]
-    paths:
-      - launchpad/backend/**
-      - launchpad/docker-compose.yaml
-      - .github/workflows/launchpad-backend.yml
-      - .github/workflows/_reusable-java-ci.yml
   pull_request:
     branches: [main]
-    paths:
-      - launchpad/backend/**
-      - launchpad/docker-compose.yaml
-      - .github/workflows/launchpad-backend.yml
-      - .github/workflows/_reusable-java-ci.yml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -25,6 +15,6 @@ jobs:
     uses: ./.github/workflows/_reusable-java-ci.yml
     with:
       service-path: launchpad/backend
-      image-name: hatchloom-launchpad
+      image-name: launchpad-backend
       use-postgres: true
       oauth2-issuer-uri: http://localhost:8081

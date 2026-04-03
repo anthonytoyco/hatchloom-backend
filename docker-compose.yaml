@@ -2,15 +2,15 @@ services:
   launchpad-postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: launchpad_db
-      POSTGRES_USER: launchpad_user
-      POSTGRES_PASSWORD: launchpad_pass
+      POSTGRES_DB: ${LAUNCHPAD_DB}
+      POSTGRES_USER: ${LAUNCHPAD_USER}
+      POSTGRES_PASSWORD: ${LAUNCHPAD_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - launchpad_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U launchpad_user -d launchpad_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${LAUNCHPAD_USER} -d ${LAUNCHPAD_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -18,15 +18,15 @@ services:
   auth-postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: user_service_db
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: ${AUTH_DB}
+      POSTGRES_USER: ${AUTH_USER}
+      POSTGRES_PASSWORD: ${AUTH_PASSWORD}
     ports:
       - "5433:5432"
     volumes:
       - auth_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U myuser -d user_service_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${AUTH_USER} -d ${AUTH_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -37,12 +37,13 @@ services:
     ports:
       - "8081:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-postgres:5432/user_service_db
-      SPRING_DATASOURCE_USERNAME: myuser
-      SPRING_DATASOURCE_PASSWORD: secret
-      JWT_ACCESS_TOKEN_EXPIRY_MINUTES: 30
-      JWT_REFRESH_TOKEN_EXPIRY_DAYS: 7
-      JWT_ISSUER_URI: http://auth-service:8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-postgres:5432/${AUTH_DB}
+      SPRING_DATASOURCE_USERNAME: ${AUTH_USER}
+      SPRING_DATASOURCE_PASSWORD: ${AUTH_PASSWORD}
+      JWT_ACCESS_TOKEN_EXPIRY_MINUTES: ${JWT_ACCESS_TOKEN_EXPIRY_MINUTES}
+      JWT_REFRESH_TOKEN_EXPIRY_DAYS: ${JWT_REFRESH_TOKEN_EXPIRY_DAYS}
+      JWT_ISSUER_URI: ${JWT_ISSUER_URI}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
     depends_on:
       auth-postgres:
         condition: service_healthy
@@ -67,10 +68,11 @@ services:
     ports:
       - "8082:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://launchpad-postgres:5432/launchpad_db
-      SPRING_DATASOURCE_USERNAME: launchpad_user
-      SPRING_DATASOURCE_PASSWORD: launchpad_pass
-      AUTH_SERVICE_URL: http://auth-service:8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://launchpad-postgres:5432/${LAUNCHPAD_DB}
+      SPRING_DATASOURCE_USERNAME: ${LAUNCHPAD_USER}
+      SPRING_DATASOURCE_PASSWORD: ${LAUNCHPAD_PASSWORD}
+      AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
     depends_on:
       launchpad-postgres:
         condition: service_healthy
@@ -82,8 +84,9 @@ services:
       context: ./launchpad/frontend
       args:
         VITE_API_BASE_URL: /api
-        VITE_CONNECTHUB_URL: http://localhost:5173
-        VITE_CONNECTHUB_API_URL: http://localhost:8083
+        VITE_AUTH_URL: ${VITE_AUTH_URL}
+        VITE_CONNECTHUB_URL: ${VITE_CONNECTHUB_URL}
+        VITE_CONNECTHUB_API_URL: ${VITE_CONNECTHUB_API_URL}
     ports:
       - "4173:80"
     depends_on:
@@ -104,8 +107,8 @@ services:
     ports:
       - "5050:80"
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@gmail.com
-      PGADMIN_DEFAULT_PASSWORD: secret
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
       PGADMIN_CONFIG_SERVER_MODE: "False"
       PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
     depends_on:
@@ -114,15 +117,16 @@ services:
   connecthub-postgres:
     image: postgres:14-alpine
     environment:
-      POSTGRES_DB: connecthub_db
-      POSTGRES_USER: connecthub_user
-      POSTGRES_PASSWORD: connecthub_pass
+      POSTGRES_DB: ${CONNECTHUB_DB}
+      POSTGRES_USER: ${CONNECTHUB_USER}
+      POSTGRES_PASSWORD: ${CONNECTHUB_PASSWORD}
     ports:
       - "5434:5432"
     volumes:
       - connecthub_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U connecthub_user -d connecthub_db"]
+      test:
+        ["CMD-SHELL", "pg_isready -U ${CONNECTHUB_USER} -d ${CONNECTHUB_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -135,12 +139,13 @@ services:
     environment:
       DB_HOST: connecthub-postgres
       DB_PORT: 5432
-      DB_USERNAME: connecthub_user
-      DB_PASSWORD: connecthub_pass
-      DB_NAME: connecthub_db
-      DB_URL: jdbc:postgresql://connecthub-postgres:5432/connecthub_db
-      AUTH_SERVICE_URL: http://auth-service:8080
-      LAUNCHPAD_SERVICE_URL: http://launchpad-service:8080
+      DB_USERNAME: ${CONNECTHUB_USER}
+      DB_PASSWORD: ${CONNECTHUB_PASSWORD}
+      DB_NAME: ${CONNECTHUB_DB}
+      DB_URL: jdbc:postgresql://connecthub-postgres:5432/${CONNECTHUB_DB}
+      AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
+      LAUNCHPAD_SERVICE_URL: ${LAUNCHPAD_SERVICE_URL}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
     depends_on:
       connecthub-postgres:
         condition: service_healthy
@@ -154,6 +159,7 @@ services:
       context: ./connecthub/frontend
       args:
         VITE_API_BASE_URL: ""
+        VITE_AUTH_URL: ${VITE_AUTH_URL}
     ports:
       - "5173:80"
     depends_on:

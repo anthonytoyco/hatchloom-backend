@@ -3,16 +3,8 @@ name: user-service-frontend
 on:
   push:
     branches: [main]
-    paths:
-      - user-service/frontend/**
-      - .github/workflows/user-service-frontend.yml
-      - .github/workflows/_reusable-node-ci.yml
   pull_request:
     branches: [main]
-    paths:
-      - user-service/frontend/**
-      - .github/workflows/user-service-frontend.yml
-      - .github/workflows/_reusable-node-ci.yml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

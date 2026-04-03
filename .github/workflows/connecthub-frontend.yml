@@ -3,16 +3,8 @@ name: connecthub-frontend
 on:
   push:
     branches: [main]
-    paths:
-      - connecthub/frontend/**
-      - .github/workflows/connecthub-frontend.yml
-      - .github/workflows/_reusable-node-ci.yml
   pull_request:
     branches: [main]
-    paths:
-      - connecthub/frontend/**
-      - .github/workflows/connecthub-frontend.yml
-      - .github/workflows/_reusable-node-ci.yml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
