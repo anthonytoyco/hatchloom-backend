@@ -3,22 +3,8 @@ name: user-service-backend
 on:
   push:
     branches: [main]
-    paths:
-      - user-service/src/**
-      - user-service/pom.xml
-      - user-service/mvnw
-      - user-service/Dockerfile
-      - .github/workflows/user-service-backend.yml
-      - .github/workflows/_reusable-java-ci.yml
   pull_request:
     branches: [main]
-    paths:
-      - user-service/src/**
-      - user-service/pom.xml
-      - user-service/mvnw
-      - user-service/Dockerfile
-      - .github/workflows/user-service-backend.yml
-      - .github/workflows/_reusable-java-ci.yml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -29,5 +15,5 @@ jobs:
     uses: ./.github/workflows/_reusable-java-ci.yml
     with:
       service-path: user-service
-      image-name: user-service
+      image-name: user-service-backend
       jwt-secret: test-secret-key-for-ci-cd-pipeline-at-least-256-bits
