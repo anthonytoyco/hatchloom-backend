@@ -2,6 +2,7 @@ package com.hatchloom.user.user_service.controller;
 
 import com.hatchloom.user.user_service.dto.*;
 import com.hatchloom.user.user_service.service.AuthService;
+import com.hatchloom.user.user_service.service.ParentStudentLinkService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,9 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private ParentStudentLinkService parentStudentLinkService;
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
@@ -86,7 +90,7 @@ public class AuthController {
             @PathVariable String studentId) {
 
         String token = extractTokenFromHeader(authHeader);
-        boolean success = authService.linkParentToStudent(token, java.util.UUID.fromString(studentId));
+        boolean success = parentStudentLinkService.linkParentToStudent(token, java.util.UUID.fromString(studentId));
 
         if (success) {
             return ResponseEntity.ok("Parent linked successfully");
@@ -102,4 +106,3 @@ public class AuthController {
         return null;
     }
 }
-

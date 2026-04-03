@@ -8,11 +8,11 @@ import com.hatchloom.user.user_service.model.AcademicProfile;
 import com.hatchloom.user.user_service.model.Parent;
 import com.hatchloom.user.user_service.model.RoleType;
 import com.hatchloom.user.user_service.model.Student;
-import com.hatchloom.user.user_service.repository.ParentRepository;
 import com.hatchloom.user.user_service.repository.StudentRepository;
 import com.hatchloom.user.user_service.repository.UserProfileRepository;
 import com.hatchloom.user.user_service.repository.UserRepository;
 import com.hatchloom.user.user_service.security.SessionManager;
+import com.hatchloom.user.user_service.security.SessionToken;
 import com.hatchloom.user.user_service.strategy.StrategyFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,13 +39,13 @@ class AuthServiceTest {
     private StudentRepository studentRepository;
 
     @Mock
-    private ParentRepository parentRepository;
-
-    @Mock
     private UserProfileRepository userProfileRepository;
 
     @Mock
     private SessionManager sessionManager;
+
+    @Mock
+    private UserProfileProvisioningService userProfileProvisioningService;
 
     @Mock
     private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
@@ -73,18 +73,12 @@ class AuthServiceTest {
         testUsername = "testuser";
 
         // Setup registration strategies for each role
-        com.hatchloom.user.user_service.strategy.registration.StudentRegistrationStrategy studentStrategy =
-                new com.hatchloom.user.user_service.strategy.registration.StudentRegistrationStrategy();
-        com.hatchloom.user.user_service.strategy.registration.ParentRegistrationStrategy parentStrategy =
-                new com.hatchloom.user.user_service.strategy.registration.ParentRegistrationStrategy();
-        com.hatchloom.user.user_service.strategy.registration.SchoolTeacherRegistrationStrategy teacherStrategy =
-                new com.hatchloom.user.user_service.strategy.registration.SchoolTeacherRegistrationStrategy();
-        com.hatchloom.user.user_service.strategy.registration.SchoolAdminRegistrationStrategy adminStrategy =
-                new com.hatchloom.user.user_service.strategy.registration.SchoolAdminRegistrationStrategy();
-        com.hatchloom.user.user_service.strategy.registration.HatchloomTeacherRegistrationStrategy hatchloomTeacherStrategy =
-                new com.hatchloom.user.user_service.strategy.registration.HatchloomTeacherRegistrationStrategy();
-        com.hatchloom.user.user_service.strategy.registration.HatchloomAdminRegistrationStrategy hatchloomAdminStrategy =
-                new com.hatchloom.user.user_service.strategy.registration.HatchloomAdminRegistrationStrategy();
+        com.hatchloom.user.user_service.strategy.registration.StudentRegistrationStrategy studentStrategy = new com.hatchloom.user.user_service.strategy.registration.StudentRegistrationStrategy();
+        com.hatchloom.user.user_service.strategy.registration.ParentRegistrationStrategy parentStrategy = new com.hatchloom.user.user_service.strategy.registration.ParentRegistrationStrategy();
+        com.hatchloom.user.user_service.strategy.registration.SchoolTeacherRegistrationStrategy teacherStrategy = new com.hatchloom.user.user_service.strategy.registration.SchoolTeacherRegistrationStrategy();
+        com.hatchloom.user.user_service.strategy.registration.SchoolAdminRegistrationStrategy adminStrategy = new com.hatchloom.user.user_service.strategy.registration.SchoolAdminRegistrationStrategy();
+        com.hatchloom.user.user_service.strategy.registration.HatchloomTeacherRegistrationStrategy hatchloomTeacherStrategy = new com.hatchloom.user.user_service.strategy.registration.HatchloomTeacherRegistrationStrategy();
+        com.hatchloom.user.user_service.strategy.registration.HatchloomAdminRegistrationStrategy hatchloomAdminStrategy = new com.hatchloom.user.user_service.strategy.registration.HatchloomAdminRegistrationStrategy();
 
         // Wire up strategies for each role type
         when(registrationStrategyFactory.getStrategy(RoleType.STUDENT)).thenReturn(studentStrategy);
@@ -206,10 +200,9 @@ class AuthServiceTest {
         when(userRepository.findByUsername(testUsername)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("TestPassword123", "hashed_password")).thenReturn(true);
         when(sessionManager.generateSessionTokens(any(), anyString(), anyString()))
-                .thenReturn(new com.hatchloom.user.user_service.security.SessionToken(
+                .thenReturn(new SessionToken(
                         "access_token_jwt",
-                        "refresh_token_jwt"
-                ));
+                        "refresh_token_jwt"));
 
         // Act
         LoginResponse response = authService.login(request);
@@ -246,10 +239,9 @@ class AuthServiceTest {
         when(passwordEncoder.matches("TestPassword123", "hashed_password")).thenReturn(true);
         when(userProfileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(sessionManager.generateSessionTokens(any(), anyString(), anyString()))
-                .thenReturn(new com.hatchloom.user.user_service.security.SessionToken(
+                .thenReturn(new SessionToken(
                         "access_token_jwt",
-                        "refresh_token_jwt"
-                ));
+                        "refresh_token_jwt"));
 
         // Act
         LoginResponse response = authService.login(request);
@@ -406,4 +398,3 @@ class AuthServiceTest {
         verify(sessionManager, times(1)).validateSessionToken(validToken);
     }
 }
-

@@ -2,8 +2,6 @@ package com.hatchloom.user.user_service.service;
 
 import com.hatchloom.user.user_service.dto.*;
 import com.hatchloom.user.user_service.model.*;
-import com.hatchloom.user.user_service.repository.ParentRepository;
-import com.hatchloom.user.user_service.repository.StudentRepository;
 import com.hatchloom.user.user_service.repository.UserProfileRepository;
 import com.hatchloom.user.user_service.repository.UserRepository;
 import com.hatchloom.user.user_service.security.SessionManager;
@@ -26,16 +24,13 @@ public class AuthService {
     private UserRepository userRepository;
 
     @Autowired
-    private StudentRepository studentRepository;
-
-    @Autowired
-    private ParentRepository parentRepository;
-
-    @Autowired
     private UserProfileRepository userProfileRepository;
 
     @Autowired
     private SessionManager sessionManager;
+
+    @Autowired
+    private UserProfileProvisioningService userProfileProvisioningService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -81,7 +76,7 @@ public class AuthService {
             }
 
             user = userRepository.save(user);
-            createDefaultProfileForUser(user);
+            userProfileProvisioningService.createDefaultProfileForUser(user);
 
             log.info("User registered successfully: {}", user.getUsername());
             return RegisterResponse.builder()
@@ -109,7 +104,8 @@ public class AuthService {
             return false;
         }
 
-        if (isBlank(request.getUsername()) || isBlank(request.getEmail()) || isBlank(request.getPassword()) || isBlank(request.getRole())) {
+        if (isBlank(request.getUsername()) || isBlank(request.getEmail()) || isBlank(request.getPassword())
+                || isBlank(request.getRole())) {
             log.warn("Registration rejected: missing base fields (username/email/password/role)");
             return false;
         }
@@ -125,7 +121,6 @@ public class AuthService {
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
-
 
     public LoginResponse login(LoginRequest request) {
         try {
@@ -145,7 +140,8 @@ public class AuthService {
                         .build();
             }
 
-            // Polymorphic login hook: each profile handles post-login actions (e.g., lastActive update)
+            // Polymorphic login hook: each profile handles post-login actions (e.g.,
+            // lastActive update)
             if (user.getProfile() != null) {
                 user.getProfile().onUserLogin(user);
                 userProfileRepository.save(user.getProfile());
@@ -154,8 +150,7 @@ public class AuthService {
             SessionToken tokens = sessionManager.generateSessionTokens(
                     user.getId(),
                     user.getUsername(),
-                    user.getRole().toString()
-            );
+                    user.getRole().toString());
 
             log.info("User logged in successfully: {}", user.getUsername());
 
@@ -253,51 +248,4 @@ public class AuthService {
         }
     }
 
-    public boolean linkParentToStudent(String parentToken, UUID studentId) {
-        try {
-            User parentUser = sessionManager.getUserFromSessionToken(parentToken);
-
-            if (!(parentUser instanceof Parent)) {
-                log.warn("Attempted parent linking by non-parent user");
-                return false;
-            }
-
-            Student student = studentRepository.findById(studentId).orElse(null);
-
-            if (student == null) {
-                log.warn("Student not found for linking: {}", studentId);
-                return false;
-            }
-
-            student.setParent((Parent) parentUser);
-            studentRepository.save(student);
-
-            log.info("Parent {} linked to student {}", parentUser.getId(), studentId);
-            return true;
-        } catch (Exception e) {
-            log.error("Error linking parent to student", e);
-            return false;
-        }
-    }
-
-    private void createDefaultProfileForUser(User user) {
-        UserProfile profile = null;
-
-        if (user instanceof Student || user instanceof SchoolTeacher) {
-            profile = new AcademicProfile();
-        } else if (user instanceof SchoolAdmin || user instanceof HatchloomAdmin || user instanceof HatchloomTeacher) {
-            profile = new ProfessionalProfile();
-        } else if (user instanceof Parent) {
-            profile = new ProfessionalProfile();
-        }
-
-        if (profile != null) {
-            profile.setUser(user);
-            profile.setBio("Bio");
-            profile.setDescription("Description");
-            profile.initializeDefaults(user);
-            user.setProfile(profile);
-            userRepository.save(user);
-        }
-    }
 }

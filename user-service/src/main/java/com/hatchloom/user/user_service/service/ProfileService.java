@@ -64,53 +64,63 @@ public class ProfileService {
 
     public ProfileDTO updateProfile(String token, UUID userId, UpdateProfileRequest request) {
         try {
-            User requestingUser = sessionManager.getUserFromSessionToken(token);
-
-            if (requestingUser == null) {
-                log.warn("Unauthorized profile update attempt");
-                return null;
-            }
-
-            // Users can only update their own profile
-            if (!requestingUser.getId().equals(userId)) {
-                log.warn("Unauthorized profile update by user: {} for user: {}",
-                        requestingUser.getId(), userId);
-                return null;
-            }
-
-            User user = userRepository.findById(userId).orElse(null);
-
-            if (user == null || !user.getActive()) {
-                log.warn("User not found or inactive: {}", userId);
+            User user = resolveAuthorizedUserForUpdate(token, userId);
+            if (user == null) {
                 return null;
             }
 
             UserProfile profile = user.getProfile();
 
-            if (profile != null) {
-                // Update common fields
-                if (request.getBio() != null) {
-                    profile.setBio(request.getBio());
-                }
-                if (request.getDescription() != null) {
-                    profile.setDescription(request.getDescription());
-                }
-                if (request.getProfilePictureUrl() != null) {
-                    profile.setProfilePictureUrl(request.getProfilePictureUrl());
-                }
-
-                // Polymorphic update: each profile type handles its own fields
-                // Pass user so profile can determine Student vs Teacher type
-                profile.applyUpdates(request, user);
-
-                userProfileRepository.save(profile);
-                log.info("Profile updated for user: {}", userId);
+            if (profile == null) {
+                return mapUserToProfileDTO(user);
             }
+
+            applyCommonProfileUpdates(profile, request);
+            profile.applyUpdates(request, user);
+
+            userProfileRepository.save(profile);
+            log.info("Profile updated for user: {}", userId);
 
             return mapUserToProfileDTO(user);
         } catch (Exception e) {
             log.error("Error updating profile", e);
             return null;
+        }
+    }
+
+    private User resolveAuthorizedUserForUpdate(String token, UUID userId) {
+        User requestingUser = sessionManager.getUserFromSessionToken(token);
+
+        if (requestingUser == null) {
+            log.warn("Unauthorized profile update attempt");
+            return null;
+        }
+
+        if (!requestingUser.getId().equals(userId)) {
+            log.warn("Unauthorized profile update by user: {} for user: {}",
+                    requestingUser.getId(), userId);
+            return null;
+        }
+
+        User user = userRepository.findById(userId).orElse(null);
+
+        if (user == null || !user.getActive()) {
+            log.warn("User not found or inactive: {}", userId);
+            return null;
+        }
+
+        return user;
+    }
+
+    private void applyCommonProfileUpdates(UserProfile profile, UpdateProfileRequest request) {
+        if (request.getBio() != null) {
+            profile.setBio(request.getBio());
+        }
+        if (request.getDescription() != null) {
+            profile.setDescription(request.getDescription());
+        }
+        if (request.getProfilePictureUrl() != null) {
+            profile.setProfilePictureUrl(request.getProfilePictureUrl());
         }
     }
 
@@ -149,11 +159,12 @@ public class ProfileService {
         if (user.getProfile() != null) {
             UserProfile profile = user.getProfile();
             builder.bio(profile.getBio())
-                   .description(profile.getDescription())
-                   .profilePictureUrl(profile.getProfilePictureUrl());
+                    .description(profile.getDescription())
+                    .profilePictureUrl(profile.getProfilePictureUrl());
 
             // Polymorphic enrichment: each profile type adds its own fields
-            // Pass user so profile can determine Student vs Teacher without relying on bidirectional relationship
+            // Pass user so profile can determine Student vs Teacher without relying on
+            // bidirectional relationship
             profile.enrichProfileDTO(builder, user);
         }
 
@@ -164,4 +175,3 @@ public class ProfileService {
         return role == RoleType.HATCHLOOM_ADMIN || role == RoleType.SCHOOL_ADMIN;
     }
 }
-
