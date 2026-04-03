@@ -43,6 +43,7 @@ services:
       JWT_ACCESS_TOKEN_EXPIRY_MINUTES: ${JWT_ACCESS_TOKEN_EXPIRY_MINUTES}
       JWT_REFRESH_TOKEN_EXPIRY_DAYS: ${JWT_REFRESH_TOKEN_EXPIRY_DAYS}
       JWT_ISSUER_URI: ${JWT_ISSUER_URI}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
     depends_on:
       auth-postgres:
         condition: service_healthy
@@ -71,6 +72,7 @@ services:
       SPRING_DATASOURCE_USERNAME: ${LAUNCHPAD_USER}
       SPRING_DATASOURCE_PASSWORD: ${LAUNCHPAD_PASSWORD}
       AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
     depends_on:
       launchpad-postgres:
         condition: service_healthy
@@ -143,6 +145,7 @@ services:
       DB_URL: jdbc:postgresql://connecthub-postgres:5432/${CONNECTHUB_DB}
       AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
       LAUNCHPAD_SERVICE_URL: ${LAUNCHPAD_SERVICE_URL}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
     depends_on:
       connecthub-postgres:
         condition: service_healthy
