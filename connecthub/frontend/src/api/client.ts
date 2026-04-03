@@ -24,11 +24,16 @@ apiClient.interceptors.response.use(
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
       localStorage.removeItem("user");
-      const callbackUrl = encodeURIComponent(`${window.location.origin}/auth/callback`);
-      window.location.href = `http://localhost:3000/login?redirect_uri=${callbackUrl}`;
+      const callbackUrl = encodeURIComponent(
+        `${window.location.origin}/auth/callback`,
+      );
+      const authUrl =
+        (import.meta.env.VITE_AUTH_URL as string | undefined) ??
+        "http://localhost:3000";
+      window.location.href = `${authUrl}/login?redirect_uri=${callbackUrl}`;
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default apiClient;

@@ -82,8 +82,9 @@ services:
       context: ./launchpad/frontend
       args:
         VITE_API_BASE_URL: /api
-        VITE_CONNECTHUB_URL: http://localhost:5173
-        VITE_CONNECTHUB_API_URL: http://localhost:8083
+        VITE_AUTH_URL: ${VITE_AUTH_URL}
+        VITE_CONNECTHUB_URL: ${VITE_CONNECTHUB_URL}
+        VITE_CONNECTHUB_API_URL: ${VITE_CONNECTHUB_API_URL}
     ports:
       - "4173:80"
     depends_on:
@@ -122,7 +123,8 @@ services:
     volumes:
       - connecthub_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${CONNECTHUB_USER} -d ${CONNECTHUB_DB}"]
+      test:
+        ["CMD-SHELL", "pg_isready -U ${CONNECTHUB_USER} -d ${CONNECTHUB_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -154,6 +156,7 @@ services:
       context: ./connecthub/frontend
       args:
         VITE_API_BASE_URL: ""
+        VITE_AUTH_URL: ${VITE_AUTH_URL}
     ports:
       - "5173:80"
     depends_on:
