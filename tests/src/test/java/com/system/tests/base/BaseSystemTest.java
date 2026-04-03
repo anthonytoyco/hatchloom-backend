@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
-
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -24,6 +23,12 @@ public abstract class BaseSystemTest {
     protected static final String TEST_PASSWORD = "testpassword123";
     protected static final String USER_ROLE = "STUDENT";
 
+    // Second Default user credentials for testing (messaging portion)
+    protected static final String SECOND_USERNAME = "seconduser";
+    protected static final String SECOND_EMAIL = "seconduser@gmail.com";
+    protected static final String SECOND_PASSWORD = "secondpassword123";
+    protected static final String SECOND_USER_ROLE = "STUDENT";
+
     // randomly generated UUID
     protected static final String SCHOOL_ID = "d437c52b-3158-46bd-aa8c-de61511b23f0";
     protected static final Integer AGE = 18;
@@ -32,47 +37,51 @@ public abstract class BaseSystemTest {
     protected static final ObjectMapper objectMapper = new ObjectMapper();
 
     protected static String authToken;
+    protected static String secondAuthToken;
 
     @BeforeAll
     static void authenticate() throws Exception {
+        authToken = authenticateUser(USERNAME, TEST_EMAIL, TEST_PASSWORD, USER_ROLE);
+        secondAuthToken = authenticateUser(SECOND_USERNAME, SECOND_EMAIL, SECOND_PASSWORD, SECOND_USER_ROLE);
+    }
+
+    private static String authenticateUser(String username, String email, String password, String role) throws Exception {
         Map<String, Object> registerRequest = new HashMap<>();
-        registerRequest.put("username", USERNAME);
-        registerRequest.put("email", TEST_EMAIL);
-        registerRequest.put("password", TEST_PASSWORD);
-        registerRequest.put("role", USER_ROLE);
+        registerRequest.put("username", username);
+        registerRequest.put("email", email);
+        registerRequest.put("password", password);
+        registerRequest.put("role", role);
         registerRequest.put("schoolId", SCHOOL_ID);
         registerRequest.put("age", AGE);
 
-        String registerJson = objectMapper.writeValueAsString(registerRequest);
-
-        HttpRequest request = HttpRequest.newBuilder(URI.create(AUTH_URL + "/auth/register"))
+        HttpRequest registerHttpRequest = HttpRequest.newBuilder(URI.create(AUTH_URL + "/auth/register"))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(registerJson))
+                .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(registerRequest)))
                 .build();
 
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-        int registerStatus = response.statusCode();
+        HttpResponse<String> registerResponse = httpClient.send(registerHttpRequest, HttpResponse.BodyHandlers.ofString());
+        int registerStatus = registerResponse.statusCode();
 
         Assertions.assertTrue(
                 registerStatus == 201 || registerStatus == 400,
-                "Register failed. Expected 201 or 400, got " + registerStatus + ". Body: " + response.body()
+                "Register failed. Expected 201 or 400, got " + registerStatus + ". Body: " + registerResponse.body()
         );
 
         Map<String, Object> loginRequest = new HashMap<>();
-        loginRequest.put("username", USERNAME);
-        loginRequest.put("password", TEST_PASSWORD);
+        loginRequest.put("username", username);
+        loginRequest.put("password", password);
 
-        String loginJson = objectMapper.writeValueAsString(loginRequest);
         HttpRequest loginHttpRequest = HttpRequest.newBuilder(URI.create(AUTH_URL + "/auth/login"))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(loginJson))
+                .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(loginRequest)))
                 .build();
 
-        HttpResponse<String> loginResponse = httpClient.send(loginHttpRequest, HttpResponse.BodyHandlers.ofString());
-        Assertions.assertEquals(200, loginResponse.statusCode());
 
-        authToken = objectMapper.readTree(loginResponse.body()).get("accessToken").asText();
+        HttpResponse<String>  loginResponse = httpClient.send(loginHttpRequest, HttpResponse.BodyHandlers.ofString());
+        int loginStatus = loginResponse.statusCode();
+        Assertions.assertEquals(200, loginStatus);
+
+        return objectMapper.readTree(loginResponse.body()).get("accessToken").asText();
     }
 
     protected HttpResponse<String> get(String url, String path) throws Exception {
