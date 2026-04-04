@@ -13,9 +13,10 @@ The HatchLoom Quebec subpack is an education platform monorepo composed of three
 5. [Configuration](#configuration)
 6. [Running the Full Stack](#running-the-full-stack)
 7. [Running Services Individually](#running-services-individually)
-8. [API Documentation](#api-documentation)
-9. [Deployment (Google Cloud VM)](#deployment-google-cloud-vm)
-10. [CI/CD (GitHub Actions)](#cicd-github-actions)
+8. [Test Documentation](#test-documentation)
+9. [API Documentation](#api-documentation)
+10. [Deployment (Google Cloud VM)](#deployment-google-cloud-vm)
+11. [CI/CD (GitHub Actions)](#cicd-github-actions)
 
 ---
 
@@ -32,13 +33,13 @@ The subpack is composed of three independently deployable microservices, each wi
 | Component               | Technology                    | Function                                                                                                           |
 | ----------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | **auth-frontend**       | React + Vite, served by nginx | Login, registration, profile management UI                                                                         |
-| **auth-service**        | Spring Boot 3, Java 25        | Issues JWT access/refresh tokens (RS256), exposes OIDC discovery + JWKS endpoints, manages user profiles and roles |
+| **auth-service**        | Spring Boot 4, Java 25        | Issues JWT access/refresh tokens (RS256), exposes OIDC discovery + JWKS endpoints, manages user profiles and roles |
 | **auth-postgres**       | PostgreSQL 16                 | Stores user accounts, roles, and profiles                                                                          |
 | **launchpad-frontend**  | React + Vite, served by nginx | Student workspace UI: sandboxes, side hustles, BMC editor, team management                                         |
-| **launchpad-service**   | Spring Boot 3, Java 25        | Sandboxes, SideHustles, Business Model Canvases, Teams, Positions; validates JWTs via auth-service JWKS            |
+| **launchpad-service**   | Spring Boot 4, Java 25        | Sandboxes, SideHustles, Business Model Canvases, Teams, Positions; validates JWTs via auth-service JWKS            |
 | **launchpad-postgres**  | PostgreSQL 16                 | Stores sandboxes, side_hustles, bmc_sections, teams, positions                                                     |
 | **connecthub-frontend** | React + Vite, served by nginx | Social feed UI: posts, classified listings, messaging                                                              |
-| **connecthub-service**  | Spring Boot 3, Java 25        | Feed posts, feed actions, classified posts, messaging, notifications; validates JWTs via auth-service JWKS         |
+| **connecthub-service**  | Spring Boot 4, Java 25        | Feed posts, feed actions, classified posts, messaging, notifications; validates JWTs via auth-service JWKS         |
 | **connecthub-postgres** | PostgreSQL 16                 | Stores posts, feed_actions, classified_posts, conversations, messages, notifications                               |
 | **auth-pgadmin**        | pgAdmin 4                     | Web-based database management (dev/ops use)                                                                        |
 
@@ -293,27 +294,163 @@ The dev profile (`docker-compose.dev.yaml`) sets `SPRING_PROFILES_ACTIVE=dev`, w
 
 ### Running tests
 
-**Backend unit tests (no database required):**
+See [Test Documentation](#test-documentation) for the full inventory of unit, integration, and system tests by module and location.
+
+---
+
+## Test Documentation
+
+This repository uses three test types:
+
+- **Unit tests**: fast tests run during `mvn test` (includes unit, slice/controller, and app context checks).
+- **Integration tests**: database/API-crossing tests run during `mvn verify`.
+- **System tests**: cross-service end-to-end tests in the dedicated `system-tests` module.
+
+### How the test pipeline works
+
+The backend modules (`user-service`, `launchpad/backend`, `connecthub/backend`) use Maven's standard split:
+
+- `maven-surefire-plugin` runs the **unit phase** via `mvn test`.
+- `maven-failsafe-plugin` runs the **integration phase** during `mvn verify`.
+
+Current separation rules:
+
+- Unit phase excludes `*IntegrationTest`, `*ApiIntegrationTest`, and `*RepositoryTest` patterns.
+- ConnectHub and user-service additionally exclude JUnit `@Tag("integration")` from unit phase.
+- Integration phase includes `*IntegrationTest`, `*ApiIntegrationTest`, and `*RepositoryTest` patterns.
+
+System tests are isolated in the standalone `system-tests` Maven module and are executed with `mvn test` from that directory.
+
+### Common Commands
 
 ```bash
-# user-service
+# Unit phase
 cd user-service && ./mvnw test
-
-# launchpad
 cd launchpad/backend && ./mvnw test
-
-# connecthub
 cd connecthub/backend && ./mvnw test
+
+# Integration phase
+cd user-service && ./mvnw verify
+cd launchpad/backend && ./mvnw verify
+cd connecthub/backend && ./mvnw verify
+
+# System phase (uses docker-compose.test.yaml)
+cd system-tests && mvn test
 ```
 
-**Launchpad integration tests (requires running Postgres):**
+### Implementations of Each Test Type
 
-```bash
-cd launchpad/backend && ./mvnw test -Dgroups=integration \
-  -DSPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/launchpad_db \
-  -DSPRING_DATASOURCE_USERNAME=launchpad_user \
-  -DSPRING_DATASOURCE_PASSWORD=launchpad_pass
-```
+#### Unit Tests
+
+Implementation characteristics:
+
+- Pure logic tests use JUnit 5 + Mockito style patterns.
+- Controller slice tests use Spring MVC test support (`MockMvc`), typically with `*WebMvcTest` naming.
+- Service unit tests in ConnectHub use explicit `*ServiceUnitTest` naming.
+- Application context sanity checks use `*ApplicationTests` classes.
+
+Runtime behavior:
+
+- Should be fast and deterministic.
+- Should not depend on Docker Compose or cross-service availability.
+- Focuses on validation, controller contracts, service logic, and security behavior at unit/slice level.
+
+#### Integration Tests
+
+Implementation characteristics:
+
+- Run against real Spring Boot wiring and persistence layers.
+- Include API-level tests (`*ApiIntegrationTest`) and repository tests (`*RepositoryTest`).
+- ConnectHub integration suites are named `*IntegrationTest` and tagged with `@Tag("integration")`.
+
+Runtime behavior:
+
+- Exercise database interactions, transaction boundaries, serialization, and API behavior beyond simple mocking.
+- Executed in Maven `verify` lifecycle (Failsafe), separate from unit test phase.
+
+#### System Tests
+
+Implementation characteristics:
+
+- Located in `system-tests/src/test/java` and share `BaseSystemTest`.
+- Use Java `HttpClient` + Jackson to call live APIs over HTTP.
+- Automatically bootstrap backend dependencies via `docker compose -f docker-compose.test.yaml up -d --build`.
+
+How `BaseSystemTest` works:
+
+- Resolves `docker-compose.test.yaml` relative to compiled test location.
+- Performs startup/readiness checks with explicit bounded timeouts.
+- Waits for:
+  - auth-service OIDC discovery endpoint (`/.well-known/openid-configuration`) returning `200`.
+  - connecthub-service feed endpoint (`/api/feed`) returning non-5xx.
+  - launchpad-service TCP reachability.
+- Authenticates fixture users before tests run and reuses tokens in test requests.
+- Emits compose diagnostics (`docker compose ps` and `docker compose logs`) when startup fails.
+
+What system tests verify:
+
+- Feed post creation/retrieval/deletion flows.
+- Feed actions (likes/comments) behavior.
+- Messaging conversation and message flows.
+- Cross-service behavior for ConnectHub dependencies:
+  - LaunchPad position status lookup (`/launchpad/positions/{positionId}/status`).
+  - Auth service token/JWKS-driven security path readiness via OIDC discovery.
+
+### Test Inventory by Location and Type
+
+#### connecthub/backend/src/test/java
+
+| Type        | Tests                                                                                                                                                                                                                                |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Unit        | `ConnecthubServiceApplicationTests`, `FeedPostControllerWebMvcTest`, `MessageControllerWebMvcTest`, `ClassifiedPostServiceUnitTest`, `FeedActionServiceUnitTest`, `FeedPostServiceUnitTest`, `JwtUtilTest`, `MessageServiceUnitTest` |
+| Integration | `ClassifiedPostIntegrationTest`, `FeedActionIntegrationTest`, `FeedPostIntegrationTest`, `MessageIntegrationTest`, `NotificationIntegrationTest`, `ClassifiedPostRepositoryTest`, `FeedPostRepositoryTest`, `MessageRepositoryTest`  |
+| System      | None in this module                                                                                                                                                                                                                  |
+
+Notes:
+
+- Unit tests here cover controller slices and isolated service logic.
+- Integration tests validate feed, classified, messaging, and notification flows using full Spring wiring and persistence.
+
+#### launchpad/backend/src/test/java
+
+| Type        | Tests                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit        | `LaunchpadApplicationTests`, `BMCControllerTest`, `BMCControllerWebMvcTest`, `LaunchPadHomeControllerTest`, `PositionControllerTest`, `PositionControllerWebMvcTest`, `SandboxControllerTest`, `SandboxToolControllerTest`, `SideHustleControllerTest`, `TeamControllerTest`, `BMCServiceTest`, `LaunchPadAggregatorTest`, `PositionServiceTest`, `SandboxServiceTest`, `SandboxToolServiceTest`, `SideHustleServiceTest` |
+| Integration | `BMCApiIntegrationTest`, `PositionApiIntegrationTest`, `BMCRepositoryTest`, `PositionRepositoryTest`                                                                                                                                                                                                                                                                                                                      |
+| System      | None in this module                                                                                                                                                                                                                                                                                                                                                                                                       |
+
+Notes:
+
+- Unit tests heavily exercise controller/service contracts for sandbox, side hustle, BMC, team, and position domains.
+- Integration tests focus on API behavior and repository persistence for BMC and position modules.
+
+#### user-service/src/test/java
+
+| Type        | Tests                                                                                                                                        |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit        | `UserServiceApplicationTests`, `AuthControllerWebMvcTest`, `SessionManagerTest`, `AuthServiceTest`, `ProfileServiceTest`, `RoleStrategyTest` |
+| Integration | `AuthApiIntegrationTest`, `ProfileApiIntegrationTest`, `UserRepositoryTest`                                                                  |
+| System      | None in this module                                                                                                                          |
+
+Notes:
+
+- Unit tests cover authentication/session logic, RBAC strategies, profile business rules, and auth controller slice behavior.
+- Integration tests validate auth/profile endpoints and repository persistence against real Spring/JPA wiring.
+
+#### system-tests/src/test/java
+
+| Type        | Tests                                                              |
+| ----------- | ------------------------------------------------------------------ |
+| Unit        | None in this module                                                |
+| Integration | None in this module                                                |
+| System      | `FeedActionsSystemTest`, `FeedPostSystemTest`, `MessageSystemTest` |
+
+System test support base class: `BaseSystemTest`.
+
+Notes:
+
+- These tests run against the backend stack defined in `docker-compose.test.yaml` (no frontend containers).
+- They validate real HTTP contracts across service boundaries rather than mocked collaborators.
 
 ---
 
@@ -385,27 +522,59 @@ See [claude/0-deployment-guide-start-here.md](./claude/0-deployment-guide-start-
 
 ## CI/CD (GitHub Actions)
 
-Every push to `main` (and every pull request targeting `main`) runs six CI workflows in parallel - three for backends and three for frontends. All images are published to **GitHub Container Registry (GHCR)** at `ghcr.io/anthonytoyco/<image-name>`.
+CI is split between service build/test workflows and orchestration workflows:
+
+- **6 service workflows** run on `push` and `pull_request` to `main` (3 backend + 3 frontend).
+- **1 system test workflow** (`system-tests.yml`) runs on `workflow_run` after backend workflows complete successfully on `main` pushes.
+- **1 deploy workflow** (`deploy.yml`) runs on `workflow_run` and deploys only after all required workflows for the same commit SHA are green.
+
+Docker images are pushed to **GitHub Container Registry (GHCR)** at `ghcr.io/anthonytoyco/<image-name>` on `main` pushes.
 
 ### CI Workflows
 
-| Workflow file               | Trigger          | What it does                                                                   |
-| --------------------------- | ---------------- | ------------------------------------------------------------------------------ |
-| `user-service-backend.yml`  | push / PR → main | Tests with Maven (JWT secret injected), builds & pushes Docker image           |
-| `launchpad-backend.yml`     | push / PR → main | Tests with Maven + Postgres 16 service container, builds & pushes Docker image |
-| `connecthub-backend.yml`    | push / PR → main | Tests with Maven, builds & pushes Docker image                                 |
-| `user-service-frontend.yml` | push / PR → main | Lint, build production bundle, builds & pushes Docker image                    |
-| `launchpad-frontend.yml`    | push / PR → main | Lint, typecheck, build production bundle, builds & pushes Docker image         |
-| `connecthub-frontend.yml`   | push / PR → main | Lint, build production bundle, builds & pushes Docker image                    |
+| Workflow file               | Trigger                  | What it does                                                                                                                                      |
+| --------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `user-service-backend.yml`  | push / PR → main         | Calls reusable Java CI, runs `./mvnw clean verify` (with JWT secret), uploads reports, builds/pushes image on main push                           |
+| `connecthub-backend.yml`    | push / PR → main         | Calls reusable Java CI, runs `./mvnw clean verify`, uploads reports, builds/pushes image on main push                                             |
+| `launchpad-backend.yml`     | push / PR → main         | Custom workflow: starts Postgres service, runs unit then integration phase, uploads surefire + failsafe reports, builds/pushes image on main push |
+| `user-service-frontend.yml` | push / PR → main         | Calls reusable Node CI: `npm ci`, lint, build, uploads `dist`, builds/pushes image on main push                                                   |
+| `launchpad-frontend.yml`    | push / PR → main         | Calls reusable Node CI with typecheck enabled, then build + image publish on main push                                                            |
+| `connecthub-frontend.yml`   | push / PR → main         | Calls reusable Node CI: lint + build + image publish on main push                                                                                 |
+| `system-tests.yml`          | workflow_run (main push) | Runs cross-service system tests after backend workflow success (`mvn test` in `system-tests`)                                                     |
 
-Two reusable workflow templates keep the CI logic DRY:
+Reusable workflow templates:
 
-- **`_reusable-java-ci.yml`** - Sets up Java 25 (Temurin), runs `./mvnw clean verify`, optionally spins up a Postgres 16 service container, uploads Surefire reports, and builds/pushes the Docker image to GHCR on `main` pushes.
-- **`_reusable-node-ci.yml`** - Sets up Node 22, runs `npm ci`, lint, optional typecheck, `npm run build`, uploads the `dist/` artifact, and builds/pushes the Docker image to GHCR on `main` pushes.
+- **`_reusable-java-ci.yml`**: Java 25 setup, Maven `clean verify`, optional Postgres service mode, Surefire report upload, Docker build/push on main pushes.
+- **`_reusable-node-ci.yml`**: Node 22 setup, `npm ci`, lint, optional typecheck, `npm run build`, `dist` artifact upload, Docker build/push on main pushes.
+
+### system-tests.yml (Detailed)
+
+`system-tests.yml` is a workflow-run orchestrated test gate for backend integration across services.
+
+- Trigger: `workflow_run` for `user-service-backend`, `connecthub-backend`, and `launchpad-backend` on `main`.
+- Guard condition: executes only when upstream workflow conclusion is `success` and the original event is `push`.
+- Concurrency: grouped by commit SHA so only one system-test run per SHA is active (`cancel-in-progress: true`).
+- Runtime steps:
+  - checkout repository
+  - setup Java 25 (Temurin)
+  - run `cd system-tests && mvn test`
+  - upload Surefire reports only on failure for diagnosis
+
+Because this workflow is triggered from backend workflow completion events, it does not run directly on pull request events.
 
 ### Deploy Workflow
 
-The `deploy.yml` workflow triggers via `workflow_run` whenever any of the six CI workflows completes on `main`. Before deploying, it queries the GitHub API to confirm that **all six CI workflows have passed** for the same commit SHA. Only then does it SSH into the VM and run:
+The `deploy.yml` workflow triggers via `workflow_run` when any required workflow completes on `main`, then performs a commit-SHA gate check. Deployment runs only if **all 7 required workflows** succeeded for the same SHA:
+
+- `launchpad-backend`
+- `user-service-backend`
+- `connecthub-backend`
+- `system-tests`
+- `launchpad-frontend`
+- `user-service-frontend`
+- `connecthub-frontend`
+
+If all are green, it SSHes into the VM and runs:
 
 ```bash
 cd /home/anthonytoyco/app/hatchloom-backend

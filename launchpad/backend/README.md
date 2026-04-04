@@ -658,8 +658,8 @@ Swagger UI is available at `http://localhost:8080/swagger-ui.html` when the serv
 Run tests:
 
 ```bash
-./mvnw test                        # unit tests only
-./mvnw test -Dgroups=integration   # include integration tests
+./mvnw test    # unit tests only
+./mvnw verify  # integration/repository tests via Failsafe
 ```
 
 ---

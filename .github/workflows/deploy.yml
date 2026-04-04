@@ -6,6 +6,7 @@ on:
       - launchpad-backend
       - user-service-backend
       - connecthub-backend
+      - system-tests
       - launchpad-frontend
       - user-service-frontend
       - connecthub-frontend
@@ -30,7 +31,7 @@ jobs:
         with:
           script: |
             const sha = context.payload.workflow_run.head_sha;
-            const required = ['launchpad-backend', 'user-service-backend', 'connecthub-backend', 'launchpad-frontend', 'user-service-frontend', 'connecthub-frontend'];
+            const required = ['launchpad-backend', 'user-service-backend', 'connecthub-backend', 'system-tests', 'launchpad-frontend', 'user-service-frontend', 'connecthub-frontend'];
             const { data: { workflow_runs } } = await github.rest.actions.listWorkflowRunsForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,

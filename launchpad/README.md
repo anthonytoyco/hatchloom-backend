@@ -61,11 +61,13 @@ cd backend && ./mvnw test
 Integration tests (requires a running Postgres):
 
 ```bash
-cd backend && ./mvnw test -Dgroups=integration \
+cd backend && ./mvnw verify \
   -DSPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/launchpad_db \
   -DSPRING_DATASOURCE_USERNAME=launchpad_user \
   -DSPRING_DATASOURCE_PASSWORD=launchpad_pass
 ```
+
+`verify` runs integration/repository tests via Failsafe.
 
 ## Environment variables
 

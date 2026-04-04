@@ -1,13 +1,14 @@
 package com.system.tests.message;
 
-import com.system.tests.base.BaseSystemTest;
+import java.net.http.HttpResponse;
+import java.util.HashMap;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.net.http.HttpResponse;
-import java.util.HashMap;
+import com.system.tests.base.BaseSystemTest;
 
 public class MessageSystemTest extends BaseSystemTest {
     private HashMap<String, Object> body;
@@ -23,12 +24,16 @@ public class MessageSystemTest extends BaseSystemTest {
         body.put("conversationId", null);
         body.put("content", "Hello World");
         HttpResponse<String> response = post(CONNECTHUB_URL, "/api/message/" + secondUserId + "/send",
-               body);
-
+                body);
 
         Assertions.assertEquals(201, response.statusCode());
         var jsonResponse = objectMapper.readTree(response.body());
         Assertions.assertNotNull(jsonResponse);
+        Assertions.assertEquals(firstUserId, jsonResponse.get("senderId").asText());
+        Assertions.assertEquals(secondUserId, jsonResponse.get("recipientId").asText());
+        Assertions.assertEquals("Hello World", jsonResponse.get("content").asText());
+        Assertions.assertNotNull(jsonResponse.get("conversationId").asText());
+        Assertions.assertNotNull(jsonResponse.get("messageId").asText());
 
     }
 
@@ -56,18 +61,33 @@ public class MessageSystemTest extends BaseSystemTest {
         Assertions.assertEquals(400, response.statusCode());
     }
 
-
     @Test
     @DisplayName("Test getting conversations")
     void testGetConversation() throws Exception {
+        body.put("conversationId", null);
+        body.put("content", "Seed conversation");
+
+        HttpResponse<String> seedResponse = post(CONNECTHUB_URL, "/api/message/" + secondUserId + "/send", body);
+        Assertions.assertEquals(201, seedResponse.statusCode());
+        String seededConversationId = objectMapper.readTree(seedResponse.body()).get("conversationId").asText();
+
         HttpResponse<String> response = get(CONNECTHUB_URL, "/api/message/conversation/");
 
         Assertions.assertEquals(200, response.statusCode());
         var jsonResponse = objectMapper.readTree(response.body());
         Assertions.assertNotNull(jsonResponse);
+        Assertions.assertTrue(jsonResponse.isArray());
+        Assertions.assertTrue(jsonResponse.size() >= 1);
 
-        // 1 is from the first test since it was never deleted
-        Assertions.assertEquals(1, jsonResponse.size());
+        boolean containsSeededConversation = false;
+        for (var conversation : jsonResponse) {
+            if (seededConversationId.equals(conversation.get("id").asText())) {
+                containsSeededConversation = true;
+                break;
+            }
+        }
+        Assertions.assertTrue(containsSeededConversation,
+                "Expected conversation list to include seeded conversation " + seededConversationId);
     }
 
     @Test
@@ -91,9 +111,10 @@ public class MessageSystemTest extends BaseSystemTest {
         var jsonMessageResponse = objectMapper.readTree(getMessageResponse.body());
         Assertions.assertNotNull(jsonMessageResponse);
         Assertions.assertTrue(jsonMessageResponse.isArray());
-        Assertions.assertTrue(jsonMessageResponse.size() >= 2);
+        Assertions.assertTrue(jsonMessageResponse.size() >= 1);
+        Assertions.assertEquals("Hello World", jsonMessageResponse.get(0).get("content").asText());
+        Assertions.assertEquals(firstUserId, jsonMessageResponse.get(0).get("senderId").asText());
 
     }
-
 
 }
