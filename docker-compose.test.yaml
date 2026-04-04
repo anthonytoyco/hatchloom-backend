@@ -49,8 +49,7 @@ services:
       retries: 5
 
   auth-service:
-    build:
-      context: ./user-service
+    image: ghcr.io/anthonytoyco/user-service-backend:${IMAGE_TAG:-latest}
     ports:
       - "8081:8080"
     environment:
@@ -80,8 +79,7 @@ services:
           - user-service
 
   launchpad-service:
-    build:
-      context: ./launchpad/backend
+    image: ghcr.io/anthonytoyco/launchpad-backend:${IMAGE_TAG:-latest}
     ports:
       - "8082:8080"
     environment:
@@ -97,8 +95,7 @@ services:
         condition: service_healthy
 
   connecthub-service:
-    build:
-      context: ./connecthub/backend
+    image: ghcr.io/anthonytoyco/connecthub-backend:${IMAGE_TAG:-latest}
     ports:
       - "8083:8080"
     environment:

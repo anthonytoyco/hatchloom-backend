@@ -374,16 +374,28 @@ Implementation characteristics:
 
 - Located in `system-tests/src/test/java` and share `BaseSystemTest`.
 - Use Java `HttpClient` + Jackson to call live APIs over HTTP.
-- Automatically bootstrap backend dependencies via `docker compose -f docker-compose.test.yaml up -d --build`.
+- Require the backend stack to already be running before `mvn test` is invoked.
+
+How to run system tests locally:
+
+```bash
+# Start the backend stack first
+docker compose -f docker-compose.test.yaml up -d --build
+
+# Wait until services are ready, then run the tests
+cd system-tests && mvn test
+
+# Tear down after
+docker compose -f docker-compose.test.yaml down -v
+```
+
+In CI, the `system-tests` workflow handles starting, health-checking, and tearing down the stack automatically.
 
 How `BaseSystemTest` works:
 
-- Resolves `docker-compose.test.yaml` relative to compiled test location.
-- Performs startup/readiness checks with explicit bounded timeouts.
-- Waits for:
-  - auth-service OIDC discovery endpoint (`/.well-known/openid-configuration`) returning `200`.
-  - connecthub-service feed endpoint (`/api/feed`) returning non-5xx.
-  - launchpad-service TCP reachability.
+- Detects whether the backend stack is already running (checks auth-service and connecthub-service health).
+- If already running, skips compose startup and proceeds directly to test execution.
+- If not running, attempts to start the stack via `docker compose -f docker-compose.test.yaml up -d --build` as a fallback.
 - Authenticates fixture users before tests run and reuses tokens in test requests.
 - Emits compose diagnostics (`docker compose ps` and `docker compose logs`) when startup fails.
 

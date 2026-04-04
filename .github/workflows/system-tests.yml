@@ -29,8 +29,16 @@ jobs:
           java-version: "25"
           cache: maven
 
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Start backend stack
         env:
+          IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
           AUTH_DB: ${{ secrets.AUTH_DB }}
           AUTH_USER: ${{ secrets.AUTH_USER }}
           AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
@@ -47,7 +55,7 @@ jobs:
           AUTH_SERVICE_URL: ${{ secrets.AUTH_SERVICE_URL }}
           LAUNCHPAD_SERVICE_URL: ${{ secrets.LAUNCHPAD_SERVICE_URL }}
         run: |
-          docker compose -f docker-compose.test.yaml up -d --build
+          docker compose -f docker-compose.test.yaml up -d
           echo "Waiting for auth-service..."
           timeout 300 bash -c 'until curl -sf http://localhost:8081/.well-known/openid-configuration > /dev/null 2>&1; do sleep 5; done'
           echo "Auth-service ready"
@@ -74,6 +82,7 @@ jobs:
       - name: Dump docker logs on failure
         if: failure()
         env:
+          IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
           AUTH_DB: ${{ secrets.AUTH_DB }}
           AUTH_USER: ${{ secrets.AUTH_USER }}
           AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
@@ -96,6 +105,7 @@ jobs:
       - name: Cleanup
         if: always()
         env:
+          IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
           AUTH_DB: ${{ secrets.AUTH_DB }}
           AUTH_USER: ${{ secrets.AUTH_USER }}
           AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
