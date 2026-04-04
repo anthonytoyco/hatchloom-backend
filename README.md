@@ -379,8 +379,12 @@ Implementation characteristics:
 How to run system tests locally:
 
 ```bash
-# Start the backend stack first
-docker compose -f docker-compose.test.yaml up -d --build
+# Option A: pull pre-built images from GHCR (requires docker login)
+docker login ghcr.io -u <your-github-username> -p <your-github-pat>
+docker compose -f docker-compose.test.yaml up -d
+
+# Option B: build images locally from source
+IMAGE_TAG=local docker compose -f docker-compose.test.yaml up -d --build
 
 # Wait until services are ready, then run the tests
 cd system-tests && mvn test
@@ -389,13 +393,13 @@ cd system-tests && mvn test
 docker compose -f docker-compose.test.yaml down -v
 ```
 
-In CI, the `system-tests` workflow handles starting, health-checking, and tearing down the stack automatically.
+In CI, the `system-tests` workflow pulls the exact pre-built images pushed to GHCR by the backend CI workflows (matched by commit SHA), then handles health-checking and teardown automatically.
 
 How `BaseSystemTest` works:
 
 - Detects whether the backend stack is already running (checks auth-service and connecthub-service health).
 - If already running, skips compose startup and proceeds directly to test execution.
-- If not running, attempts to start the stack via `docker compose -f docker-compose.test.yaml up -d --build` as a fallback.
+- If not running, attempts to start the stack via `docker compose -f docker-compose.test.yaml up -d` as a fallback.
 - Authenticates fixture users before tests run and reuses tokens in test requests.
 - Emits compose diagnostics (`docker compose ps` and `docker compose logs`) when startup fails.
 
@@ -542,15 +546,15 @@ Docker images are pushed to **GitHub Container Registry (GHCR)** at `ghcr.io/ant
 
 ### CI Workflows
 
-| Workflow file               | Trigger                  | What it does                                                                                                                                                              |
-| --------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `user-service-backend.yml`  | push / PR -> main        | Calls reusable Java CI; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports, builds/pushes image on main push                      |
-| `connecthub-backend.yml`    | push / PR -> main        | Calls reusable Java CI; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports, builds/pushes image on main push                      |
-| `launchpad-backend.yml`     | push / PR -> main        | Calls reusable Java CI with issuer override; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports, builds/pushes image on main push |
-| `user-service-frontend.yml` | push / PR -> main        | Calls reusable Node CI: `npm ci`, lint, build, uploads `dist`, builds/pushes image on main push                                                                           |
-| `launchpad-frontend.yml`    | push / PR -> main        | Calls reusable Node CI with typecheck enabled, then build + image publish on main push                                                                                    |
-| `connecthub-frontend.yml`   | push / PR -> main        | Calls reusable Node CI: lint + build + image publish on main push                                                                                                         |
-| `system-tests.yml`          | workflow_run (main push) | Runs cross-service system tests after backend workflow success (`mvn test` in `system-tests`)                                                                             |
+| Workflow file               | Trigger                  | What it does                                                                                                                                                                                          |
+| --------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `user-service-backend.yml`  | push / PR -> main        | Calls reusable Java CI; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports, builds/pushes image on main push                                                  |
+| `connecthub-backend.yml`    | push / PR -> main        | Calls reusable Java CI; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports, builds/pushes image on main push                                                  |
+| `launchpad-backend.yml`     | push / PR -> main        | Calls reusable Java CI with issuer override; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports, builds/pushes image on main push                             |
+| `user-service-frontend.yml` | push / PR -> main        | Calls reusable Node CI: `npm ci`, lint, build, uploads `dist`, builds/pushes image on main push                                                                                                       |
+| `launchpad-frontend.yml`    | push / PR -> main        | Calls reusable Node CI with typecheck enabled, then build + image publish on main push                                                                                                                |
+| `connecthub-frontend.yml`   | push / PR -> main        | Calls reusable Node CI: lint + build + image publish on main push                                                                                                                                     |
+| `system-tests.yml`          | workflow_run (main push) | Logs in to GHCR, pulls SHA-tagged backend images, starts stack via `docker-compose.test.yaml`, health-checks all services, runs `mvn test` in `system-tests`, dumps logs and tears down on completion |
 
 Reusable workflow templates:
 
@@ -573,17 +577,30 @@ All three backend workflows call the same reusable Java workflow and use the sam
 `system-tests.yml` is a workflow-run orchestrated test gate for backend integration across services.
 
 - Trigger: `workflow_run` for `user-service-backend`, `connecthub-backend`, and `launchpad-backend` on `main`.
-- Guard condition: executes only when upstream workflow conclusion is `success` and the original event is `push`.
+- Guard condition: executes only when upstream workflow conclusion is `success`.
 - Concurrency: grouped by commit SHA so only one system-test run per SHA is active (`cancel-in-progress: true`).
 - Runtime steps:
   - checkout repository
   - setup Java 25 (Temurin)
+  - log in to GHCR using `GITHUB_TOKEN`
+  - pull and start the backend stack via `docker compose -f docker-compose.test.yaml up -d` using the commit SHA as `IMAGE_TAG` (images pre-built by the backend CI workflows)
+  - print container states immediately after startup (`docker compose ps`) for early failure diagnosis
+  - health-check all three services before proceeding: auth (`/.well-known/openid-configuration`), connecthub (`/api/feed`), launchpad (`/actuator/health`)
   - run `cd system-tests && mvn test`
-  - upload Surefire reports only on failure for diagnosis
+  - upload Surefire reports on failure
+  - dump `docker compose ps` and `logs` on failure for diagnosis
+  - always tear down containers and volumes (`docker compose down -v`)
 
 ### Deploy Workflow
 
-The `deploy.yml` workflow triggers via `workflow_run` when any required workflow completes on `main`, then performs a commit-SHA gate check. Deployment runs only if **all 7 required workflows** succeeded for the same SHA:
+The `deploy.yml` workflow triggers via `workflow_run` when any of the following workflows completes on `main`:
+
+- `system-tests`
+- `launchpad-frontend`
+- `user-service-frontend`
+- `connecthub-frontend`
+
+It runs whenever the triggering workflow completed successfully, then performs a commit-SHA gate check and deploys only if **all 7 required workflows** succeeded for the same SHA:
 
 - `launchpad-backend`
 - `user-service-backend`
@@ -604,11 +621,33 @@ docker compose ps
 
 ### Required GitHub Secrets
 
+**Deployment secrets** (used by `deploy.yml`):
+
 | Secret        | Description                                     |
 | ------------- | ----------------------------------------------- |
 | `DEPLOY_HOST` | Public IP address of the Google Cloud VM        |
 | `DEPLOY_USER` | SSH username on the VM                          |
 | `DEPLOY_KEY`  | Private SSH key (RSA-4096) authorized on the VM |
+
+**System test secrets** (used by `system-tests.yml` to configure the test stack):
+
+| Secret                            | Description                                                               |
+| --------------------------------- | ------------------------------------------------------------------------- |
+| `AUTH_DB`                         | Auth PostgreSQL database name                                             |
+| `AUTH_USER`                       | Auth PostgreSQL username                                                  |
+| `AUTH_PASSWORD`                   | Auth PostgreSQL password                                                  |
+| `LAUNCHPAD_DB`                    | Launchpad PostgreSQL database name                                        |
+| `LAUNCHPAD_USER`                  | Launchpad PostgreSQL username                                             |
+| `LAUNCHPAD_PASSWORD`              | Launchpad PostgreSQL password                                             |
+| `CONNECTHUB_DB`                   | ConnectHub PostgreSQL database name                                       |
+| `CONNECTHUB_USER`                 | ConnectHub PostgreSQL username                                            |
+| `CONNECTHUB_PASSWORD`             | ConnectHub PostgreSQL password                                            |
+| `JWT_ACCESS_TOKEN_EXPIRY_MINUTES` | Access token lifetime in minutes                                          |
+| `JWT_REFRESH_TOKEN_EXPIRY_DAYS`   | Refresh token lifetime in days                                            |
+| `JWT_ISSUER_URI`                  | JWT issuer URI (e.g. `http://user-service:8080`)                          |
+| `CORS_ALLOWED_ORIGINS`            | Comma-separated list of allowed CORS origins                              |
+| `AUTH_SERVICE_URL`                | Internal URL for auth-service (e.g. `http://user-service:8080`)           |
+| `LAUNCHPAD_SERVICE_URL`           | Internal URL for launchpad-service (e.g. `http://launchpad-service:8080`) |
 
 ### Service Responsibilities
 
