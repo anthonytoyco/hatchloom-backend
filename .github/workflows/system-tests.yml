@@ -56,6 +56,7 @@ jobs:
           LAUNCHPAD_SERVICE_URL: ${{ secrets.LAUNCHPAD_SERVICE_URL }}
         run: |
           docker compose -f docker-compose.test.yaml up -d
+          docker compose -f docker-compose.test.yaml ps
           echo "Waiting for auth-service..."
           timeout 300 bash -c 'until curl -sf http://localhost:8081/.well-known/openid-configuration > /dev/null 2>&1; do sleep 5; done'
           echo "Auth-service ready"
@@ -63,7 +64,7 @@ jobs:
           timeout 300 bash -c 'until curl -sf -o /dev/null -w "%{http_code}" http://localhost:8083/api/feed 2>/dev/null | grep -qv "^5"; do sleep 5; done'
           echo "ConnectHub-service ready"
           echo "Waiting for launchpad-service..."
-          timeout 240 bash -c 'until curl -sf http://localhost:8082 > /dev/null 2>&1; do sleep 5; done'
+          timeout 300 bash -c 'until curl -sf http://localhost:8082/actuator/health > /dev/null 2>&1; do sleep 5; done'
           echo "Launchpad-service ready"
 
       - name: Run system tests
