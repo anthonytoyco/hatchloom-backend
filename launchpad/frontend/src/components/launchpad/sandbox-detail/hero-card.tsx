@@ -105,7 +105,7 @@ function PhaseTracker({ sandboxId, studentId }: PhaseTrackerProps) {
       setLaunchTitle("")
       setLaunchDescription("")
       setLaunchType("IN_THE_LAB")
-      void navigate(`/launchpad/sidehustles/${created.id}`)
+      void navigate(`/sidehustles/${created.id}`)
     } catch {
       toast.error("Failed to create sidehustle")
     }

@@ -42,7 +42,7 @@ export function Sidebar({ sections, ctaLabel, ctaHref }: SidebarProps) {
     if (el) {
       el.scrollIntoView({ behavior: "smooth" })
     } else {
-      void navigate("/launchpad")
+      void navigate("/")
       setTimeout(() => {
         document
           .getElementById(item.scrollToId!)
@@ -75,7 +75,7 @@ export function Sidebar({ sections, ctaLabel, ctaHref }: SidebarProps) {
               <NavLink
                 key={item.id}
                 to={item.href}
-                end={item.href === "/launchpad"}
+                end={item.href === "/"}
                 className={({ isActive }) =>
                   cn(
                     "mb-0.5 flex items-center gap-2 rounded-[9px] px-3 py-[0.525rem] text-[0.8125rem] font-semibold transition-all",

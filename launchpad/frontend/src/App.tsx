@@ -30,9 +30,8 @@ export function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/" element={<Navigate to="/launchpad" replace />} />
         <Route
-          path="/launchpad"
+          path="/"
           element={
             <RequireAuth>
               <LaunchPadHome />
@@ -40,7 +39,7 @@ export function App() {
           }
         />
         <Route
-          path="/launchpad/sandboxes/:sandboxId"
+          path="/sandboxes/:sandboxId"
           element={
             <RequireAuth>
               <SandboxDetail />
@@ -48,7 +47,7 @@ export function App() {
           }
         />
         <Route
-          path="/launchpad/sidehustles/:sideHustleId"
+          path="/sidehustles/:sideHustleId"
           element={
             <RequireAuth>
               <SideHustleDetail />
@@ -56,7 +55,7 @@ export function App() {
           }
         />
         <Route
-          path="/launchpad/sandboxes/:sandboxId/tools/:toolType"
+          path="/sandboxes/:sandboxId/tools/:toolType"
           element={
             <RequireAuth>
               <ToolPage />
@@ -64,7 +63,7 @@ export function App() {
           }
         />
         <Route
-          path="/launchpad/sandboxes"
+          path="/sandboxes"
           element={
             <PlaceholderPage
               title="My Sandboxes"
@@ -73,7 +72,7 @@ export function App() {
           }
         />
         <Route
-          path="/launchpad/sidehustles"
+          path="/sidehustles"
           element={
             <PlaceholderPage
               title="My SideHustles"
@@ -82,7 +81,7 @@ export function App() {
           }
         />
         <Route
-          path="/launchpad/teams"
+          path="/teams"
           element={
             <PlaceholderPage
               title="My Teams"
@@ -91,7 +90,7 @@ export function App() {
           }
         />
         <Route
-          path="/launchpad/events"
+          path="/events"
           element={
             <PlaceholderPage
               title="Upcoming Events"
@@ -99,12 +98,9 @@ export function App() {
             />
           }
         />
+        <Route path="/classifieds" element={<ClassifiedsRedirect />} />
         <Route
-          path="/launchpad/classifieds"
-          element={<ClassifiedsRedirect />}
-        />
-        <Route
-          path="/launchpad/market"
+          path="/market"
           element={
             <PlaceholderPage
               title="Market Square"
@@ -113,7 +109,7 @@ export function App() {
           }
         />
         <Route
-          path="/launchpad/tools"
+          path="/tools"
           element={
             <PlaceholderPage
               title="Tools Library"
@@ -122,7 +118,7 @@ export function App() {
           }
         />
         <Route
-          path="/launchpad/organizations"
+          path="/organizations"
           element={
             <PlaceholderPage
               title="Organizations"
@@ -131,7 +127,7 @@ export function App() {
           }
         />
         <Route
-          path="/launchpad/learning"
+          path="/learning"
           element={
             <PlaceholderPage
               title="Learning Paths"

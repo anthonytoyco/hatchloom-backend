@@ -49,7 +49,7 @@ export function SandboxDetail() {
   async function handleDelete() {
     try {
       await deleteSandbox.mutateAsync(sandboxId)
-      void navigate("/launchpad")
+      void navigate("/")
     } catch {
       toast.error("Failed to delete sandbox")
     }
@@ -67,11 +67,11 @@ export function SandboxDetail() {
             Student Home
           </Link>
           <ChevronRight className="size-3 text-border" />
-          <Link to="/launchpad" className="text-hatch-pink hover:underline">
+          <Link to="/" className="text-hatch-pink hover:underline">
             Launchpad
           </Link>
           <ChevronRight className="size-3 text-border" />
-          <Link to="/launchpad" className="text-hatch-pink hover:underline">
+          <Link to="/" className="text-hatch-pink hover:underline">
             My Sandboxes
           </Link>
           <ChevronRight className="size-3 text-border" />
@@ -158,7 +158,7 @@ export function SandboxDetail() {
                 This sandbox doesn't exist or you don't have access to it.
               </p>
               <Link
-                to="/launchpad"
+                to="/"
                 className="inline-flex items-center gap-2 rounded-lg bg-hatch-pink px-4 py-2 text-xs font-semibold text-white transition-all hover:opacity-90"
               >
                 Back to LaunchPad

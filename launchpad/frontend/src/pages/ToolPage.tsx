@@ -93,7 +93,7 @@ export function ToolPage() {
     if (saveTimer) clearTimeout(saveTimer)
     setSaveTimer(null)
     await deleteTool.mutateAsync(tool.id)
-    void navigate(`/launchpad/sandboxes/${sandboxId}`)
+    void navigate(`/sandboxes/${sandboxId}`)
   }
 
   function handleClose() {
@@ -112,16 +112,16 @@ export function ToolPage() {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex shrink-0 items-center gap-[0.35rem] border-b border-border bg-hatch-bg px-6 py-[0.4rem] text-[0.72rem] font-semibold text-muted-foreground">
-          <Link to="/launchpad" className="text-hatch-pink hover:underline">
+          <Link to="/" className="text-hatch-pink hover:underline">
             🚀 LaunchPad
           </Link>
           <ChevronRight className="size-3 text-border" />
-          <Link to="/launchpad" className="text-hatch-pink hover:underline">
+          <Link to="/" className="text-hatch-pink hover:underline">
             My Sandboxes
           </Link>
           <ChevronRight className="size-3 text-border" />
           <Link
-            to={`/launchpad/sandboxes/${sandboxId}`}
+            to={`/sandboxes/${sandboxId}`}
             className="text-hatch-pink hover:underline"
           >
             ♻️ {sandbox?.title ?? sandboxId}
