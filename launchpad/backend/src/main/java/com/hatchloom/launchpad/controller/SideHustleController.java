@@ -27,7 +27,7 @@ import jakarta.validation.Valid;
  * Controller for SideHustle CRUD operations.
  */
 @RestController
-@RequestMapping("/launchpad/sidehustles")
+@RequestMapping("/sidehustles")
 @Tag(name = "SideHustle")
 public class SideHustleController {
 

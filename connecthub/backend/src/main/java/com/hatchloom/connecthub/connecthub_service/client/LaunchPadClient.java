@@ -11,9 +11,11 @@ import java.util.UUID;
 /**
  * HTTP client for the LaunchPad service.
  *
- * <p>Consumes the public Position Status Interface:
- * {@code GET /launchpad/positions/{positionId}/status}
- * which returns "OPEN", "FILLED", or "CLOSED" as plain text.</p>
+ * <p>
+ * Consumes the public Position Status Interface:
+ * {@code GET /positions/{positionId}/status}
+ * which returns "OPEN", "FILLED", or "CLOSED" as plain text.
+ * </p>
  */
 @Service
 public class LaunchPadClient {
@@ -22,7 +24,7 @@ public class LaunchPadClient {
     private final String launchpadBaseUrl;
 
     public LaunchPadClient(RestTemplate restTemplate,
-                           @Value("${launchpad.service.url}") String launchpadBaseUrl) {
+            @Value("${launchpad.service.url}") String launchpadBaseUrl) {
         this.restTemplate = restTemplate;
         this.launchpadBaseUrl = launchpadBaseUrl;
     }
@@ -36,7 +38,7 @@ public class LaunchPadClient {
      * @throws IllegalStateException    if the LaunchPad service is unreachable
      */
     public String getPositionStatus(UUID positionId) {
-        String url = launchpadBaseUrl + "/launchpad/positions/" + positionId + "/status";
+        String url = launchpadBaseUrl + "/positions/" + positionId + "/status";
         try {
             return restTemplate.getForObject(url, String.class);
         } catch (HttpClientErrorException.NotFound e) {

@@ -45,7 +45,7 @@ public class SecurityConfig {
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers(HttpMethod.GET, "/launchpad/positions/*/status")
+                                                .requestMatchers(HttpMethod.GET, "/positions/*/status")
                                                 .permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info")
                                                 .permitAll()

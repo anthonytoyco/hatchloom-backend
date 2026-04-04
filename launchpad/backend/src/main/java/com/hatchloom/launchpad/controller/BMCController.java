@@ -28,7 +28,7 @@ import jakarta.validation.Valid;
  * </p>
  */
 @RestController
-@RequestMapping("/launchpad/sidehustles/{sideHustleId}/bmc")
+@RequestMapping("/sidehustles/{sideHustleId}/bmc")
 @Tag(name = "Business Model Canvas")
 public class BMCController {
 

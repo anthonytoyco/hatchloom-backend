@@ -119,7 +119,7 @@ public class PositionService {
 
     /**
      * Returns the raw status string for a position (Position Status Interface).
-     * Used by {@code GET /launchpad/positions/{id}/status} for ConnectHub.
+     * Used by {@code GET /positions/{id}/status} for ConnectHub.
      *
      * @param positionId the position UUID
      * @return the status name string (e.g. {@code "OPEN"})

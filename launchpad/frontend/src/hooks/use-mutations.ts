@@ -21,7 +21,7 @@ export function useCreateSandbox() {
       title: string
       description?: string
     }) =>
-      apiFetch<Sandbox>("/launchpad/sandboxes", {
+      apiFetch<Sandbox>("/sandboxes", {
         method: "POST",
         body: JSON.stringify(payload),
       }),
@@ -37,7 +37,7 @@ export function useUpdateSandbox(sandboxId: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (payload: { title: string; description?: string }) =>
-      apiFetch<Sandbox>(`/launchpad/sandboxes/${sandboxId}`, {
+      apiFetch<Sandbox>(`/sandboxes/${sandboxId}`, {
         method: "PUT",
         body: JSON.stringify(payload),
       }),
@@ -51,7 +51,7 @@ export function useDeleteSandbox() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (sandboxId: string) =>
-      apiFetch<void>(`/launchpad/sandboxes/${sandboxId}`, { method: "DELETE" }),
+      apiFetch<void>(`/sandboxes/${sandboxId}`, { method: "DELETE" }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["launchpad-home"] })
     },
@@ -64,7 +64,7 @@ export function useAddTool(sandboxId: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (payload: { toolType: string; data?: string }) =>
-      apiFetch<SandboxTool>(`/launchpad/sandboxes/${sandboxId}/tools`, {
+      apiFetch<SandboxTool>(`/sandboxes/${sandboxId}/tools`, {
         method: "POST",
         body: JSON.stringify(payload),
       }),
@@ -78,10 +78,10 @@ export function useUpdateTool(sandboxId: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (payload: { toolId: string; data: string }) =>
-      apiFetch<SandboxTool>(
-        `/launchpad/sandboxes/${sandboxId}/tools/${payload.toolId}`,
-        { method: "PUT", body: JSON.stringify({ data: payload.data }) }
-      ),
+      apiFetch<SandboxTool>(`/sandboxes/${sandboxId}/tools/${payload.toolId}`, {
+        method: "PUT",
+        body: JSON.stringify({ data: payload.data }),
+      }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["sandbox-tools", sandboxId] })
     },
@@ -92,7 +92,7 @@ export function useDeleteTool(sandboxId: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (toolId: string) =>
-      apiFetch<void>(`/launchpad/sandboxes/${sandboxId}/tools/${toolId}`, {
+      apiFetch<void>(`/sandboxes/${sandboxId}/tools/${toolId}`, {
         method: "DELETE",
       }),
     onSuccess: () => {
@@ -107,7 +107,7 @@ export function useCreateSideHustle() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (payload: CreateSideHustleRequest) =>
-      apiFetch<SideHustle>("/launchpad/sidehustles", {
+      apiFetch<SideHustle>("/sidehustles", {
         method: "POST",
         body: JSON.stringify(payload),
       }),
@@ -123,7 +123,7 @@ export function useUpdateSideHustle(sideHustleId: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (payload: { title: string; description?: string }) =>
-      apiFetch<SideHustle>(`/launchpad/sidehustles/${sideHustleId}`, {
+      apiFetch<SideHustle>(`/sidehustles/${sideHustleId}`, {
         method: "PUT",
         body: JSON.stringify(payload),
       }),
@@ -137,7 +137,7 @@ export function useDeleteSideHustle() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (sideHustleId: string) =>
-      apiFetch<void>(`/launchpad/sidehustles/${sideHustleId}`, {
+      apiFetch<void>(`/sidehustles/${sideHustleId}`, {
         method: "DELETE",
       }),
     onSuccess: (_data, sideHustleId) => {
@@ -153,10 +153,10 @@ export function usePatchBMC(sideHustleId: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (payload: EditBMCRequest) =>
-      apiFetch<BusinessModelCanvas>(
-        `/launchpad/sidehustles/${sideHustleId}/bmc`,
-        { method: "PATCH", body: JSON.stringify(payload) }
-      ),
+      apiFetch<BusinessModelCanvas>(`/sidehustles/${sideHustleId}/bmc`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["bmc", sideHustleId] })
     },
@@ -169,10 +169,10 @@ export function useAddTeamMember(sideHustleId: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (payload: { userId: string; role?: string }) =>
-      apiFetch<TeamMember>(
-        `/launchpad/sidehustles/${sideHustleId}/team/members`,
-        { method: "POST", body: JSON.stringify(payload) }
-      ),
+      apiFetch<TeamMember>(`/sidehustles/${sideHustleId}/team/members`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["team", sideHustleId] })
     },
@@ -183,10 +183,9 @@ export function useRemoveTeamMember(sideHustleId: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (userId: string) =>
-      apiFetch<void>(
-        `/launchpad/sidehustles/${sideHustleId}/team/members/${userId}`,
-        { method: "DELETE" }
-      ),
+      apiFetch<void>(`/sidehustles/${sideHustleId}/team/members/${userId}`, {
+        method: "DELETE",
+      }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["team", sideHustleId] })
     },
@@ -199,7 +198,7 @@ export function useCreatePosition(sideHustleId: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (payload: { title: string; description?: string }) =>
-      apiFetch<Position>(`/launchpad/sidehustles/${sideHustleId}/positions`, {
+      apiFetch<Position>(`/sidehustles/${sideHustleId}/positions`, {
         method: "POST",
         body: JSON.stringify(payload),
       }),
@@ -218,7 +217,7 @@ export function useUpdatePositionStatus() {
       sideHustleId: string
     }) =>
       apiFetch<Position>(
-        `/launchpad/sidehustles/${payload.sideHustleId}/positions/${payload.positionId}/status`,
+        `/sidehustles/${payload.sideHustleId}/positions/${payload.positionId}/status`,
         { method: "PUT", body: JSON.stringify({ status: payload.status }) }
       ),
     onSuccess: (_data, variables) => {

@@ -33,7 +33,7 @@ import com.hatchloom.launchpad.service.PositionService;
  * <p>
  * Covers both the protected SideHustle-scoped endpoints and the
  * public Position Status Interface
- * ({@code GET /launchpad/positions/{id}/status})
+ * ({@code GET /positions/{id}/status})
  * consumed by ConnectHub.
  * </p>
  */

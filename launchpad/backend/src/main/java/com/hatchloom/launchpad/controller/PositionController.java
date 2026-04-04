@@ -26,7 +26,7 @@ import jakarta.validation.Valid;
  *
  * <p>
  * Also exposes the public Position Status Interface consumed by ConnectHub:
- * {@code GET /launchpad/positions/{positionId}/status}.
+ * {@code GET /positions/{positionId}/status}.
  * </p>
  */
 @RestController
@@ -39,7 +39,7 @@ public class PositionController {
         this.positionService = positionService;
     }
 
-    @PostMapping("/launchpad/sidehustles/{sideHustleId}/positions")
+    @PostMapping("/sidehustles/{sideHustleId}/positions")
     public ResponseEntity<PositionResponse> createPosition(@PathVariable UUID sideHustleId,
             @Valid @RequestBody CreatePositionRequest request,
             @AuthenticationPrincipal Jwt jwt) {
@@ -47,12 +47,12 @@ public class PositionController {
         return ResponseEntity.ok(positionService.createPosition(sideHustleId, request, callerId));
     }
 
-    @GetMapping("/launchpad/sidehustles/{sideHustleId}/positions")
+    @GetMapping("/sidehustles/{sideHustleId}/positions")
     public ResponseEntity<List<PositionResponse>> listPositions(@PathVariable UUID sideHustleId) {
         return ResponseEntity.ok(positionService.listPositions(sideHustleId));
     }
 
-    @PutMapping("/launchpad/sidehustles/{sideHustleId}/positions/{positionId}/status")
+    @PutMapping("/sidehustles/{sideHustleId}/positions/{positionId}/status")
     public ResponseEntity<PositionResponse> updatePositionStatus(@PathVariable UUID sideHustleId,
             @PathVariable UUID positionId,
             @Valid @RequestBody UpdatePositionStatusRequest request,
@@ -68,7 +68,7 @@ public class PositionController {
      * @param positionId the position UUID
      * @return status string: "OPEN", "FILLED", or "CLOSED"
      */
-    @GetMapping("/launchpad/positions/{positionId}/status")
+    @GetMapping("/positions/{positionId}/status")
     public ResponseEntity<String> getPositionStatus(@PathVariable UUID positionId) {
         return ResponseEntity.ok(positionService.getPositionStatus(positionId));
     }

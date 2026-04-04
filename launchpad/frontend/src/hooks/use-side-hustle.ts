@@ -10,33 +10,28 @@ import { useQuery } from "@tanstack/react-query"
 export function useSideHustle(sideHustleId: string) {
   const shQuery = useQuery<SideHustle>({
     queryKey: ["sidehustle", sideHustleId],
-    queryFn: () =>
-      apiFetch<SideHustle>(`/launchpad/sidehustles/${sideHustleId}`),
+    queryFn: () => apiFetch<SideHustle>(`/sidehustles/${sideHustleId}`),
     enabled: !!sideHustleId,
   })
 
   const bmcQuery = useQuery<BusinessModelCanvas>({
     queryKey: ["bmc", sideHustleId],
     queryFn: () =>
-      apiFetch<BusinessModelCanvas>(
-        `/launchpad/sidehustles/${sideHustleId}/bmc`
-      ),
+      apiFetch<BusinessModelCanvas>(`/sidehustles/${sideHustleId}/bmc`),
     enabled: !!sideHustleId,
   })
 
   const teamQuery = useQuery<TeamMember[]>({
     queryKey: ["team", sideHustleId],
     queryFn: () =>
-      apiFetch<TeamMember[]>(
-        `/launchpad/sidehustles/${sideHustleId}/team/members`
-      ),
+      apiFetch<TeamMember[]>(`/sidehustles/${sideHustleId}/team/members`),
     enabled: !!sideHustleId,
   })
 
   const positionsQuery = useQuery<Position[]>({
     queryKey: ["positions", sideHustleId],
     queryFn: () =>
-      apiFetch<Position[]>(`/launchpad/sidehustles/${sideHustleId}/positions`),
+      apiFetch<Position[]>(`/sidehustles/${sideHustleId}/positions`),
     enabled: !!sideHustleId,
   })
 

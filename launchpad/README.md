@@ -69,25 +69,25 @@ cd backend && ./mvnw test -Dgroups=integration \
 
 ## Environment variables
 
-| Variable                    | Default (local)         | Docker value                                   |
-| --------------------------- | ----------------------- | ---------------------------------------------- |
-| `SPRING_DATASOURCE_URL`     | (Spring Docker Compose) | `jdbc:postgresql://postgres:5432/launchpad_db` |
-| `SPRING_DATASOURCE_USERNAME`| `launchpad_user`        | `launchpad_user`                               |
-| `SPRING_DATASOURCE_PASSWORD`| `launchpad_pass`        | `launchpad_pass`                               |
-| `AUTH_SERVICE_URL`          | `http://localhost:8081` | `http://auth-service:8080`                     |
-| `CORS_ALLOWED_ORIGINS`      | *(not set)*             | Comma-separated list of allowed origins        |
-| `SERVER_PORT`               | `8080`                  | `8080` (host-mapped to `8082`)                 |
+| Variable                     | Default (local)         | Docker value                                   |
+| ---------------------------- | ----------------------- | ---------------------------------------------- |
+| `SPRING_DATASOURCE_URL`      | (Spring Docker Compose) | `jdbc:postgresql://postgres:5432/launchpad_db` |
+| `SPRING_DATASOURCE_USERNAME` | `launchpad_user`        | `launchpad_user`                               |
+| `SPRING_DATASOURCE_PASSWORD` | `launchpad_pass`        | `launchpad_pass`                               |
+| `AUTH_SERVICE_URL`           | `http://localhost:8081` | `http://auth-service:8080`                     |
+| `CORS_ALLOWED_ORIGINS`       | _(not set)_             | Comma-separated list of allowed origins        |
+| `SERVER_PORT`                | `8080`                  | `8080` (host-mapped to `8082`)                 |
 
 ## Cross-service dependencies
 
-| Dependency   | Direction                  | Details                                                                                                                  |
-| ------------ | -------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Auth service | LaunchPad validates JWTs   | `issuer-uri` must point to the Auth service OIDC discovery endpoint. LaunchPad does NOT issue tokens.                    |
-| ConnectHub   | ConnectHub calls LaunchPad | `GET /launchpad/positions/{positionId}/status` - public, no token required. Returns `"OPEN"`, `"FILLED"`, or `"CLOSED"`. |
+| Dependency   | Direction                  | Details                                                                                                        |
+| ------------ | -------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Auth service | LaunchPad validates JWTs   | `issuer-uri` must point to the Auth service OIDC discovery endpoint. LaunchPad does NOT issue tokens.          |
+| ConnectHub   | ConnectHub calls LaunchPad | `GET /positions/{positionId}/status` - public, no token required. Returns `"OPEN"`, `"FILLED"`, or `"CLOSED"`. |
 
 ## API documentation
 
-- Static docs: [API_DOCS.md](API_DOCS.md)
+- Static docs: [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
 - Interactive (Swagger UI, requires running service): `http://localhost:8082/swagger-ui.html`
 
 ## Known issues

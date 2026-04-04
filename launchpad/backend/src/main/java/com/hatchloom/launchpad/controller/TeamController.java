@@ -31,7 +31,7 @@ import jakarta.validation.Valid;
  * </p>
  */
 @RestController
-@RequestMapping("/launchpad/sidehustles/{sideHustleId}/team/members")
+@RequestMapping("/sidehustles/{sideHustleId}/team/members")
 @Tag(name = "Team")
 public class TeamController {
 

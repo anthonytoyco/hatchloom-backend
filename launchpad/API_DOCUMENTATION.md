@@ -6,13 +6,13 @@
 
 All endpoints require `Authorization: Bearer <token>` **except**:
 
-| Endpoint                                       | Reason                                                    |
-| ---------------------------------------------- | --------------------------------------------------------- |
-| `GET /launchpad/positions/{positionId}/status` | Public - Position Status Interface consumed by ConnectHub |
-| `GET /actuator/health`                         | Health probe - used by Docker health checks               |
-| `GET /actuator/info`                           | Service info probe                                        |
-| `GET /swagger-ui.html`, `/swagger-ui/**`       | Interactive API docs                                      |
-| `GET /v3/api-docs`, `/v3/api-docs/**`          | OpenAPI JSON spec                                         |
+| Endpoint                                 | Reason                                                    |
+| ---------------------------------------- | --------------------------------------------------------- |
+| `GET /positions/{positionId}/status`     | Public - Position Status Interface consumed by ConnectHub |
+| `GET /actuator/health`                   | Health probe - used by Docker health checks               |
+| `GET /actuator/info`                     | Service info probe                                        |
+| `GET /swagger-ui.html`, `/swagger-ui/**` | Interactive API docs                                      |
+| `GET /v3/api-docs`, `/v3/api-docs/**`    | OpenAPI JSON spec                                         |
 
 Tokens are JWTs issued by the Auth service (`http://localhost:8081` locally, `http://auth-service:8080` in Docker). LaunchPad validates but does not issue tokens.
 
@@ -33,7 +33,7 @@ Tokens are JWTs issued by the Auth service (`http://localhost:8081` locally, `ht
 
 ### LaunchPad Home
 
-#### `GET /launchpad/home/{userId}`
+#### `GET /home/{userId}`
 
 Returns the aggregated home view for a student (Facade pattern via `LaunchPadAggregator`).
 
@@ -80,7 +80,7 @@ Returns the aggregated home view for a student (Facade pattern via `LaunchPadAgg
 
 ### Sandbox Module
 
-#### `POST /launchpad/sandboxes`
+#### `POST /sandboxes`
 
 Creates a new Sandbox for a student.
 
@@ -122,7 +122,7 @@ Creates a new Sandbox for a student.
 
 ---
 
-#### `GET /launchpad/sandboxes/{sandboxId}`
+#### `GET /sandboxes/{sandboxId}`
 
 Returns a single Sandbox by ID.
 
@@ -154,7 +154,7 @@ Returns a single Sandbox by ID.
 
 ---
 
-#### `PUT /launchpad/sandboxes/{sandboxId}`
+#### `PUT /sandboxes/{sandboxId}`
 
 Updates a Sandbox's title and/or description.
 
@@ -196,7 +196,7 @@ Updates a Sandbox's title and/or description.
 
 ---
 
-#### `DELETE /launchpad/sandboxes/{sandboxId}`
+#### `DELETE /sandboxes/{sandboxId}`
 
 Deletes a Sandbox.
 
@@ -223,7 +223,7 @@ Cascade behavior:
 
 ---
 
-#### `GET /launchpad/sandboxes?studentId={userId}`
+#### `GET /sandboxes?studentId={userId}`
 
 Returns all Sandboxes owned by a student.
 
@@ -258,7 +258,7 @@ Returns all Sandboxes owned by a student.
 
 ### SandboxTool Module
 
-#### `POST /launchpad/sandboxes/{sandboxId}/tools`
+#### `POST /sandboxes/{sandboxId}/tools`
 
 Adds a tool to a Sandbox.
 
@@ -304,7 +304,7 @@ Adds a tool to a Sandbox.
 
 ---
 
-#### `GET /launchpad/sandboxes/{sandboxId}/tools`
+#### `GET /sandboxes/{sandboxId}/tools`
 
 Returns all tools for a Sandbox.
 
@@ -337,7 +337,7 @@ Returns all tools for a Sandbox.
 
 ---
 
-#### `PUT /launchpad/sandboxes/{sandboxId}/tools/{toolId}`
+#### `PUT /sandboxes/{sandboxId}/tools/{toolId}`
 
 Updates the data payload of a SandboxTool.
 
@@ -377,7 +377,7 @@ Updates the data payload of a SandboxTool.
 
 ---
 
-#### `DELETE /launchpad/sandboxes/{sandboxId}/tools/{toolId}`
+#### `DELETE /sandboxes/{sandboxId}/tools/{toolId}`
 
 Removes a tool from a Sandbox.
 
@@ -401,7 +401,7 @@ Removes a tool from a Sandbox.
 
 ### SideHustle Module
 
-#### `POST /launchpad/sidehustles`
+#### `POST /sidehustles`
 
 Creates a new SideHustle using the Factory Method pattern. Auto-creates an empty BMC and Team.
 
@@ -451,7 +451,7 @@ Creates a new SideHustle using the Factory Method pattern. Auto-creates an empty
 
 ---
 
-#### `GET /launchpad/sidehustles/{sideHustleId}`
+#### `GET /sidehustles/{sideHustleId}`
 
 Returns a single SideHustle by ID.
 
@@ -486,7 +486,7 @@ Returns a single SideHustle by ID.
 
 ---
 
-#### `PUT /launchpad/sidehustles/{sideHustleId}`
+#### `PUT /sidehustles/{sideHustleId}`
 
 Updates a SideHustle's title and/or description (metadata only).
 
@@ -531,7 +531,7 @@ Updates a SideHustle's title and/or description (metadata only).
 
 ---
 
-#### `DELETE /launchpad/sidehustles/{sideHustleId}`
+#### `DELETE /sidehustles/{sideHustleId}`
 
 Deletes a SideHustle. Cascades to its BMC, Team, TeamMembers, and Positions.
 
@@ -552,7 +552,7 @@ Deletes a SideHustle. Cascades to its BMC, Team, TeamMembers, and Positions.
 
 ---
 
-#### `GET /launchpad/sidehustles?studentId={userId}`
+#### `GET /sidehustles?studentId={userId}`
 
 Returns all SideHustles owned by a student.
 
@@ -590,7 +590,7 @@ Returns all SideHustles owned by a student.
 
 ### Business Model Canvas (BMC) Module
 
-#### `GET /launchpad/sidehustles/{sideHustleId}/bmc`
+#### `GET /sidehustles/{sideHustleId}/bmc`
 
 Returns the full Business Model Canvas for a SideHustle.
 
@@ -627,7 +627,7 @@ Returns the full Business Model Canvas for a SideHustle.
 
 ---
 
-#### `PATCH /launchpad/sidehustles/{sideHustleId}/bmc`
+#### `PATCH /sidehustles/{sideHustleId}/bmc`
 
 Updates a single BMC section. The caller must own the SideHustle (validated via JWT subject).
 
@@ -680,7 +680,7 @@ Updates a single BMC section. The caller must own the SideHustle (validated via 
 
 ### Team Module
 
-#### `POST /launchpad/sidehustles/{sideHustleId}/team/members`
+#### `POST /sidehustles/{sideHustleId}/team/members`
 
 Adds a member to the SideHustle team. The caller must own the SideHustle (validated via JWT subject).
 
@@ -727,7 +727,7 @@ Adds a member to the SideHustle team. The caller must own the SideHustle (valida
 
 ---
 
-#### `GET /launchpad/sidehustles/{sideHustleId}/team/members`
+#### `GET /sidehustles/{sideHustleId}/team/members`
 
 Returns all members of the SideHustle team.
 
@@ -760,7 +760,7 @@ Returns all members of the SideHustle team.
 
 ---
 
-#### `DELETE /launchpad/sidehustles/{sideHustleId}/team/members/{userId}`
+#### `DELETE /sidehustles/{sideHustleId}/team/members/{userId}`
 
 Removes a member from the SideHustle team.
 
@@ -784,7 +784,7 @@ Removes a member from the SideHustle team.
 
 ### Position Module
 
-#### `POST /launchpad/sidehustles/{sideHustleId}/positions`
+#### `POST /sidehustles/{sideHustleId}/positions`
 
 Creates a new Position for a SideHustle. Positions start with status `OPEN`. The caller must own the SideHustle (validated via JWT subject).
 
@@ -826,7 +826,7 @@ Creates a new Position for a SideHustle. Positions start with status `OPEN`. The
 
 ---
 
-#### `GET /launchpad/sidehustles/{sideHustleId}/positions`
+#### `GET /sidehustles/{sideHustleId}/positions`
 
 Returns all Positions for a SideHustle.
 
@@ -859,7 +859,7 @@ Returns all Positions for a SideHustle.
 
 ---
 
-#### `PUT /launchpad/sidehustles/{sideHustleId}/positions/{positionId}/status`
+#### `PUT /sidehustles/{sideHustleId}/positions/{positionId}/status`
 
 Transitions a Position to a new status (State pattern). Valid transitions:
 
@@ -912,7 +912,7 @@ Transitions a Position to a new status (State pattern). Valid transitions:
 
 ---
 
-#### `GET /launchpad/positions/{positionId}/status` PUBLIC
+#### `GET /positions/{positionId}/status` PUBLIC
 
 **Position Status Interface - consumed by ConnectHub Classifieds Module.**
 
@@ -950,7 +950,7 @@ Spring Boot returns errors in the following default format:
   "status": 400,
   "error": "Bad Request",
   "message": "sandboxId is required to create a SideHustle",
-  "path": "/launchpad/sidehustles"
+  "path": "/sidehustles"
 }
 ```
 
@@ -961,7 +961,7 @@ Spring Boot returns errors in the following default format:
 ConnectHub's Classifieds Module calls:
 
 ```
-GET /launchpad/positions/{positionId}/status
+GET /positions/{positionId}/status
 ```
 
 This endpoint returns a plain string: `"OPEN"`, `"FILLED"`, or `"CLOSED"`.
@@ -969,7 +969,7 @@ This endpoint returns a plain string: `"OPEN"`, `"FILLED"`, or `"CLOSED"`.
 It **must** remain public and unauthenticated so ConnectHub containers can reach it without a user token (Design Doc §4.1, §4.2). Verify with:
 
 ```bash
-curl http://localhost:8082/launchpad/positions/<any-uuid>/status
+curl http://localhost:8082/positions/<any-uuid>/status
 # Must return 404, NOT 401
 ```
 

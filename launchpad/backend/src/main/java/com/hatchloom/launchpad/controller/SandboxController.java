@@ -27,7 +27,7 @@ import jakarta.validation.Valid;
  * Controller for Sandbox CRUD operations.
  */
 @RestController
-@RequestMapping("/launchpad/sandboxes")
+@RequestMapping("/sandboxes")
 @Tag(name = "Sandbox")
 public class SandboxController {
 

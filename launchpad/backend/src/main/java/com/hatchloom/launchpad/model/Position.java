@@ -23,7 +23,7 @@ import jakarta.persistence.Table;
  * Positions are always created with {@code status = OPEN}. Transitions to
  * {@code FILLED} or {@code CLOSED} are enforced by the State pattern
  * ({@code PositionStateContext}). The status is exposed to ConnectHub via the
- * Position Status Interface: {@code GET /launchpad/positions/{id}/status}.
+ * Position Status Interface: {@code GET /positions/{id}/status}.
  * </p>
  */
 @Entity

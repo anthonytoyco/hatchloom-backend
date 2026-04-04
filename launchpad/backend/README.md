@@ -23,9 +23,9 @@ The LaunchPad Service is a Spring Boot REST API that manages a student's entrepr
 
 ## 1. Key Design Choices
 
-### Spring Boot 4 + Java 21
+### Spring Boot 4 + Java 25
 
-Java 21 virtual threads (Project Loom) are available and the framework is Spring Boot 4. The service is a standard MVC application - controllers receive HTTP, delegate to services, services call repositories. No reactive stack is used; the domain logic is straightforward CRUD with a few state machines.
+Java 25 is required (matches the `<java.version>25</java.version>` in `pom.xml`). The framework is Spring Boot 4. The service is a standard MVC application - controllers receive HTTP, delegate to services, services call repositories. No reactive stack is used; the domain logic is straightforward CRUD with a few state machines.
 
 ### Flyway owns the schema, Hibernate only validates
 

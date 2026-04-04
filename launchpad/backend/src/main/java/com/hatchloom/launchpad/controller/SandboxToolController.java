@@ -26,7 +26,7 @@ import jakarta.validation.Valid;
  * Controller for SandboxTool CRUD operations nested under a Sandbox.
  */
 @RestController
-@RequestMapping("/launchpad/sandboxes/{sandboxId}/tools")
+@RequestMapping("/sandboxes/{sandboxId}/tools")
 @Tag(name = "Sandbox Tools")
 public class SandboxToolController {
 

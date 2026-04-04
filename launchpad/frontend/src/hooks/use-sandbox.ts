@@ -5,14 +5,13 @@ import { useQuery } from "@tanstack/react-query"
 export function useSandbox(sandboxId: string) {
   const sandboxQuery = useQuery<Sandbox>({
     queryKey: ["sandbox", sandboxId],
-    queryFn: () => apiFetch<Sandbox>(`/launchpad/sandboxes/${sandboxId}`),
+    queryFn: () => apiFetch<Sandbox>(`/sandboxes/${sandboxId}`),
     enabled: !!sandboxId,
   })
 
   const toolsQuery = useQuery<SandboxTool[]>({
     queryKey: ["sandbox-tools", sandboxId],
-    queryFn: () =>
-      apiFetch<SandboxTool[]>(`/launchpad/sandboxes/${sandboxId}/tools`),
+    queryFn: () => apiFetch<SandboxTool[]>(`/sandboxes/${sandboxId}/tools`),
     enabled: !!sandboxId,
   })
 
