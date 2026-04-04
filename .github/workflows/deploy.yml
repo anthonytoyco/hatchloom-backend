@@ -1,0 +1,31 @@
+name: deploy
+
+on:
+  workflow_run:
+    workflows:
+      - launchpad-backend
+      - user-service-backend
+      - connecthub-backend
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Deploy to VM
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Deploy to hatchloom-backend VM
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: 22
+          script: |
+            set -e
+            cd /home/anthonytoyco05/app/hatchloom-backend
+            git pull origin main
+            docker compose up -d --build
+            docker compose ps
