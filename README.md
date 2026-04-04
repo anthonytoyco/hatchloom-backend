@@ -569,8 +569,6 @@ All three backend workflows call the same reusable Java workflow and use the sam
   - run `cd system-tests && mvn test`
   - upload Surefire reports only on failure for diagnosis
 
-Because this workflow is triggered from backend workflow completion events, it does not run directly on pull request events.
-
 ### Deploy Workflow
 
 The `deploy.yml` workflow triggers via `workflow_run` when any required workflow completes on `main`, then performs a commit-SHA gate check. Deployment runs only if **all 7 required workflows** succeeded for the same SHA:
