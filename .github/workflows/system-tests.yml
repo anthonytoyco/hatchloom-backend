@@ -30,6 +30,22 @@ jobs:
           cache: maven
 
       - name: Run system tests
+        env:
+          AUTH_DB: ${{ secrets.AUTH_DB }}
+          AUTH_USER: ${{ secrets.AUTH_USER }}
+          AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
+          LAUNCHPAD_DB: ${{ secrets.LAUNCHPAD_DB }}
+          LAUNCHPAD_USER: ${{ secrets.LAUNCHPAD_USER }}
+          LAUNCHPAD_PASSWORD: ${{ secrets.LAUNCHPAD_PASSWORD }}
+          CONNECTHUB_DB: ${{ secrets.CONNECTHUB_DB }}
+          CONNECTHUB_USER: ${{ secrets.CONNECTHUB_USER }}
+          CONNECTHUB_PASSWORD: ${{ secrets.CONNECTHUB_PASSWORD }}
+          JWT_ACCESS_TOKEN_EXPIRY_MINUTES: ${{ secrets.JWT_ACCESS_TOKEN_EXPIRY_MINUTES }}
+          JWT_REFRESH_TOKEN_EXPIRY_DAYS: ${{ secrets.JWT_REFRESH_TOKEN_EXPIRY_DAYS }}
+          JWT_ISSUER_URI: ${{ secrets.JWT_ISSUER_URI }}
+          CORS_ALLOWED_ORIGINS: ${{ secrets.CORS_ALLOWED_ORIGINS }}
+          AUTH_SERVICE_URL: ${{ secrets.AUTH_SERVICE_URL }}
+          LAUNCHPAD_SERVICE_URL: ${{ secrets.LAUNCHPAD_SERVICE_URL }}
         run: |
           cd system-tests
           mvn test
