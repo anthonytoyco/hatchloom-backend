@@ -534,33 +534,30 @@ Docker images are pushed to **GitHub Container Registry (GHCR)** at `ghcr.io/ant
 
 ### CI Workflows
 
-| Workflow file               | Trigger                  | What it does                                                                                                                                                                            |
-| --------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `user-service-backend.yml`  | push / PR -> main        | Calls reusable Java CI with Postgres integration mode; runs unit phase (`test`) + integration phase (`failsafe`), uploads reports, builds/pushes image on main push                     |
-| `connecthub-backend.yml`    | push / PR -> main        | Calls reusable Java CI with Postgres integration mode; runs unit phase (`test`) + integration phase (`failsafe`), uploads reports, builds/pushes image on main push                     |
-| `launchpad-backend.yml`     | push / PR -> main        | Calls reusable Java CI with Postgres integration mode and issuer override; runs unit phase (`test`) + integration phase (`failsafe`), uploads reports, builds/pushes image on main push |
-| `user-service-frontend.yml` | push / PR -> main        | Calls reusable Node CI: `npm ci`, lint, build, uploads `dist`, builds/pushes image on main push                                                                                         |
-| `launchpad-frontend.yml`    | push / PR -> main        | Calls reusable Node CI with typecheck enabled, then build + image publish on main push                                                                                                  |
-| `connecthub-frontend.yml`   | push / PR -> main        | Calls reusable Node CI: lint + build + image publish on main push                                                                                                                       |
-| `system-tests.yml`          | workflow_run (main push) | Runs cross-service system tests after backend workflow success (`mvn test` in `system-tests`)                                                                                           |
+| Workflow file               | Trigger                  | What it does                                                                                                                                                              |
+| --------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `user-service-backend.yml`  | push / PR -> main        | Calls reusable Java CI; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports, builds/pushes image on main push                      |
+| `connecthub-backend.yml`    | push / PR -> main        | Calls reusable Java CI; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports, builds/pushes image on main push                      |
+| `launchpad-backend.yml`     | push / PR -> main        | Calls reusable Java CI with issuer override; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports, builds/pushes image on main push |
+| `user-service-frontend.yml` | push / PR -> main        | Calls reusable Node CI: `npm ci`, lint, build, uploads `dist`, builds/pushes image on main push                                                                           |
+| `launchpad-frontend.yml`    | push / PR -> main        | Calls reusable Node CI with typecheck enabled, then build + image publish on main push                                                                                    |
+| `connecthub-frontend.yml`   | push / PR -> main        | Calls reusable Node CI: lint + build + image publish on main push                                                                                                         |
+| `system-tests.yml`          | workflow_run (main push) | Runs cross-service system tests after backend workflow success (`mvn test` in `system-tests`)                                                                             |
 
 Reusable workflow templates:
 
 - **`_reusable-java-ci.yml`**: Java 25 setup with explicit two-phase backend testing:
   - `unit-tests`: runs `./mvnw clean test` and uploads Surefire reports.
-  - Integration phase:
-    - `integration-tests` runs for services using embedded DB in CI.
-    - `integration-tests-postgres` runs for services with `use-postgres: true` and provisions PostgreSQL 16 service container.
-    - Both integration paths run `./mvnw failsafe:integration-test failsafe:verify` and upload Failsafe reports.
+  - `integration-tests`: provisions PostgreSQL 16 service container, runs `./mvnw failsafe:integration-test failsafe:verify`, and uploads Failsafe reports.
   - `build-docker`: runs only on `main` pushes after required test jobs succeed.
 - **`_reusable-node-ci.yml`**: Node 22 setup, `npm ci`, lint, optional typecheck, `npm run build`, `dist` artifact upload, Docker build/push on main pushes.
 
 ### Backend CI Modes
 
-All three backend workflows call the same reusable Java workflow and set `use-postgres: true`.
+All three backend workflows call the same reusable Java workflow and use the same CI path.
 
 - Unit phase always runs first (`mvn test`).
-- Integration phase runs with a Postgres 16 service container (`failsafe` goals).
+- Integration phase always runs with a Postgres 16 service container (`failsafe` goals).
 - Backend image build/push on `main` happens only after both phases are green.
 
 ### system-tests.yml (Detailed)

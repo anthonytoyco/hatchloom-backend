@@ -16,5 +16,4 @@ jobs:
     with:
       service-path: launchpad/backend
       image-name: launchpad-backend
-      use-postgres: true
       oauth2-issuer-uri: http://localhost:8081

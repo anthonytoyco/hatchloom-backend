@@ -16,11 +16,6 @@ on:
         required: false
         type: string
         default: "25"
-      use-postgres:
-        description: "Spin up a Postgres 16 service container and inject datasource env vars"
-        required: false
-        type: boolean
-        default: false
       jwt-secret:
         description: "Value for JWT_SECRET env var (used by services with symmetric JWT signing)"
         required: false
@@ -74,50 +69,8 @@ jobs:
           retention-days: 30
 
   integration-tests:
-    name: Integration Tests
-    runs-on: ubuntu-latest
-    if: ${{ !inputs.use-postgres }}
-
-    env:
-      SPRING_PROFILES_ACTIVE: test
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Java ${{ inputs.java-version }}
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: ${{ inputs.java-version }}
-          cache: maven
-
-      - name: Export JWT secret
-        if: ${{ inputs.jwt-secret != '' }}
-        run: echo "JWT_SECRET=${{ inputs.jwt-secret }}" >> $GITHUB_ENV
-
-      - name: Export OAuth2 issuer URI
-        if: ${{ inputs.oauth2-issuer-uri != '' }}
-        run: echo "SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=${{ inputs.oauth2-issuer-uri }}" >> $GITHUB_ENV
-
-      - name: Run integration tests
-        working-directory: ${{ inputs.service-path }}
-        run: |
-          chmod +x mvnw
-          ./mvnw failsafe:integration-test failsafe:verify
-
-      - name: Upload failsafe reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: failsafe-${{ inputs.image-name }}-${{ github.run_id }}
-          path: ${{ inputs.service-path }}/target/failsafe-reports/
-          retention-days: 30
-
-  integration-tests-postgres:
     name: Integration Tests (Postgres)
     runs-on: ubuntu-latest
-    if: ${{ inputs.use-postgres }}
 
     services:
       postgres:
@@ -176,8 +129,8 @@ jobs:
   build-docker:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
-    needs: [unit-tests, integration-tests, integration-tests-postgres]
-    # Run only on main pushes, after whichever test job ran succeeds (the other is skipped)
+    needs: [unit-tests, integration-tests]
+    # Run only on main pushes, after tests succeed
     if: |
       always() &&
       github.event_name == 'push' &&

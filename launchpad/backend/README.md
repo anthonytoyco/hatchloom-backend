@@ -58,7 +58,7 @@ A `SideHustle` can be created as `IN_THE_LAB` or `LIVE_VENTURE`. The **Factory**
 The LaunchPad Service sits behind an API Gateway and integrates with two external services:
 
 - **Auth Service** - issues JWTs; LaunchPad validates signatures against the Auth issuer URI.
-- **ConnectHub Service** - consumes the public `GET /launchpad/positions/{positionId}/status` endpoint to display open positions in its classifieds feed.
+- **ConnectHub Service** - consumes the public `GET /positions/{positionId}/status` endpoint to display open positions in its classifieds feed.
 
 ```plantuml
 @startuml component_overview
@@ -394,7 +394,7 @@ All endpoints require a valid `Authorization: Bearer <JWT>` header unless marked
 | `POST` | `/launchpad/sidehustles/{id}/positions`                     | JWT        | `CreatePositionRequest`       | `200 PositionResponse`             | Sets `hasOpenPositions=true` |
 | `GET`  | `/launchpad/sidehustles/{id}/positions`                     | JWT        | -                             | `List<PositionResponse>`           |                              |
 | `PUT`  | `/launchpad/sidehustles/{id}/positions/{positionId}/status` | JWT        | `UpdatePositionStatusRequest` | `PositionResponse`                 | State machine enforced       |
-| `GET`  | `/launchpad/positions/{positionId}/status`                  | **Public** | -                             | `"OPEN"` / `"FILLED"` / `"CLOSED"` | Position Status Interface    |
+| `GET`  | `/positions/{positionId}/status`                            | **Public** | -                             | `"OPEN"` / `"FILLED"` / `"CLOSED"` | Position Status Interface    |
 
 ### Business Model Canvas
 
@@ -487,7 +487,7 @@ Database --> Server: 8 Position row
 Server --> Client: 9 201 + PositionResponse
 Client --> User: 10 Display success
 
-ConnectHub -> Server: 11 GET /launchpad/positions/{positionId}/status (public)
+ConnectHub -> Server: 11 GET /positions/{positionId}/status (public)
 Server -> Database: 12 Read positions.status
 Database --> Server: 13 OPEN | FILLED | CLOSED
 Server --> ConnectHub: 14 Plain status string
@@ -519,7 +519,7 @@ Security is configured in `SecurityConfig`:
 
 ```text
 Public (no token required):
-  GET  /launchpad/positions/{positionId}/status
+  GET  /positions/{positionId}/status
   GET  /actuator/health
   GET  /actuator/info
   GET  /swagger-ui/**
@@ -618,7 +618,7 @@ Client --> User: 19 Display section update confirmation
 The one truly public endpoint in the service. ConnectHub calls it to determine whether a position listed in its classifieds feed is still open.
 
 ```text
-GET /launchpad/positions/{positionId}/status
+GET /positions/{positionId}/status
 Authorization: none required
 Response: plain text - "OPEN", "FILLED", or "CLOSED"
 ```
