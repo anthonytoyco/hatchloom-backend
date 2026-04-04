@@ -38,6 +38,7 @@ public abstract class BaseSystemTest {
 
     protected static String authToken;
     protected static String secondAuthToken;
+    protected static String firstUserId;
     protected static String secondUserId;
 
     @BeforeAll
@@ -48,6 +49,7 @@ public abstract class BaseSystemTest {
         authToken = r1.accessToken();
         secondAuthToken = r2.accessToken();
 
+        firstUserId = r1.userId();
         secondUserId = r2.userId();
     }
 
