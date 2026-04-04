@@ -89,7 +89,7 @@ export function ActiveToolsCard({
           return (
             <Link
               key={tool.id}
-              to={`/launchpad/sandboxes/${sandboxId}/tools/${tool.toolType}`}
+              to={`/sandboxes/${sandboxId}/tools/${tool.toolType}`}
               className="group flex items-center gap-2.5 rounded-[10px] border border-border bg-hatch-bg px-3 py-2.5 transition-all hover:border-sandbox-green hover:bg-white hover:shadow-[0_2px_8px_rgba(5,150,105,0.1)]"
             >
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-orange-50">

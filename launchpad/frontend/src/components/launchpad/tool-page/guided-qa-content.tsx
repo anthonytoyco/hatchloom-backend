@@ -134,7 +134,7 @@ export function GuidedQAContent({
   }
 
   function handleComplete() {
-    void navigate(`/launchpad/sandboxes/${sandboxId}`)
+    void navigate(`/sandboxes/${sandboxId}`)
   }
 
   const step = QA_STEPS[currentStep]

@@ -46,7 +46,7 @@ export function CreateSandboxDialog({
     onClose()
     setTitle("")
     setDescription("")
-    void navigate(`/launchpad/sandboxes/${createdSandbox.id}`)
+    void navigate(`/sandboxes/${createdSandbox.id}`)
   }
 
   return (
@@ -142,7 +142,7 @@ export function CreateSideHustleDialog({
     setDescription("")
     setType("IN_THE_LAB")
     setSandboxId("")
-    void navigate(`/launchpad/sidehustles/${createdSideHustle.id}`)
+    void navigate(`/sidehustles/${createdSideHustle.id}`)
   }
 
   return (

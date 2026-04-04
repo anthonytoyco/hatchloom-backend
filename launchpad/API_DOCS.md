@@ -9,16 +9,21 @@ All endpoints require `Authorization: Bearer <token>` **except**:
 | Endpoint                                       | Reason                                                    |
 | ---------------------------------------------- | --------------------------------------------------------- |
 | `GET /launchpad/positions/{positionId}/status` | Public - Position Status Interface consumed by ConnectHub |
+| `GET /actuator/health`                         | Health probe - used by Docker health checks               |
+| `GET /actuator/info`                           | Service info probe                                        |
+| `GET /swagger-ui.html`, `/swagger-ui/**`       | Interactive API docs                                      |
+| `GET /v3/api-docs`, `/v3/api-docs/**`          | OpenAPI JSON spec                                         |
 
-Tokens are JWTs issued by the Auth service (`http://localhost:8081` locally, `http://auth:8081` in Docker). LaunchPad validates but does not issue tokens.
+Tokens are JWTs issued by the Auth service (`http://localhost:8081` locally, `http://auth-service:8080` in Docker). LaunchPad validates but does not issue tokens.
 
 ---
 
 ## Base URL
 
-```
-http://localhost:8082
-```
+| Environment            | URL                                            |
+| ---------------------- | ---------------------------------------------- |
+| Local (Docker Compose) | `http://localhost:8082`                        |
+| Production             | `https://launchpad.hatchloom.anthonytoyco.com` |
 
 ---
 
@@ -44,13 +49,22 @@ Returns the aggregated home view for a student (Facade pattern via `LaunchPadAgg
 {
   "inTheLabCount": 2,
   "liveVenturesCount": 1,
-  "sandboxes": [{ "id": "uuid", "title": "My Sandbox" }],
+  "sandboxes": [
+    {
+      "id": "uuid",
+      "title": "My Sandbox",
+      "description": null,
+      "createdAt": "2024-01-15T10:30:00"
+    }
+  ],
   "sideHustles": [
     {
       "id": "uuid",
       "title": "My Hustle",
+      "description": null,
       "status": "LIVE_VENTURE",
-      "hasOpenPositions": true
+      "hasOpenPositions": true,
+      "createdAt": "2024-01-15T10:30:00"
     }
   ]
 }
@@ -965,12 +979,14 @@ curl http://localhost:8082/launchpad/positions/<any-uuid>/status
 
 When the service is running, interactive API docs are available at:
 
-```
-http://localhost:8082/swagger-ui.html
-```
+| Environment | URL                                                            |
+| ----------- | -------------------------------------------------------------- |
+| Local       | `http://localhost:8082/swagger-ui.html`                        |
+| Production  | `https://launchpad.hatchloom.anthonytoyco.com/swagger-ui.html` |
 
 OpenAPI JSON spec:
 
-```
-http://localhost:8082/v3/api-docs
-```
+| Environment | URL                                                        |
+| ----------- | ---------------------------------------------------------- |
+| Local       | `http://localhost:8082/v3/api-docs`                        |
+| Production  | `https://launchpad.hatchloom.anthonytoyco.com/v3/api-docs` |

@@ -26,7 +26,7 @@ export function PlaceholderPage({
           Back to Student Home
         </Link>
         <Link
-          to="/launchpad"
+          to="/"
           className="rounded-lg bg-hatch-pink px-4 py-2 font-heading text-sm font-bold text-white hover:opacity-90"
         >
           Open LaunchPad

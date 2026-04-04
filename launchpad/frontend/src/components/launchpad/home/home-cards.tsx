@@ -146,7 +146,7 @@ export function SandboxTile({ sandbox }: { sandbox: SandboxSummary }) {
 
   return (
     <Link
-      to={`/launchpad/sandboxes/${sandbox.id}`}
+      to={`/sandboxes/${sandbox.id}`}
       className="group scroll-snap-align-start flex w-[240px] shrink-0 flex-col overflow-hidden rounded-[18px] border border-border bg-card transition-all duration-200 hover:-translate-y-1 hover:border-gray-300 hover:shadow-xl"
     >
       <div
@@ -195,7 +195,7 @@ export function SideHustleTile({ sh }: { sh: SideHustleSummary }) {
 
   return (
     <Link
-      to={`/launchpad/sidehustles/${sh.id}`}
+      to={`/sidehustles/${sh.id}`}
       className="group flex w-[240px] shrink-0 flex-col overflow-hidden rounded-[18px] border border-border bg-card transition-all duration-200 hover:-translate-y-1 hover:border-gray-300 hover:shadow-xl"
     >
       <div

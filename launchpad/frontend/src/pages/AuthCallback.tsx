@@ -19,7 +19,7 @@ export function AuthCallback() {
       localStorage.setItem("access_token", token)
       localStorage.setItem("refresh_token", refreshToken)
       localStorage.setItem("user", user)
-      void navigate("/launchpad")
+      void navigate("/")
     } else {
       redirectToLogin()
     }

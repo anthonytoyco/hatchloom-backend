@@ -22,7 +22,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: "🔭 Explore", href: "/explore" },
   { label: "🔗 Connect", href: CONNECTHUB_URL, external: true },
-  { label: "🚀 Launch", href: "/launchpad" },
+  { label: "🚀 Launch", href: "/" },
 ]
 
 interface TopNavProps {

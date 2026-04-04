@@ -50,7 +50,7 @@ export function SideHustleDetail() {
     try {
       setIsDeleting(true)
       await deleteSideHustle.mutateAsync(sideHustleId)
-      void navigate("/launchpad")
+      void navigate("/")
     } catch {
       setIsDeleting(false)
       toast.error("Failed to delete side hustle")
@@ -77,12 +77,12 @@ export function SideHustleDetail() {
             Student Home
           </Link>
           <ChevronRight className="size-3 text-border" />
-          <Link to="/launchpad" className="text-hatch-pink hover:underline">
+          <Link to="/" className="text-hatch-pink hover:underline">
             Launchpad
           </Link>
           <ChevronRight className="size-3 text-border" />
           <Link
-            to="/launchpad/sidehustles"
+            to="/sidehustles"
             className="text-hatch-pink hover:underline"
           >
             My SideHustles
@@ -170,7 +170,7 @@ export function SideHustleDetail() {
                 This side hustle doesn't exist or you don't have access to it.
               </p>
               <Link
-                to="/launchpad"
+                to="/"
                 className="inline-flex items-center gap-2 rounded-lg bg-hatch-pink px-4 py-2 text-xs font-semibold text-white transition-all hover:opacity-90"
               >
                 Back to LaunchPad
