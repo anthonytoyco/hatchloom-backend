@@ -1,5 +1,7 @@
 # HatchLoom Quebec
 
+Anthony Toyco, Andrew Cao, Daniel Zhong
+
 The HatchLoom Quebec subpack is an education platform monorepo composed of three microservices and their frontends, orchestrated together via Docker Compose.
 
 ---
@@ -259,14 +261,16 @@ Docker Compose enforces the following startup dependency chain:
 
 ```
 auth-postgres (healthy)
-    └─► auth-service (healthy - OIDC endpoint reachable)
-            ├─► launchpad-postgres (healthy)
-            │       └─► launchpad-service
-            │               └─► launchpad-frontend
-            └─── connecthub-postgres (healthy)
-                     └─► connecthub-service
-                             └─► connecthub-frontend
+    ├─► auth-service (healthy - OIDC endpoint reachable)
+    │       ├─► auth-frontend
+    │       ├─► launchpad-service ◄─── launchpad-postgres (healthy)
+    │       │       └─► launchpad-frontend
+    │       └─► connecthub-service ◄─── connecthub-postgres (healthy)
+    │               └─► connecthub-frontend
+    └─► auth-pgadmin
 ```
+
+> `launchpad-postgres` and `connecthub-postgres` start in parallel with `auth-service`. Their dependent application services wait for **both** their own database (healthy) and `auth-service` (healthy) before starting. `connecthub-service` additionally waits for `launchpad-service` to have started.
 
 ---
 
@@ -644,9 +648,9 @@ docker compose ps
 | `CONNECTHUB_PASSWORD`             | ConnectHub PostgreSQL password                                            |
 | `JWT_ACCESS_TOKEN_EXPIRY_MINUTES` | Access token lifetime in minutes                                          |
 | `JWT_REFRESH_TOKEN_EXPIRY_DAYS`   | Refresh token lifetime in days                                            |
-| `JWT_ISSUER_URI`                  | JWT issuer URI (e.g. `http://user-service:8080`)                          |
+| `JWT_ISSUER_URI`                  | JWT issuer URI (e.g. `http://auth-service:8080`)                          |
 | `CORS_ALLOWED_ORIGINS`            | Comma-separated list of allowed CORS origins                              |
-| `AUTH_SERVICE_URL`                | Internal URL for auth-service (e.g. `http://user-service:8080`)           |
+| `AUTH_SERVICE_URL`                | Internal URL for auth-service (e.g. `http://auth-service:8080`)           |
 | `LAUNCHPAD_SERVICE_URL`           | Internal URL for launchpad-service (e.g. `http://launchpad-service:8080`) |
 
 ### Service Responsibilities
