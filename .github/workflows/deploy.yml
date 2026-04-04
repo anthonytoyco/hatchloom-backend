@@ -9,11 +9,16 @@ on:
     types: [completed]
     branches: [main]
 
+concurrency:
+  group: deploy-main
+  cancel-in-progress: true
+
 jobs:
   deploy:
     name: Deploy to VM
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    timeout-minutes: 15
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
 
     steps:
       - name: Deploy to hatchloom-backend VM
@@ -25,7 +30,7 @@ jobs:
           port: 22
           script: |
             set -e
-            cd /home/anthonytoyco05/app/hatchloom-backend
-            git pull origin main
+            cd /home/anthonytoyco/app/hatchloom-backend
+            git pull --ff-only origin main
             docker compose up -d --build
             docker compose ps
