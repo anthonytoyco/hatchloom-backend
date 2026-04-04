@@ -516,10 +516,6 @@ Caddy routes each subdomain to the matching frontend container. The frontend ngi
 | https://launchpad.hatchloom.anthonytoyco.com  | LaunchPad Frontend    |
 | https://connecthub.hatchloom.anthonytoyco.com | ConnectHub Frontend   |
 
-### Deployment steps
-
-See [claude/0-deployment-guide-start-here.md](./claude/0-deployment-guide-start-here.md) for the full step-by-step guide, which covers VM provisioning, Docker setup, Caddy configuration, SSL, and GitHub Actions secrets.
-
 ---
 
 ## CI/CD (GitHub Actions)
