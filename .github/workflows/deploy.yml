@@ -6,12 +6,15 @@ on:
       - launchpad-backend
       - user-service-backend
       - connecthub-backend
+      - launchpad-frontend
+      - user-service-frontend
+      - connecthub-frontend
     types: [completed]
     branches: [main]
 
 concurrency:
-  group: deploy-main
-  cancel-in-progress: true
+  group: deploy-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -21,8 +24,30 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
 
     steps:
+      - name: Check all CI workflows passed
+        id: gate
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sha = context.payload.workflow_run.head_sha;
+            const required = ['launchpad-backend', 'user-service-backend', 'connecthub-backend', 'launchpad-frontend', 'user-service-frontend', 'connecthub-frontend'];
+            const { data: { workflow_runs } } = await github.rest.actions.listWorkflowRunsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head_sha: sha,
+              per_page: 100,
+            });
+            const passed = workflow_runs
+              .filter(r => r.conclusion === 'success')
+              .map(r => r.name);
+            const allPassed = required.every(name => passed.includes(name));
+            console.log(`Passed so far: ${passed.join(', ')}`);
+            console.log(`All required passed: ${allPassed}`);
+            core.setOutput('all-passed', allPassed.toString());
+
       - name: Deploy to hatchloom-backend VM
-        uses: appleboy/ssh-action@master
+        if: steps.gate.outputs.all-passed == 'true'
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
