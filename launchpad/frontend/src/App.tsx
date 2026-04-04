@@ -6,7 +6,7 @@ import { PlaceholderPage } from "@/pages/PlaceholderPage"
 import { SandboxDetail } from "@/pages/SandboxDetail"
 import { SideHustleDetail } from "@/pages/SideHustleDetail"
 import { ToolPage } from "@/pages/ToolPage"
-import { BrowserRouter, Navigate, Route, Routes } from "react-router"
+import { BrowserRouter, Route, Routes } from "react-router"
 
 const CONNECTHUB_URL: string =
   (import.meta.env.VITE_CONNECTHUB_URL as string | undefined) ??
