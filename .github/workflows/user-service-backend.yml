@@ -1,8 +1,6 @@
 name: user-service-backend
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
 

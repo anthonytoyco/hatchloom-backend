@@ -1,21 +1,74 @@
-name: system-tests
+name: push-main
 
 on:
-  workflow_run:
-    workflows:
-      - user-service-backend
-      - connecthub-backend
-      - launchpad-backend
-    types: [completed]
+  push:
     branches: [main]
 
 concurrency:
-  group: system-tests-${{ github.event.workflow_run.head_sha }}
+  group: push-main-${{ github.sha }}
   cancel-in-progress: true
 
 jobs:
+  user-service-backend:
+    uses: ./.github/workflows/_reusable-java-ci.yml
+    with:
+      service-path: user-service
+      image-name: user-service-backend
+      jwt-secret: test-secret-key-for-ci-cd-pipeline-at-least-256-bits
+    permissions:
+      contents: read
+      packages: write
+
+  connecthub-backend:
+    uses: ./.github/workflows/_reusable-java-ci.yml
+    with:
+      service-path: connecthub/backend
+      image-name: connecthub-backend
+    permissions:
+      contents: read
+      packages: write
+
+  launchpad-backend:
+    uses: ./.github/workflows/_reusable-java-ci.yml
+    with:
+      service-path: launchpad/backend
+      image-name: launchpad-backend
+      oauth2-issuer-uri: http://localhost:8081
+    permissions:
+      contents: read
+      packages: write
+
+  user-service-frontend:
+    uses: ./.github/workflows/_reusable-node-ci.yml
+    with:
+      service-path: user-service/frontend
+      image-name: user-service-frontend
+    permissions:
+      contents: read
+      packages: write
+
+  connecthub-frontend:
+    uses: ./.github/workflows/_reusable-node-ci.yml
+    with:
+      service-path: connecthub/frontend
+      image-name: connecthub-frontend
+    permissions:
+      contents: read
+      packages: write
+
+  launchpad-frontend:
+    uses: ./.github/workflows/_reusable-node-ci.yml
+    with:
+      service-path: launchpad/frontend
+      image-name: launchpad-frontend
+      run-typecheck: true
+    permissions:
+      contents: read
+      packages: write
+
   system-tests:
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
+    name: System Tests
+    needs: [user-service-backend, connecthub-backend, launchpad-backend]
     runs-on: ubuntu-latest
 
     steps:
@@ -38,7 +91,7 @@ jobs:
 
       - name: Start backend stack
         env:
-          IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
+          IMAGE_TAG: ${{ github.sha }}
           AUTH_DB: ${{ secrets.AUTH_DB }}
           AUTH_USER: ${{ secrets.AUTH_USER }}
           AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
@@ -83,7 +136,7 @@ jobs:
       - name: Dump docker logs on failure
         if: failure()
         env:
-          IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
+          IMAGE_TAG: ${{ github.sha }}
           AUTH_DB: ${{ secrets.AUTH_DB }}
           AUTH_USER: ${{ secrets.AUTH_USER }}
           AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
@@ -106,7 +159,7 @@ jobs:
       - name: Cleanup
         if: always()
         env:
-          IMAGE_TAG: ${{ github.event.workflow_run.head_sha }}
+          IMAGE_TAG: ${{ github.sha }}
           AUTH_DB: ${{ secrets.AUTH_DB }}
           AUTH_USER: ${{ secrets.AUTH_USER }}
           AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
@@ -123,3 +176,30 @@ jobs:
           AUTH_SERVICE_URL: ${{ secrets.AUTH_SERVICE_URL }}
           LAUNCHPAD_SERVICE_URL: ${{ secrets.LAUNCHPAD_SERVICE_URL }}
         run: docker compose -f docker-compose.test.yaml down -v
+
+  deploy:
+    name: Deploy to VM
+    needs:
+      [
+        system-tests,
+        user-service-frontend,
+        connecthub-frontend,
+        launchpad-frontend,
+      ]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Deploy to hatchloom-backend VM
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: 22
+          script: |
+            set -e
+            cd /home/anthonytoyco/app/hatchloom-backend
+            git pull --ff-only origin main
+            docker compose up -d --build
+            docker compose ps

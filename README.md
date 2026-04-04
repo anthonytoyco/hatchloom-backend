@@ -397,7 +397,7 @@ cd system-tests && mvn test
 docker compose -f docker-compose.test.yaml down -v
 ```
 
-In CI, the `system-tests` workflow pulls the exact pre-built images pushed to GHCR by the backend CI workflows (matched by commit SHA), then handles health-checking and teardown automatically.
+In CI, the `system-tests` job in `push-main.yml` runs after all three backend jobs complete, pulls the exact pre-built images pushed to GHCR (matched by commit SHA), then handles health-checking and teardown automatically.
 
 How `BaseSystemTest` works:
 
@@ -540,25 +540,21 @@ Caddy routes each subdomain to the matching frontend container. The frontend ngi
 
 ## CI/CD (GitHub Actions)
 
-CI is split between service build/test workflows and orchestration workflows:
-
-- **6 service workflows** run on `push` and `pull_request` to `main` (3 backend + 3 frontend).
-- **1 system test workflow** (`system-tests.yml`) runs on `workflow_run` after backend workflows complete successfully on `main` pushes.
-- **1 deploy workflow** (`deploy.yml`) runs on `workflow_run` and deploys only after all required workflows for the same commit SHA are green.
+All CI for `main` pushes runs in a single workflow (`push-main.yml`). Individual service workflows handle only `pull_request` checks.
 
 Docker images are pushed to **GitHub Container Registry (GHCR)** at `ghcr.io/anthonytoyco/<image-name>` on `main` pushes.
 
 ### CI Workflows
 
-| Workflow file               | Trigger                  | What it does                                                                                                                                                                                          |
-| --------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `user-service-backend.yml`  | push / PR -> main        | Calls reusable Java CI; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports, builds/pushes image on main push                                                  |
-| `connecthub-backend.yml`    | push / PR -> main        | Calls reusable Java CI; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports, builds/pushes image on main push                                                  |
-| `launchpad-backend.yml`     | push / PR -> main        | Calls reusable Java CI with issuer override; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports, builds/pushes image on main push                             |
-| `user-service-frontend.yml` | push / PR -> main        | Calls reusable Node CI: `npm ci`, lint, build, uploads `dist`, builds/pushes image on main push                                                                                                       |
-| `launchpad-frontend.yml`    | push / PR -> main        | Calls reusable Node CI with typecheck enabled, then build + image publish on main push                                                                                                                |
-| `connecthub-frontend.yml`   | push / PR -> main        | Calls reusable Node CI: lint + build + image publish on main push                                                                                                                                     |
-| `system-tests.yml`          | workflow_run (main push) | Logs in to GHCR, pulls SHA-tagged backend images, starts stack via `docker-compose.test.yaml`, health-checks all services, runs `mvn test` in `system-tests`, dumps logs and tears down on completion |
+| Workflow file               | Trigger           | What it does                                                                                                                                          |
+| --------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `push-main.yml`             | push -> main      | Orchestrates all CI for main: 6 service jobs in parallel, system-tests (gated on 3 backends), deploy (gated on system-tests + 3 frontends)            |
+| `user-service-backend.yml`  | PR -> main        | Calls reusable Java CI; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports                                    |
+| `connecthub-backend.yml`    | PR -> main        | Calls reusable Java CI; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports                                    |
+| `launchpad-backend.yml`     | PR -> main        | Calls reusable Java CI with issuer override; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports               |
+| `user-service-frontend.yml` | PR -> main        | Calls reusable Node CI: `npm ci`, lint, build, uploads `dist`                                                                                         |
+| `launchpad-frontend.yml`    | PR -> main        | Calls reusable Node CI with typecheck enabled, then build                                                                                             |
+| `connecthub-frontend.yml`   | PR -> main        | Calls reusable Node CI: lint + build                                                                                                                  |
 
 Reusable workflow templates:
 
@@ -568,53 +564,24 @@ Reusable workflow templates:
   - `build-docker`: runs only on `main` pushes after required test jobs succeed.
 - **`_reusable-node-ci.yml`**: Node 22 setup, `npm ci`, lint, optional typecheck, `npm run build`, `dist` artifact upload, Docker build/push on main pushes.
 
-### Backend CI Modes
+### push-main.yml (Detailed)
 
-All three backend workflows call the same reusable Java workflow and use the same CI path.
+`push-main.yml` is the single orchestrating workflow for all `main` push activity. All jobs run within one workflow run, connected via native `needs` dependencies.
 
-- Unit phase always runs first (`mvn test`).
-- Integration phase always runs with a Postgres 16 service container (`failsafe` goals).
-- Backend image build/push on `main` happens only after both phases are green.
+**Job dependency graph:**
 
-### system-tests.yml (Detailed)
+```
+user-service-backend ─┐
+connecthub-backend   ──┼─► system-tests ─┐
+launchpad-backend    ─┘                  ├─► deploy
+user-service-frontend ──────────────────┤
+connecthub-frontend   ──────────────────┤
+launchpad-frontend    ──────────────────┘
+```
 
-`system-tests.yml` is a workflow-run orchestrated test gate for backend integration across services.
-
-- Trigger: `workflow_run` for `user-service-backend`, `connecthub-backend`, and `launchpad-backend` on `main`.
-- Guard condition: executes only when upstream workflow conclusion is `success`.
-- Concurrency: grouped by commit SHA so only one system-test run per SHA is active (`cancel-in-progress: true`).
-- Runtime steps:
-  - checkout repository
-  - setup Java 25 (Temurin)
-  - log in to GHCR using `GITHUB_TOKEN`
-  - pull and start the backend stack via `docker compose -f docker-compose.test.yaml up -d` using the commit SHA as `IMAGE_TAG` (images pre-built by the backend CI workflows)
-  - print container states immediately after startup (`docker compose ps`) for early failure diagnosis
-  - health-check all three services before proceeding: auth (`/.well-known/openid-configuration`), connecthub (`/api/feed`), launchpad (`/actuator/health`)
-  - run `cd system-tests && mvn test`
-  - upload Surefire reports on failure
-  - dump `docker compose ps` and `logs` on failure for diagnosis
-  - always tear down containers and volumes (`docker compose down -v`)
-
-### Deploy Workflow
-
-The `deploy.yml` workflow triggers via `workflow_run` when any of the following workflows completes on `main`:
-
-- `system-tests`
-- `launchpad-frontend`
-- `user-service-frontend`
-- `connecthub-frontend`
-
-It runs whenever the triggering workflow completed successfully, then performs a commit-SHA gate check and deploys only if **all 7 required workflows** succeeded for the same SHA:
-
-- `launchpad-backend`
-- `user-service-backend`
-- `connecthub-backend`
-- `system-tests`
-- `launchpad-frontend`
-- `user-service-frontend`
-- `connecthub-frontend`
-
-If all are green, it SSHes into the VM and runs:
+- The 6 service jobs (3 backends + 3 frontends) run in parallel, each calling the appropriate reusable CI workflow.
+- `system-tests` waits for all 3 backend jobs, then: checks out, sets up Java 25, logs in to GHCR, pulls and starts the backend stack via `docker-compose.test.yaml` (using `github.sha` as `IMAGE_TAG`), health-checks all three services, runs `cd system-tests && mvn test`, uploads Surefire reports on failure, dumps `docker compose` logs on failure, and always tears down.
+- `deploy` waits for `system-tests` and all 3 frontend jobs, then SSHes into the VM and runs:
 
 ```bash
 cd /home/anthonytoyco/app/hatchloom-backend
@@ -625,7 +592,7 @@ docker compose ps
 
 ### Required GitHub Secrets
 
-**Deployment secrets** (used by `deploy.yml`):
+**Deployment secrets** (used by the `deploy` job in `push-main.yml`):
 
 | Secret        | Description                                     |
 | ------------- | ----------------------------------------------- |
@@ -633,7 +600,7 @@ docker compose ps
 | `DEPLOY_USER` | SSH username on the VM                          |
 | `DEPLOY_KEY`  | Private SSH key (RSA-4096) authorized on the VM |
 
-**System test secrets** (used by `system-tests.yml` to configure the test stack):
+**System test secrets** (used by the `system-tests` job in `push-main.yml` to configure the test stack):
 
 | Secret                            | Description                                                               |
 | --------------------------------- | ------------------------------------------------------------------------- |
