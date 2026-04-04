@@ -1,0 +1,44 @@
+@startuml component_overview
+title Hatchloom System Overview
+top to bottom direction
+
+actor "Student\nParent\nSchoolTeacher\nSchoolAdmin\nHatchloomTeacher\nHatchloomAdmin" as User
+
+node "Caddy Reverse Proxy\n(TLS termination, subdomain routing)" as Caddy
+
+package "Auth Frontend\n(auth.hatchloom... :3000)" as AuthFE
+package "LaunchPad Frontend\n(launchpad.hatchloom... :4173)" as LaunchpadFE
+package "ConnectHub Frontend\n(connecthub.hatchloom... :5173)" as ConnectHubFE
+
+component "Auth & User-Profile Service\n(:8081)\n— register, login, JWT (RS256)\n— OIDC JWKS endpoint\n— profile CRUD, parent-student link" as Auth
+
+component "LaunchPad Service\n(:8082)\n— sandboxes, sandbox_tools\n— side_hustles, BMC\n— teams, positions\n— aggregated home view" as LaunchPad
+
+component "ConnectHub Service\n(:8083)\n— feed posts (share/announcement/achievement)\n— feed actions (likes, comments)\n— classified posts + applications\n— 1:1 messaging, notifications\n— classified subscriptions" as ConnectHub
+
+database "auth-postgres (:5433)\n──────────────\napp_users (JOINED)\nstudents / parents\nschool_teachers / school_admins\nhatchloom_teachers / hatchloom_admins\nuser_profiles\nacademic_profiles\nprofessional_profiles" as AuthDB
+
+database "launchpad-postgres (:5432)\n──────────────\nsandboxes\nsandbox_tools\nside_hustles\nbmc_sections\nteams / team_members\npositions" as LaunchpadDB
+
+database "connecthub-postgres (:5434)\n──────────────\nposts (share/announcement/achievement)\nfeed_actions\nclassified_posts\nclassified_post_applications\nclassified_subscriptions\nconversations\nmessages\nnotifications" as ConnectHubDB
+
+interface "Position Status API\nGET /positions/{id}/status\n→ OPEN | FILLED | CLOSED" as PositionStatus
+
+User --> Caddy : HTTPS
+
+Caddy --> AuthFE
+Caddy --> LaunchpadFE
+Caddy --> ConnectHubFE
+
+AuthFE --> Auth : /api (proxied)
+LaunchpadFE --> LaunchPad : /api (proxied)
+ConnectHubFE --> ConnectHub : /api (proxied)
+
+Auth --> AuthDB : read / write
+LaunchPad --> LaunchpadDB : read / write
+ConnectHub --> ConnectHubDB : read / write
+
+LaunchPad - PositionStatus
+ConnectHub ..> PositionStatus : <<uses>>\nLaunchPadClient (RestTemplate)\ncalled before classified post creation
+
+@enduml
