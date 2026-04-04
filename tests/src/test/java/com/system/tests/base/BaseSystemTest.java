@@ -38,14 +38,20 @@ public abstract class BaseSystemTest {
 
     protected static String authToken;
     protected static String secondAuthToken;
+    protected static String secondUserId;
 
     @BeforeAll
     static void authenticate() throws Exception {
-        authToken = authenticateUser(USERNAME, TEST_EMAIL, TEST_PASSWORD, USER_ROLE);
-        secondAuthToken = authenticateUser(SECOND_USERNAME, SECOND_EMAIL, SECOND_PASSWORD, SECOND_USER_ROLE);
+        AuthResult r1 = authenticateUser(USERNAME, TEST_EMAIL, TEST_PASSWORD, USER_ROLE);
+        AuthResult r2  = authenticateUser(SECOND_USERNAME, SECOND_EMAIL, SECOND_PASSWORD, SECOND_USER_ROLE);
+
+        authToken = r1.accessToken();
+        secondAuthToken = r2.accessToken();
+
+        secondUserId = r2.userId();
     }
 
-    private static String authenticateUser(String username, String email, String password, String role) throws Exception {
+    private static AuthResult authenticateUser(String username, String email, String password, String role) throws Exception {
         Map<String, Object> registerRequest = new HashMap<>();
         registerRequest.put("username", username);
         registerRequest.put("email", email);
@@ -81,7 +87,20 @@ public abstract class BaseSystemTest {
         int loginStatus = loginResponse.statusCode();
         Assertions.assertEquals(200, loginStatus);
 
-        return objectMapper.readTree(loginResponse.body()).get("accessToken").asText();
+        String accessToken = objectMapper.readTree(loginResponse.body()).get("accessToken").asText();
+        String refreshToken = objectMapper.readTree(loginResponse.body()).get("refreshToken").asText();
+
+        HttpRequest validateRequest = HttpRequest.newBuilder(URI.create(AUTH_URL + "/auth/validate"))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + accessToken)
+                .GET()
+                .build();
+
+        HttpResponse<String> validateResponse = httpClient.send(validateRequest, HttpResponse.BodyHandlers.ofString());
+        Assertions.assertEquals(200, validateResponse.statusCode());
+        String userId = objectMapper.readTree(validateResponse.body()).get("userId").asText();
+
+        return new AuthResult(accessToken, refreshToken, userId);
     }
 
     protected HttpResponse<String> get(String url, String path) throws Exception {
