@@ -112,7 +112,8 @@ public class MessageSystemTest extends BaseSystemTest {
         Assertions.assertNotNull(jsonMessageResponse);
         Assertions.assertTrue(jsonMessageResponse.isArray());
         Assertions.assertTrue(jsonMessageResponse.size() >= 1);
-        Assertions.assertEquals("Hello World", jsonMessageResponse.get(0).get("content").asText());
+        Assertions.assertEquals("Seed conversation", jsonMessageResponse.get(0).get("content").asText());
+        Assertions.assertEquals("Hello World", jsonMessageResponse.get(1).get("content").asText());
         Assertions.assertEquals(firstUserId, jsonMessageResponse.get(0).get("senderId").asText());
 
     }
