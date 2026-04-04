@@ -3,9 +3,6 @@ name: deploy
 on:
   workflow_run:
     workflows:
-      - launchpad-backend
-      - user-service-backend
-      - connecthub-backend
       - system-tests
       - launchpad-frontend
       - user-service-frontend
