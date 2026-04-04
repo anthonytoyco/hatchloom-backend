@@ -16,3 +16,4 @@ jobs:
     with:
       service-path: connecthub/backend
       image-name: connecthub-backend
+      use-postgres: true

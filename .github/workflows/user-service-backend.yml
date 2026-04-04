@@ -16,4 +16,5 @@ jobs:
     with:
       service-path: user-service
       image-name: user-service-backend
+      use-postgres: true
       jwt-secret: test-secret-key-for-ci-cd-pipeline-at-least-256-bits

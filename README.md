@@ -67,7 +67,7 @@ A pgAdmin instance is also available at **http://localhost:5050** for database m
 
 Services communicate over the internal Docker network. There are two integration points:
 
-### 1. JWT Validation (auth-service → launchpad-service, connecthub-service)
+### 1. JWT Validation (auth-service -> launchpad-service, connecthub-service)
 
 auth-service issues RS256 JWT access tokens and exposes a standard OIDC discovery endpoint. Both launchpad-service and connecthub-service validate incoming Bearer tokens by fetching the public key from auth-service's JWKS endpoint - they do not share a secret and do not talk to auth-service at request time.
 
@@ -90,13 +90,13 @@ auth-service (:8081)
 | `GET /.well-known/openid-configuration` | OIDC discovery document                 |
 | `GET /.well-known/jwks.json`            | RSA public key set for JWT verification |
 
-### 2. Position Status Interface (launchpad-service → connecthub-service)
+### 2. Position Status Interface (launchpad-service -> connecthub-service)
 
 When a user creates a classified post in ConnectHub, the service validates that the referenced LaunchPad position exists and is `OPEN` by calling a public endpoint on launchpad-service. This call requires no authentication token.
 
 ```
 connecthub-service
-  │  GET /launchpad/positions/{positionId}/status
+  │  GET /positions/{positionId}/status
   ▼
 launchpad-service (:8082)
   │  "OPEN" | "FILLED" | "CLOSED"
@@ -123,16 +123,16 @@ User Browser
 Caddy (reverse proxy, TLS termination)
   │
   ├─► auth-frontend (:3000)
-  │       │  /api/* → auth-service (:8081)
+  │       │  /api/* -> auth-service (:8081)
   │       │              └─► auth-postgres (:5433)
   │
   ├─► launchpad-frontend (:4173)
-  │       │  /api/* → launchpad-service (:8082)
+  │       │  /api/* -> launchpad-service (:8082)
   │       │              ├─► launchpad-postgres (:5432)
   │       │              └─► auth-service JWKS (token validation, cached)
   │
   └─► connecthub-frontend (:5173)
-          │  /api/* → connecthub-service (:8083)
+          │  /api/* -> connecthub-service (:8083)
           │              ├─► connecthub-postgres (:5434)
           │              ├─► auth-service JWKS (token validation, cached)
           │              └─► launchpad-service position status (on classified post creation)
@@ -393,8 +393,9 @@ What system tests verify:
 - Feed actions (likes/comments) behavior.
 - Messaging conversation and message flows.
 - Cross-service behavior for ConnectHub dependencies:
-  - LaunchPad position status lookup (`/launchpad/positions/{positionId}/status`).
+  - LaunchPad position status lookup (`/positions/{positionId}/status`).
   - Auth service token/JWKS-driven security path readiness via OIDC discovery.
+  - Classified post creation allowed only while linked LaunchPad position is `OPEN`.
 
 ### Test Inventory by Location and Type
 
@@ -423,14 +424,15 @@ Notes:
 
 - Unit tests heavily exercise controller/service contracts for sandbox, side hustle, BMC, team, and position domains.
 - Integration tests focus on API behavior and repository persistence for BMC and position modules.
+- `LaunchpadApplicationTests` is tagged `integration`; with the current naming-based Failsafe includes, it is mainly a context sanity class for explicit runs rather than a primary CI gate test.
 
 #### user-service/src/test/java
 
-| Type        | Tests                                                                                                                                        |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit        | `UserServiceApplicationTests`, `AuthControllerWebMvcTest`, `SessionManagerTest`, `AuthServiceTest`, `ProfileServiceTest`, `RoleStrategyTest` |
-| Integration | `AuthApiIntegrationTest`, `ProfileApiIntegrationTest`, `UserRepositoryTest`                                                                  |
-| System      | None in this module                                                                                                                          |
+| Type        | Tests                                                                                                                                                                    |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Unit        | `UserServiceApplicationTests`, `AuthControllerWebMvcTest`, `OidcControllerWebMvcTest`, `SessionManagerTest`, `AuthServiceTest`, `ProfileServiceTest`, `RoleStrategyTest` |
+| Integration | `AuthApiIntegrationTest`, `ProfileApiIntegrationTest`, `UserRepositoryTest`                                                                                              |
+| System      | None in this module                                                                                                                                                      |
 
 Notes:
 
@@ -439,11 +441,11 @@ Notes:
 
 #### system-tests/src/test/java
 
-| Type        | Tests                                                              |
-| ----------- | ------------------------------------------------------------------ |
-| Unit        | None in this module                                                |
-| Integration | None in this module                                                |
-| System      | `FeedActionsSystemTest`, `FeedPostSystemTest`, `MessageSystemTest` |
+| Type        | Tests                                                                                                 |
+| ----------- | ----------------------------------------------------------------------------------------------------- |
+| Unit        | None in this module                                                                                   |
+| Integration | None in this module                                                                                   |
+| System      | `FeedActionsSystemTest`, `FeedPostSystemTest`, `MessageSystemTest`, `CrossServiceContractsSystemTest` |
 
 System test support base class: `BaseSystemTest`.
 
@@ -484,9 +486,9 @@ Internet
     ▼
 Caddy (ports 80 / 443) - auto HTTPS via Let's Encrypt
     │
-    ├─► auth.hatchloom.anthonytoyco.com      → auth-frontend     (localhost:3000)
-    ├─► launchpad.hatchloom.anthonytoyco.com → launchpad-frontend (localhost:4173)
-    └─► connecthub.hatchloom.anthonytoyco.com → connecthub-frontend (localhost:5173)
+    ├─► auth.hatchloom.anthonytoyco.com      -> auth-frontend     (localhost:3000)
+    ├─► launchpad.hatchloom.anthonytoyco.com -> launchpad-frontend (localhost:4173)
+    └─► connecthub.hatchloom.anthonytoyco.com -> connecthub-frontend (localhost:5173)
 ```
 
 Caddy routes each subdomain to the matching frontend container. The frontend nginx configs then proxy `/api/*` traffic to their Spring Boot backend on the internal Docker network. Backend services and databases are not publicly exposed.
@@ -532,20 +534,34 @@ Docker images are pushed to **GitHub Container Registry (GHCR)** at `ghcr.io/ant
 
 ### CI Workflows
 
-| Workflow file               | Trigger                  | What it does                                                                                                                                      |
-| --------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `user-service-backend.yml`  | push / PR → main         | Calls reusable Java CI, runs `./mvnw clean verify` (with JWT secret), uploads reports, builds/pushes image on main push                           |
-| `connecthub-backend.yml`    | push / PR → main         | Calls reusable Java CI, runs `./mvnw clean verify`, uploads reports, builds/pushes image on main push                                             |
-| `launchpad-backend.yml`     | push / PR → main         | Custom workflow: starts Postgres service, runs unit then integration phase, uploads surefire + failsafe reports, builds/pushes image on main push |
-| `user-service-frontend.yml` | push / PR → main         | Calls reusable Node CI: `npm ci`, lint, build, uploads `dist`, builds/pushes image on main push                                                   |
-| `launchpad-frontend.yml`    | push / PR → main         | Calls reusable Node CI with typecheck enabled, then build + image publish on main push                                                            |
-| `connecthub-frontend.yml`   | push / PR → main         | Calls reusable Node CI: lint + build + image publish on main push                                                                                 |
-| `system-tests.yml`          | workflow_run (main push) | Runs cross-service system tests after backend workflow success (`mvn test` in `system-tests`)                                                     |
+| Workflow file               | Trigger                  | What it does                                                                                                                                                                            |
+| --------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `user-service-backend.yml`  | push / PR -> main        | Calls reusable Java CI with Postgres integration mode; runs unit phase (`test`) + integration phase (`failsafe`), uploads reports, builds/pushes image on main push                     |
+| `connecthub-backend.yml`    | push / PR -> main        | Calls reusable Java CI with Postgres integration mode; runs unit phase (`test`) + integration phase (`failsafe`), uploads reports, builds/pushes image on main push                     |
+| `launchpad-backend.yml`     | push / PR -> main        | Calls reusable Java CI with Postgres integration mode and issuer override; runs unit phase (`test`) + integration phase (`failsafe`), uploads reports, builds/pushes image on main push |
+| `user-service-frontend.yml` | push / PR -> main        | Calls reusable Node CI: `npm ci`, lint, build, uploads `dist`, builds/pushes image on main push                                                                                         |
+| `launchpad-frontend.yml`    | push / PR -> main        | Calls reusable Node CI with typecheck enabled, then build + image publish on main push                                                                                                  |
+| `connecthub-frontend.yml`   | push / PR -> main        | Calls reusable Node CI: lint + build + image publish on main push                                                                                                                       |
+| `system-tests.yml`          | workflow_run (main push) | Runs cross-service system tests after backend workflow success (`mvn test` in `system-tests`)                                                                                           |
 
 Reusable workflow templates:
 
-- **`_reusable-java-ci.yml`**: Java 25 setup, Maven `clean verify`, optional Postgres service mode, Surefire report upload, Docker build/push on main pushes.
+- **`_reusable-java-ci.yml`**: Java 25 setup with explicit two-phase backend testing:
+  - `unit-tests`: runs `./mvnw clean test` and uploads Surefire reports.
+  - Integration phase:
+    - `integration-tests` runs for services using embedded DB in CI.
+    - `integration-tests-postgres` runs for services with `use-postgres: true` and provisions PostgreSQL 16 service container.
+    - Both integration paths run `./mvnw failsafe:integration-test failsafe:verify` and upload Failsafe reports.
+  - `build-docker`: runs only on `main` pushes after required test jobs succeed.
 - **`_reusable-node-ci.yml`**: Node 22 setup, `npm ci`, lint, optional typecheck, `npm run build`, `dist` artifact upload, Docker build/push on main pushes.
+
+### Backend CI Modes
+
+All three backend workflows call the same reusable Java workflow and set `use-postgres: true`.
+
+- Unit phase always runs first (`mvn test`).
+- Integration phase runs with a Postgres 16 service container (`failsafe` goals).
+- Backend image build/push on `main` happens only after both phases are green.
 
 ### system-tests.yml (Detailed)
 
@@ -596,7 +612,7 @@ docker compose ps
 | Service                | Key Features                                                                                                                                                                                           |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **auth-service**       | JWT issuance (RS256, access + refresh tokens), OIDC JWKS endpoint, role-based permission strategy, user profile CRUD, parent–student linking                                                           |
-| **launchpad-service**  | Sandbox workspaces + tools, SideHustle venture lifecycle, Business Model Canvas (9 sections), team membership, position lifecycle (OPEN → FILLED → CLOSED), aggregated home view                       |
+| **launchpad-service**  | Sandbox workspaces + tools, SideHustle venture lifecycle, Business Model Canvas (9 sections), team membership, position lifecycle (OPEN -> FILLED -> CLOSED), aggregated home view                     |
 | **connecthub-service** | Multi-type feed (share / announcement / achievement), likes + nested comments, classified posts linked to LaunchPad positions, applications, 1-to-1 messaging, notifications, classified subscriptions |
 
 ### Databases
