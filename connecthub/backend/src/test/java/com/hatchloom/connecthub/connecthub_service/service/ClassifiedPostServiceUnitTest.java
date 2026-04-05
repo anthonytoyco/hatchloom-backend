@@ -5,14 +5,15 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.hatchloom.connecthub.connecthub_service.utils.ClassifiedPostValidators;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.hatchloom.connecthub.connecthub_service.client.LaunchPadClient;
@@ -39,10 +40,16 @@ class ClassifiedPostServiceUnitTest {
         private ClassifiedPostApplicationRepository classifiedPostApplicationRepository;
 
         @Mock
+        private ClassifiedPostValidators classifiedPostValidators;
+
+        @Mock
         private LaunchPadClient launchPadClient;
 
         @InjectMocks
         private ClassifiedPostService classifiedPostService;
+
+        @InjectMocks
+        private ClassifiedPostQueryService classifiedPostQueryService;
 
         @Test
         void createClassifiedPost_validRequest_savesAndNotifies() {
@@ -73,6 +80,9 @@ class ClassifiedPostServiceUnitTest {
                                 null,
                                 "open");
 
+                doThrow(new IllegalArgumentException("Author ID must not be null"))
+                        .when(classifiedPostValidators).validateClassifiedRequest(eq(request), isNull());
+
                 IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                                 () -> classifiedPostService.createClassifiedPost(request, null));
 
@@ -87,7 +97,7 @@ class ClassifiedPostServiceUnitTest {
                 when(classifiedPostRepository.existsById(postId)).thenReturn(false);
 
                 IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                                () -> classifiedPostService.getClassifiedById(postId));
+                                () -> classifiedPostQueryService.getClassifiedById(postId));
 
                 assertEquals("Post with ID 999 does not exist", ex.getMessage());
         }

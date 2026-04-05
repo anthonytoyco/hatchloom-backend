@@ -3,6 +3,8 @@ package com.hatchloom.connecthub.connecthub_service.controller;
 import java.util.List;
 import java.util.UUID;
 
+import com.hatchloom.connecthub.connecthub_service.service.ClassifiedPostApplicationService;
+import com.hatchloom.connecthub.connecthub_service.service.ClassifiedPostQueryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,13 +36,19 @@ import com.hatchloom.connecthub.connecthub_service.utils.JwtUtil;
 @RequestMapping("/api/classified")
 public class ClassifiedPostController {
     private final ClassifiedPostService classifiedPostService;
+    private final ClassifiedPostApplicationService classifiedPostApplicationService;
+    private final ClassifiedPostQueryService classifiedPostQueryService;
     private final ClassifiedPostFeed classifiedPostFeed;
     private final JwtUtil jwtUtil;
 
     public ClassifiedPostController(ClassifiedPostService classifiedPostService, ClassifiedPostFeed classifiedPostFeed,
+            ClassifiedPostApplicationService classifiedPostApplicationService,
+            ClassifiedPostQueryService classifiedPostQueryService,
             JwtUtil jwtUtil) {
         this.classifiedPostService = classifiedPostService;
         this.classifiedPostFeed = classifiedPostFeed;
+        this.classifiedPostApplicationService = classifiedPostApplicationService;
+        this.classifiedPostQueryService = classifiedPostQueryService;
         this.jwtUtil = jwtUtil;
     }
 
@@ -60,7 +68,7 @@ public class ClassifiedPostController {
     public ResponseEntity<?> getClassifiedPosts(@RequestParam(defaultValue = "25") Integer limit,
             @RequestParam(required = false) String after, @RequestParam(defaultValue = "open") String statusType) {
         try {
-            CursorResponse<ClassifiedPost> response = classifiedPostService.getAllClassifiedPosts(after, limit,
+            CursorResponse<ClassifiedPost> response = classifiedPostQueryService.getAllClassifiedPosts(after, limit,
                     statusType);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
@@ -71,7 +79,7 @@ public class ClassifiedPostController {
     @GetMapping("/filtered")
     public ResponseEntity<?> getFilteredClassifieds(@RequestParam String statusType) {
         try {
-            List<ClassifiedPost> posts = classifiedPostService.filterClassifiedPostsByStatus(statusType);
+            List<ClassifiedPost> posts = classifiedPostQueryService.filterClassifiedPostsByStatus(statusType);
             return new ResponseEntity<>(posts, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -81,7 +89,7 @@ public class ClassifiedPostController {
     @GetMapping("/{postId}")
     public ResponseEntity<?> getClassifiedById(@PathVariable Integer postId) {
         try {
-            ClassifiedPost post = classifiedPostService.getClassifiedById(postId);
+            ClassifiedPost post = classifiedPostQueryService.getClassifiedById(postId);
             return new ResponseEntity<>(post, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -96,7 +104,7 @@ public class ClassifiedPostController {
      */
     @GetMapping("/by-position/{positionId}")
     public ResponseEntity<ClassifiedPost> getClassifiedByPositionId(@PathVariable UUID positionId) {
-        return classifiedPostService.getClassifiedByPositionId(positionId)
+        return classifiedPostQueryService.getClassifiedByPositionId(positionId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().<ClassifiedPost>build());
     }
@@ -143,7 +151,7 @@ public class ClassifiedPostController {
             @PathVariable Integer postId) {
         try {
             UUID userId = jwtUtil.extractUserId(authHeader);
-            classifiedPostService.applyToClassifiedPost(postId, userId);
+            classifiedPostApplicationService.applyToClassifiedPost(postId, userId);
             return new ResponseEntity<>("Application submitted successfully", HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -155,7 +163,7 @@ public class ClassifiedPostController {
             @RequestHeader("Authorization") String authHeader, @PathVariable Integer postId) {
         try {
             UUID userId = jwtUtil.extractUserId(authHeader);
-            List<ClassifiedPostApplication> applications = classifiedPostService
+            List<ClassifiedPostApplication> applications = classifiedPostApplicationService
                     .getApplicationsForClassifiedPost(postId, userId);
             return new ResponseEntity<>(applications, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
@@ -167,8 +175,8 @@ public class ClassifiedPostController {
     public ResponseEntity<ApplicationResponse> getMyApplications(@RequestHeader("Authorization") String authHeader) {
         try {
             UUID userId = jwtUtil.extractUserId(authHeader);
-            List<ClassifiedPost> posts = classifiedPostService.getAppliedClassifiedPostsByUser(userId);
-            Integer totalApplications = classifiedPostService.getTotalApplicationsForAuthor(userId);
+            List<ClassifiedPost> posts = classifiedPostApplicationService.getAppliedClassifiedPostsByUser(userId);
+            Integer totalApplications = classifiedPostApplicationService.getTotalApplicationsForAuthor(userId);
             ApplicationResponse response = new ApplicationResponse(posts, totalApplications);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
