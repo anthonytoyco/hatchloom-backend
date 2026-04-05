@@ -1,5 +1,6 @@
 package com.hatchloom.connecthub.connecthub_service.service;
 
+import com.hatchloom.connecthub.connecthub_service.dto.CursorPaginationRequest;
 import com.hatchloom.connecthub.connecthub_service.dto.CursorResponse;
 import com.hatchloom.connecthub.connecthub_service.dto.PostCreationRequest;
 import com.hatchloom.connecthub.connecthub_service.model.AchievementPost;
@@ -77,14 +78,18 @@ public class FeedPostService {
 
 
     public CursorResponse<Post> getAllFeedPosts(String after, Integer limit) {
-        return cursorPaginationService.paginate(after, limit, feedPostRepository::findAllByOrderByCreatedAtDescIdDesc,
-                (payload, pageable) -> {
-                    LocalDateTime createdAt = LocalDateTime.parse(payload.createdAt());
-                    return feedPostRepository.findAllWithCursor(createdAt, payload.id(), pageable);
-                },
-                cursor -> CursorPaginationCodec.decodeCursor(cursor, PostCursorPayload::new),
-                payload -> CursorPaginationCodec.encodeCursor(payload.id(), payload.createdAt()),
-                post -> new PostCursorPayload(post.getCreatedAt().toString(), post.getId())
+        return cursorPaginationService.paginate(
+                new CursorPaginationRequest<>(
+                        after, limit,
+                        feedPostRepository::findAllByOrderByCreatedAtDescIdDesc,
+                        (payload, pageable) -> {
+                            LocalDateTime createdAt = LocalDateTime.parse(payload.createdAt());
+                            return feedPostRepository.findAllWithCursor(createdAt, payload.id(), pageable);
+                        },
+                        cursor -> CursorPaginationCodec.decodeCursor(cursor, PostCursorPayload::new),
+                        payload -> CursorPaginationCodec.encodeCursor(payload.id(), payload.createdAt()),
+                        post -> new PostCursorPayload(post.getCreatedAt().toString(), post.getId())
+                )
         );
     }
 }

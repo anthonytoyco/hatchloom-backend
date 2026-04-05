@@ -9,6 +9,11 @@ import java.net.http.HttpResponse;
 import java.util.Map;
 
 public class FeedPostSystemTest extends BaseSystemTest {
+    private void deletePost(Integer postId) throws Exception {
+        delete(CONNECTHUB_URL, "/api/feed/" + postId);
+    }
+
+
     @Test
     @DisplayName("Test creating a feed post")
     void testCreateFeedPost() throws Exception {
@@ -21,6 +26,9 @@ public class FeedPostSystemTest extends BaseSystemTest {
         ));
 
         Assertions.assertEquals(201, response.statusCode());
+
+        int postId = objectMapper.readTree(response.body()).get("id").asInt();
+        deletePost(postId);
     }
 
     @Test
@@ -120,6 +128,12 @@ public class FeedPostSystemTest extends BaseSystemTest {
         var posts = objectMapper.readTree(getResponse.body()).get("data");
         Assertions.assertTrue(posts.isArray());
         Assertions.assertTrue(posts.size() >= 2);
+
+        int postId = objectMapper.readTree(response.body()).get("id").asInt();
+        deletePost(postId);
+
+        int postId2 = objectMapper.readTree(response2.body()).get("id").asInt();
+        deletePost(postId2);
 
     }
 }

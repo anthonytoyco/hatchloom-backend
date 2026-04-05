@@ -18,6 +18,7 @@ import com.hatchloom.connecthub.connecthub_service.repository.ClassifiedPostAppl
 import com.hatchloom.connecthub.connecthub_service.repository.ClassifiedPostRepository;
 import com.hatchloom.connecthub.connecthub_service.utils.ClassifiedCursorPayload;
 import com.hatchloom.connecthub.connecthub_service.utils.CursorPaginationCodec;
+import com.hatchloom.connecthub.connecthub_service.dto.CursorPaginationRequest;
 
 /**
  * Service class for managing classified posts, including creation,
@@ -194,15 +195,22 @@ public class ClassifiedPostService {
             throw new IllegalArgumentException("Status must be 'open', 'filled', or 'closed'");
         }
 
-        return cursorPaginationService.paginate(after, limit,
-                pageable -> classifiedPostRepository.findByStatusOrderByCreatedAtDescIdDesc(status, pageable),
-                (payload, pageable) -> {
-                    LocalDateTime createdAt = LocalDateTime.parse(payload.createdAt());
-                    return classifiedPostRepository.findByStatusWithCursor(status, createdAt, payload.id(), pageable);
-                },
-                cursor -> CursorPaginationCodec.decodeCursor(cursor, ClassifiedCursorPayload::new),
-                payload -> CursorPaginationCodec.encodeCursor(payload.id(), payload.createdAt()),
-                post -> new ClassifiedCursorPayload(post.getCreatedAt().toString(), post.getId()));
+        return cursorPaginationService.paginate(
+                new CursorPaginationRequest<>(
+                        after,
+                        limit,
+                        pageable -> classifiedPostRepository.findByStatusOrderByCreatedAtDescIdDesc(status, pageable),
+                        (payload, pageable) -> {
+                            LocalDateTime createdAt = LocalDateTime.parse(payload.createdAt());
+                            return classifiedPostRepository.findByStatusWithCursor(status, createdAt, payload.id(), pageable);
+                        },
+                        cursor -> CursorPaginationCodec.decodeCursor(cursor, ClassifiedCursorPayload::new),
+                        payload -> CursorPaginationCodec.encodeCursor(payload.id(), payload.createdAt()),
+                        post -> new ClassifiedCursorPayload(post.getCreatedAt().toString(), post.getId())
+                )
+        );
+
+
     }
 
     /**
