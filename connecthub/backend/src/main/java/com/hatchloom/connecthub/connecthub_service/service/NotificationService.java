@@ -38,70 +38,38 @@ public class NotificationService {
     }
 
     /**
-     * Getting classified notifications for the user
+     * Get notifications for the user based on type
      * @param userId the user ID
-     * @param unread whether to get only unread notifications or all notifications
+     * @param unread whether to only get unread notifications or all notifications
+     * @param type the type of notification
      * @return a list of notification responses
      */
-    public List<NotificationResponse> getClassifiedNotifications(UUID userId, boolean unread) {
+    public List<NotificationResponse> getNotifications(UUID userId, boolean unread, NotificationType type) {
         List<Notification> notifications;
+
         if (unread) {
             notifications = notificationRepository.findByRecipientUserIdAndTypeAndIsReadFalseOrderByCreatedAtDesc(
-                    userId, NotificationType.CLASSIFIED_CREATED
+                    userId, type
             );
         }
         else {
             notifications = notificationRepository.findByRecipientUserIdAndTypeOrderByCreatedAtDesc(
-                    userId, NotificationType.CLASSIFIED_CREATED
+                    userId, type
             );
         }
 
-        return notifications.stream().map(m -> new NotificationResponse(
-                m.getId(),
-                m.getRecipientUserId(),
-                m.getSenderUserId(),
-                m.getType(),
-                m.getMessage(),
-                m.getClassifiedPostId(),
-                m.getConversationId(),
-                m.getMessageId(),
-                m.isRead(),
-                m.getCreatedAt(),
-                m.getReadAt()
-        )).toList();
-    }
-
-    /**
-     * Getting message notifications for the user
-     * @param userId the user ID
-     * @param unread whether to get only unread message notifications or all message notifications
-     * @return a list of notification responses
-     */
-    public List<NotificationResponse> getMessageNotifications(UUID userId, boolean unread) {
-        List<Notification> msgNotifications;
-        if (unread) {
-            msgNotifications = notificationRepository.findByRecipientUserIdAndTypeAndIsReadFalseOrderByCreatedAtDesc(
-                    userId, NotificationType.MESSAGE
-            );
-        }
-        else {
-            msgNotifications = notificationRepository.findByRecipientUserIdAndTypeOrderByCreatedAtDesc(
-                    userId, NotificationType.MESSAGE
-            );
-        }
-
-        return msgNotifications.stream().map(m -> new NotificationResponse(
-                m.getId(),
-                m.getRecipientUserId(),
-                m.getSenderUserId(),
-                m.getType(),
-                m.getMessage(),
-                m.getClassifiedPostId(),
-                m.getConversationId(),
-                m.getMessageId(),
-                m.isRead(),
-                m.getCreatedAt(),
-                m.getReadAt()
+        return notifications.stream().map(n -> new NotificationResponse(
+                n.getId(),
+                n.getRecipientUserId(),
+                n.getSenderUserId(),
+                n.getType(),
+                n.getMessage(),
+                n.getClassifiedPostId(),
+                n.getConversationId(),
+                n.getMessageId(),
+                n.isRead(),
+                n.getCreatedAt(),
+                n.getReadAt()
         )).toList();
     }
 
@@ -147,12 +115,12 @@ public class NotificationService {
 
         boolean isSubscribed = classifiedSubscriptionRepository.existsByUserId(userId);
 
-        List<NotificationResponse> classifiedNotifications = getClassifiedNotifications(userId, unreadOnly)
+        List<NotificationResponse> classifiedNotifications = getNotifications(userId, unreadOnly, NotificationType.CLASSIFIED_CREATED)
                 .stream()
                 .limit(previewLimit)
                 .toList();
 
-        List<NotificationResponse> messageNotifications = getMessageNotifications(userId, unreadOnly)
+        List<NotificationResponse> messageNotifications = getNotifications(userId, unreadOnly, NotificationType.MESSAGE)
                 .stream()
                 .limit(previewLimit)
                 .toList();

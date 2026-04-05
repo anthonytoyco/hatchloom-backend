@@ -2,6 +2,7 @@ package com.hatchloom.connecthub.connecthub_service.controller;
 
 import com.hatchloom.connecthub.connecthub_service.dto.NotificationResponse;
 import com.hatchloom.connecthub.connecthub_service.dto.NotificationSummaryResponse;
+import com.hatchloom.connecthub.connecthub_service.enums.NotificationType;
 import com.hatchloom.connecthub.connecthub_service.service.NotificationService;
 import com.hatchloom.connecthub.connecthub_service.utils.JwtUtil;
 import org.springframework.http.HttpStatus;
@@ -42,13 +43,13 @@ public class NotificationController {
     @GetMapping("/classified")
     public ResponseEntity<List<NotificationResponse>> getClassifiedNotifications(@RequestHeader("Authorization") String authHeader, @RequestParam boolean unread) {
         UUID userId = jwtUtil.extractUserId(authHeader);
-        return new ResponseEntity<>(notificationService.getClassifiedNotifications(userId, unread), HttpStatus.OK);
+        return new ResponseEntity<>(notificationService.getNotifications(userId, unread, NotificationType.CLASSIFIED_CREATED), HttpStatus.OK);
     }
 
     @GetMapping("/messages")
     public ResponseEntity<List<NotificationResponse>> getMessageNotifications(@RequestHeader("Authorization") String authHeader, @RequestParam boolean unread) {
         UUID userId = jwtUtil.extractUserId(authHeader);
-        return new ResponseEntity<>(notificationService.getMessageNotifications(userId, unread), HttpStatus.OK);
+        return new ResponseEntity<>(notificationService.getNotifications(userId, unread, NotificationType.MESSAGE), HttpStatus.OK);
     }
 
     @PatchMapping("/{notificationId}/read")
