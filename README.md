@@ -1,6 +1,6 @@
 # HatchLoom Quebec
 
-Anthony Toyco, Andrew Cao, Daniel Zhong
+Anthony Toyco, Andrew Cao, Daniel Zhong, Ronald Kwok
 
 The HatchLoom Quebec subpack is an education platform monorepo composed of three microservices and their frontends, orchestrated together via Docker Compose.
 
@@ -546,15 +546,15 @@ Docker images are pushed to **GitHub Container Registry (GHCR)** at `ghcr.io/ant
 
 ### CI Workflows
 
-| Workflow file               | Trigger           | What it does                                                                                                                                          |
-| --------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `push-main.yml`             | push -> main      | Orchestrates all CI for main: 6 service jobs in parallel, system-tests (gated on 3 backends), deploy (gated on system-tests + 3 frontends)            |
-| `user-service-backend.yml`  | PR -> main        | Calls reusable Java CI; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports                                    |
-| `connecthub-backend.yml`    | PR -> main        | Calls reusable Java CI; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports                                    |
-| `launchpad-backend.yml`     | PR -> main        | Calls reusable Java CI with issuer override; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports               |
-| `user-service-frontend.yml` | PR -> main        | Calls reusable Node CI: `npm ci`, lint, build, uploads `dist`                                                                                         |
-| `launchpad-frontend.yml`    | PR -> main        | Calls reusable Node CI with typecheck enabled, then build                                                                                             |
-| `connecthub-frontend.yml`   | PR -> main        | Calls reusable Node CI: lint + build                                                                                                                  |
+| Workflow file               | Trigger      | What it does                                                                                                                               |
+| --------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `push-main.yml`             | push -> main | Orchestrates all CI for main: 6 service jobs in parallel, system-tests (gated on 3 backends), deploy (gated on system-tests + 3 frontends) |
+| `user-service-backend.yml`  | PR -> main   | Calls reusable Java CI; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports                         |
+| `connecthub-backend.yml`    | PR -> main   | Calls reusable Java CI; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports                         |
+| `launchpad-backend.yml`     | PR -> main   | Calls reusable Java CI with issuer override; runs unit phase (`test`) + Postgres-backed integration phase (`failsafe`), uploads reports    |
+| `user-service-frontend.yml` | PR -> main   | Calls reusable Node CI: `npm ci`, lint, build, uploads `dist`                                                                              |
+| `launchpad-frontend.yml`    | PR -> main   | Calls reusable Node CI with typecheck enabled, then build                                                                                  |
+| `connecthub-frontend.yml`   | PR -> main   | Calls reusable Node CI: lint + build                                                                                                       |
 
 Reusable workflow templates:
 
@@ -571,12 +571,12 @@ Reusable workflow templates:
 **Job dependency graph:**
 
 ```
-user-service-backend ─┐
+user-service-backend  ─┐
 connecthub-backend   ──┼─► system-tests ─┐
-launchpad-backend    ─┘                  ├─► deploy
-user-service-frontend ──────────────────┤
-connecthub-frontend   ──────────────────┤
-launchpad-frontend    ──────────────────┘
+launchpad-backend     ─┘                 ├─► deploy
+user-service-frontend  ──────────────────┤
+connecthub-frontend    ──────────────────┤
+launchpad-frontend     ──────────────────┘
 ```
 
 - The 6 service jobs (3 backends + 3 frontends) run in parallel, each calling the appropriate reusable CI workflow.
