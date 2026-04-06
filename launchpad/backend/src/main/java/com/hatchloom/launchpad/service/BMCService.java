@@ -59,19 +59,12 @@ public class BMCService {
     public BMCResponse editSection(UUID sideHustleId, String sectionKeyString,
             String content, UUID callerId) {
         SideHustle sideHustle = sideHustleService.findOrThrow(sideHustleId);
-        validateOwnership(sideHustle, callerId);
+        sideHustleService.checkOwnership(sideHustle, callerId);
 
         BMCSectionKey key = parseSectionKey(sectionKeyString);
         BusinessModelCanvas bmc = findBMCOrThrow(sideHustleId);
-        applySection(bmc, key, content);
+        bmc.updateSection(key, content);
         return BMCResponse.from(bmcRepository.save(bmc));
-    }
-
-    private void validateOwnership(SideHustle sideHustle, UUID callerId) {
-        if (!sideHustle.getStudentId().equals(callerId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "You do not own this SideHustle");
-        }
     }
 
     private BMCSectionKey parseSectionKey(String raw) {
@@ -80,20 +73,6 @@ public class BMCService {
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Unknown BMC section key: " + raw);
-        }
-    }
-
-    private void applySection(BusinessModelCanvas bmc, BMCSectionKey key, String content) {
-        switch (key) {
-            case KEY_PARTNERS -> bmc.setKeyPartners(content);
-            case KEY_ACTIVITIES -> bmc.setKeyActivities(content);
-            case KEY_RESOURCES -> bmc.setKeyResources(content);
-            case VALUE_PROPOSITIONS -> bmc.setValuePropositions(content);
-            case CUSTOMER_RELATIONSHIPS -> bmc.setCustomerRelationships(content);
-            case CHANNELS -> bmc.setChannels(content);
-            case CUSTOMER_SEGMENTS -> bmc.setCustomerSegments(content);
-            case COST_STRUCTURE -> bmc.setCostStructure(content);
-            case REVENUE_STREAMS -> bmc.setRevenueStreams(content);
         }
     }
 

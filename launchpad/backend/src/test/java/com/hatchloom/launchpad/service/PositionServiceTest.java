@@ -14,10 +14,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.hatchloom.launchpad.dto.request.CreatePositionRequest;
@@ -127,15 +129,18 @@ class PositionServiceTest {
     @Test
     void createPosition_callerNotOwner_returns403() {
         UUID sideHustleId = UUID.randomUUID();
+        UUID callerId = UUID.randomUUID();
         SideHustle sideHustle = new SideHustle();
         sideHustle.setStudentId(UUID.randomUUID());
         when(sideHustleService.findOrThrow(sideHustleId)).thenReturn(sideHustle);
+        doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this SideHustle"))
+                .when(sideHustleService).checkOwnership(any(), eq(callerId));
 
         CreatePositionRequest request = new CreatePositionRequest();
         request.setTitle("Some Role");
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-                () -> positionService.createPosition(sideHustleId, request, UUID.randomUUID()));
+                () -> positionService.createPosition(sideHustleId, request, callerId));
         assertEquals(403, ex.getStatusCode().value());
     }
 
@@ -227,6 +232,8 @@ class PositionServiceTest {
         position.setStatus(PositionStatus.OPEN);
 
         when(positionRepository.findById(positionId)).thenReturn(Optional.of(position));
+        doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this SideHustle"))
+                .when(sideHustleService).checkOwnership(any(), eq(callerId));
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
                 () -> positionService.updatePositionStatus(positionId, PositionStatus.FILLED, callerId));

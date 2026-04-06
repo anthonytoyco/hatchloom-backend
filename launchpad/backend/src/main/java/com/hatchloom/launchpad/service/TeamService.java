@@ -53,10 +53,7 @@ public class TeamService {
         public TeamMemberResponse addMember(UUID sideHustleId, UUID userId,
                         String role, UUID callerId) {
                 SideHustle sideHustle = sideHustleService.findOrThrow(sideHustleId);
-                if (!sideHustle.getStudentId().equals(callerId)) {
-                        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                                        "You do not own this SideHustle");
-                }
+                sideHustleService.checkOwnership(sideHustle, callerId);
 
                 Team team = teamRepository.findBySideHustle_Id(sideHustleId)
                                 .orElseThrow(() -> new ResponseStatusException(
@@ -86,10 +83,7 @@ public class TeamService {
         @Transactional
         public void removeMember(UUID sideHustleId, UUID userId, UUID callerId) {
                 SideHustle sideHustle = sideHustleService.findOrThrow(sideHustleId);
-                if (!sideHustle.getStudentId().equals(callerId)) {
-                        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                                        "You do not own this SideHustle");
-                }
+                sideHustleService.checkOwnership(sideHustle, callerId);
 
                 Team team = teamRepository.findBySideHustle_Id(sideHustleId)
                                 .orElseThrow(() -> new ResponseStatusException(

@@ -62,10 +62,7 @@ public class PositionService {
     public PositionResponse createPosition(UUID sideHustleId, CreatePositionRequest request,
             UUID callerId) {
         SideHustle sideHustle = sideHustleService.findOrThrow(sideHustleId);
-        if (!sideHustle.getStudentId().equals(callerId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "You do not own this SideHustle");
-        }
+        sideHustleService.checkOwnership(sideHustle, callerId);
 
         Position position = new Position();
         position.setSideHustle(sideHustle);
@@ -98,10 +95,7 @@ public class PositionService {
             UUID callerId) {
         Position position = findOrThrow(positionId);
         SideHustle sideHustle = position.getSideHustle();
-        if (!sideHustle.getStudentId().equals(callerId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "You do not own this SideHustle");
-        }
+        sideHustleService.checkOwnership(sideHustle, callerId);
 
         PositionStatus newStatus = positionStateContext.transition(position.getStatus(), targetStatus);
         position.setStatus(newStatus);

@@ -2,6 +2,8 @@ package com.hatchloom.launchpad.model;
 
 import java.util.UUID;
 
+import com.hatchloom.launchpad.model.enums.BMCSectionKey;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -151,5 +153,27 @@ public class BusinessModelCanvas {
 
     public void setRevenueStreams(String revenueStreams) {
         this.revenueStreams = revenueStreams;
+    }
+
+    /**
+     * Applies {@code content} to the field that corresponds to {@code key}.
+     * This keeps the mapping between section keys and fields inside the model,
+     * so callers do not need a switch statement to update a single section.
+     *
+     * @param key     the BMC section to update
+     * @param content the new text content for that section
+     */
+    public void updateSection(BMCSectionKey key, String content) {
+        switch (key) {
+            case KEY_PARTNERS -> this.keyPartners = content;
+            case KEY_ACTIVITIES -> this.keyActivities = content;
+            case KEY_RESOURCES -> this.keyResources = content;
+            case VALUE_PROPOSITIONS -> this.valuePropositions = content;
+            case CUSTOMER_RELATIONSHIPS -> this.customerRelationships = content;
+            case CHANNELS -> this.channels = content;
+            case CUSTOMER_SEGMENTS -> this.customerSegments = content;
+            case COST_STRUCTURE -> this.costStructure = content;
+            case REVENUE_STREAMS -> this.revenueStreams = content;
+        }
     }
 }

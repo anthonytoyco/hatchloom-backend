@@ -10,10 +10,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.hatchloom.launchpad.dto.response.BMCResponse;
@@ -132,6 +135,8 @@ class BMCServiceTest {
         SideHustle sideHustle = new SideHustle();
         sideHustle.setStudentId(ownerId);
         when(sideHustleService.findOrThrow(sideHustleId)).thenReturn(sideHustle);
+        doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this SideHustle"))
+                .when(sideHustleService).checkOwnership(any(), eq(callerId));
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
                 () -> bmcService.editSection(sideHustleId, "key_partners", "value", callerId));

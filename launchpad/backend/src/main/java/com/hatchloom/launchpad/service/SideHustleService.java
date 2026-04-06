@@ -68,26 +68,32 @@ public class SideHustleService {
                     "sandboxId is required to create a SideHustle");
         }
         Sandbox sandbox = sandboxService.findOrThrow(request.getSandboxId());
+        SideHustle saved = buildAndSaveSideHustle(request, sandbox);
+        createLinkedBmc(saved);
+        createLinkedTeam(saved);
+        log.debug("Created SideHustle {} (type={}) with BMC and Team", saved.getId(), saved.getStatus());
+        return SideHustleResponse.from(saved);
+    }
 
+    private SideHustle buildAndSaveSideHustle(CreateSideHustleRequest request, Sandbox sandbox) {
         SideHustle sideHustle = factoryProvider
                 .getFactory(request.getType())
                 .createSideHustle(request.getTitle(), request.getDescription(),
                         request.getStudentId(), request.getSandboxId());
         sideHustle.setSandbox(sandbox);
-        SideHustle saved = sideHustleRepository.save(sideHustle);
+        return sideHustleRepository.save(sideHustle);
+    }
 
-        // Auto-create empty BMC
+    private void createLinkedBmc(SideHustle saved) {
         BusinessModelCanvas bmc = new BusinessModelCanvas();
         bmc.setSideHustle(saved);
         bmcRepository.save(bmc);
+    }
 
-        // Auto-create empty Team
+    private void createLinkedTeam(SideHustle saved) {
         Team team = new Team();
         team.setSideHustle(saved);
         teamRepository.save(team);
-
-        log.debug("Created SideHustle {} (type={}) with BMC and Team", saved.getId(), saved.getStatus());
-        return SideHustleResponse.from(saved);
     }
 
     /**
@@ -153,5 +159,19 @@ public class SideHustleService {
         return sideHustleRepository.findById(sideHustleId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "SideHustle not found: " + sideHustleId));
+    }
+
+    /**
+     * Throws 403 if {@code callerId} is not the owner of {@code sideHustle}.
+     * Centralizes the repeated ownership guard used across service operations.
+     *
+     * @param sideHustle the SideHustle entity to check
+     * @param callerId   the authenticated student's UUID
+     */
+    public void checkOwnership(SideHustle sideHustle, UUID callerId) {
+        if (!sideHustle.getStudentId().equals(callerId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "You do not own this SideHustle");
+        }
     }
 }

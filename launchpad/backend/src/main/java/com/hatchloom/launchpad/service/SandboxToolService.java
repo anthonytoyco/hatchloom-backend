@@ -2,6 +2,7 @@ package com.hatchloom.launchpad.service;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,27 @@ import com.hatchloom.launchpad.repository.SandboxToolRepository;
  */
 @Service
 public class SandboxToolService {
+
+    /**
+     * Display labels for each known tool type.
+     * Adding a new tool type only requires a new entry here.
+     */
+    private static final Map<String, String> TOOL_LABELS = Map.ofEntries(
+            Map.entry("POSTIT", "Post-it Note"),
+            Map.entry("GUIDED_QA", "Guided Q&A"),
+            Map.entry("CANVAS_BOARD", "Canvas Board"),
+            Map.entry("CHECKLIST", "Checklist"),
+            Map.entry("CALCULATOR", "Calculator"),
+            Map.entry("DECK", "Slide Deck"),
+            Map.entry("TEMPLATE_FORM", "Template Form"),
+            Map.entry("DOWNLOAD", "Downloads"),
+            Map.entry("IMAGE_PDF", "Image / PDF Maker"),
+            Map.entry("VIDEO_AUDIO", "Video & Audio"),
+            Map.entry("SOCIAL_POST", "Social Post"),
+            Map.entry("LOGO_BRAND", "Logo & Brand Kit"),
+            Map.entry("SURVEY", "Survey"),
+            Map.entry("INVOICE", "Invoice"),
+            Map.entry("QR_CODE", "QR Code"));
 
     private final SandboxToolRepository sandboxToolRepository;
     private final SandboxService sandboxService;
@@ -111,23 +133,6 @@ public class SandboxToolService {
     }
 
     private String formatToolTypeLabel(String toolType) {
-        return switch (toolType) {
-            case "POSTIT" -> "Post-it Note";
-            case "GUIDED_QA" -> "Guided Q&A";
-            case "CANVAS_BOARD" -> "Canvas Board";
-            case "CHECKLIST" -> "Checklist";
-            case "CALCULATOR" -> "Calculator";
-            case "DECK" -> "Slide Deck";
-            case "TEMPLATE_FORM" -> "Template Form";
-            case "DOWNLOAD" -> "Downloads";
-            case "IMAGE_PDF" -> "Image / PDF Maker";
-            case "VIDEO_AUDIO" -> "Video & Audio";
-            case "SOCIAL_POST" -> "Social Post";
-            case "LOGO_BRAND" -> "Logo & Brand Kit";
-            case "SURVEY" -> "Survey";
-            case "INVOICE" -> "Invoice";
-            case "QR_CODE" -> "QR Code";
-            default -> toolType.replace('_', ' ');
-        };
+        return TOOL_LABELS.getOrDefault(toolType, toolType.replace('_', ' '));
     }
 }
